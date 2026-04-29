@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MM GOLDEN - Myanmar Earn Money App</title>
     
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (Firestore Version) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, set, get, update, remove, query, orderByChild, limitToFirst, push } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, orderBy, limit, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
         
         const firebaseConfig = {
@@ -22,28 +22,34 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        const db = getFirestore(app);
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
         
-        // Make available globally
-        window.firebaseDatabase = database;
+        // Make available globally - Firestore Version
+        window.firestore = db;
         window.firebaseAuth = auth;
         window.firebaseGoogleProvider = googleProvider;
         window.firebaseSignInWithPopup = signInWithPopup;
         window.firebaseOnAuthStateChanged = onAuthStateChanged;
         window.firebaseSignOut = signOut;
-        window.firebaseRef = ref;
-        window.firebaseSet = set;
-        window.firebaseGet = get;
-        window.firebaseUpdate = update;
-        window.firebaseRemove = remove;
-        window.firebaseQuery = query;
-        window.firebaseOrderByChild = orderByChild;
-        window.firebaseLimitToFirst = limitToFirst;
-        window.firebasePush = push;
         
-        console.log('✅ Firebase connected');
+        // Firestore functions
+        window.fsDoc = doc;
+        window.fsSetDoc = setDoc;
+        window.fsGetDoc = getDoc;
+        window.fsUpdateDoc = updateDoc;
+        window.fsDeleteDoc = deleteDoc;
+        window.fsCollection = collection;
+        window.fsGetDocs = getDocs;
+        window.fsQuery = query;
+        window.fsWhere = where;
+        window.fsOrderBy = orderBy;
+        window.fsLimit = limit;
+        window.fsArrayUnion = arrayUnion;
+        window.fsArrayRemove = arrayRemove;
+        
+        console.log('✅ Firebase Firestore connected');
     </script>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -51,99 +57,45 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
+        /* All CSS styles remain EXACTLY the same - no changes */
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;500;600;700&display=swap');
         * { user-select: none; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Pyidaungsu', sans-serif; 
-            background: #0a0e1a;
-            color: white; 
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-        
+        body { font-family: 'Pyidaungsu', sans-serif; background: #0a0e1a; color: white; overflow-x: hidden; min-height: 100vh; }
         .section { display: none; padding-bottom: 120px; animation: fadeInUp 0.4s ease; }
         .section.active { display: block; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .gold-card { 
-            background: linear-gradient(145deg, #1a1f33, #0f1424);
-            border: 1px solid rgba(251, 191, 36, 0.2);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease;
-        }
+        .gold-card { background: linear-gradient(145deg, #1a1f33, #0f1424); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); transition: transform 0.2s ease; }
         .gold-card:hover { transform: translateY(-2px); border-color: rgba(251, 191, 36, 0.4); }
-        
-        .btn-yellow { 
-            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-            color: #0a0e1a; 
-            font-weight: 800; 
-            border-radius: 16px; 
-            transition: all 0.2s ease;
-            border: none;
-        }
+        .btn-yellow { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); color: #0a0e1a; font-weight: 800; border-radius: 16px; transition: all 0.2s ease; border: none; }
         .btn-yellow:active { transform: scale(0.97); }
         .btn-yellow:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
-        
         .nav-active { color: #fbbf24 !important; border-top: 3px solid #fbbf24; background: rgba(245, 158, 11, 0.1); border-radius: 12px 12px 0 0; }
-        
-        input, textarea, select { 
-            background: #1e293b !important; 
-            border: 1px solid #334155 !important; 
-            color: #fbbf24 !important; 
-            padding: 14px 16px; 
-            border-radius: 16px; 
-            width: 100%; 
-            margin-bottom: 12px;
-        }
+        input, textarea, select { background: #1e293b !important; border: 1px solid #334155 !important; color: #fbbf24 !important; padding: 14px 16px; border-radius: 16px; width: 100%; margin-bottom: 12px; }
         input:focus, textarea:focus, select:focus { border-color: #fbbf24 !important; outline: none; }
-        
-        .withdraw-btn { 
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-            color: white;
-            border-radius: 18px;
-            padding: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        }
+        .withdraw-btn { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; border-radius: 18px; padding: 18px; font-weight: bold; cursor: pointer; width: 100%; }
         .withdraw-btn:disabled { background: #4b5563; cursor: not-allowed; }
-        
         .progress-bar { width: 100%; height: 8px; background: #334155; border-radius: 20px; overflow: hidden; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 20px; transition: width 0.3s ease; }
-        
         .gradient-text { background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        #gameCanvas {
-            background: linear-gradient(180deg, #1a472a 0%, #0d2818 100%);
-            border-radius: 20px;
-            display: block;
-            margin: 0 auto;
-            cursor: pointer;
-        }
+        #gameCanvas { background: linear-gradient(180deg, #1a472a 0%, #0d2818 100%); border-radius: 20px; display: block; margin: 0 auto; cursor: pointer; }
         .game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: center; justify-content: center; }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; }
         .modal-content { max-width: 350px; width: 90%; animation: pop 0.3s ease; }
         @keyframes pop { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        
         .admin-table { width: 100%; font-size: 10px; border-collapse: collapse; }
         .admin-table th, .admin-table td { padding: 8px 6px; border-bottom: 1px solid rgba(251,191,36,0.15); }
         .admin-table th { color: #fbbf24; background: rgba(0,0,0,0.3); }
         .user-row:hover { background: rgba(251,191,36,0.1); cursor: pointer; }
-        
         .activity-log { font-size: 9px; max-height: 300px; overflow-y: auto; }
         .activity-item { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        
         .withdrawal-item { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid #fbbf24; }
         .status-pending { color: #fbbf24; }
         .status-approved { color: #10b981; }
         .status-rejected { color: #ef4444; }
-        
         .quiz-list, .task-list { max-height: 200px; overflow-y: auto; }
         .quiz-item, .task-item { background: rgba(0,0,0,0.25); padding: 8px; margin-bottom: 6px; border-radius: 10px; }
         .completed-tasks-list { max-height: 180px; overflow-y: auto; border-top: 1px solid rgba(251,191,36,0.2); margin-top: 12px; padding-top: 12px; }
         .completed-task-item { background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 8px; margin-bottom: 5px; font-size: 11px; border-left: 2px solid #10b981; }
-        
         .quiz-counter { background: #1e293b; border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; }
         .counter-value { font-size: 32px; font-weight: bold; color: #fbbf24; }
         .milestone-item { display: inline-block; background: rgba(0,0,0,0.35); padding: 5px 12px; border-radius: 30px; margin: 4px; font-size: 10px; }
@@ -151,7 +103,6 @@
         .milestone-pending { background: #334155; color: #94a3b8; }
         .milestone-ready { background: rgba(245,158,11,0.3); border: 1px solid #f59e0b; color: #fbbf24; cursor: pointer; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-        
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
@@ -159,6 +110,7 @@
 </head>
 <body>
 
+<!-- HTML STRUCTURE REMAINS EXACTLY THE SAME - no changes -->
 <div class="fixed top-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm p-4 z-50 border-b border-amber-500/20">
     <div class="max-w-md mx-auto">
         <div class="flex justify-between items-center mb-2">
@@ -194,8 +146,7 @@
 </div>
 
 <main class="max-w-md mx-auto pt-28 px-4">
-
-    <!-- Home Section -->
+    <!-- ALL SECTIONS REMAIN EXACTLY THE SAME -->
     <div id="sec-home" class="section active space-y-5">
         <div class="gold-card p-6 text-center">
             <div class="flex items-center justify-between mb-4">
@@ -212,7 +163,6 @@
             </button>
             <p id="bonus-status" class="text-[10px] text-slate-500 mt-3">တစ်နေ့တစ်ကြိမ်သာ ရယူနိုင်ပါသည်။</p>
         </div>
-
         <div class="gold-card p-5 text-center">
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-black/30 p-3 rounded-2xl"><p class="text-xs text-amber-300">Your Points</p><p id="current-points" class="text-2xl font-bold text-white">0</p></div>
@@ -220,24 +170,20 @@
             </div>
             <p class="text-xs text-amber-300 mt-3">100,000 PTS = $1.00 USD</p>
         </div>
-        
         <div class="gold-card p-5">
             <div class="flex justify-between mb-2"><span class="text-sm font-bold text-white"><i class="fas fa-chart-line mr-2 text-amber-400"></i>Withdrawal Progress</span><span class="text-sm font-bold text-amber-400">100,000 PTS</span></div>
             <div class="progress-bar"><div id="withdraw-progress-fill" class="progress-fill" style="width: 0%"></div></div>
             <div class="flex justify-between text-[10px] text-slate-500 mt-2"><span>လက်ရှိ:</span><span id="withdraw-progress-current" class="text-amber-300 font-bold">0</span><span>PTS</span></div>
         </div>
-
         <div class="gold-card p-6">
             <div class="flex items-center gap-3 mb-5"><i class="fas fa-trophy text-2xl text-amber-400"></i><h3 class="text-amber-400 font-bold text-lg">🏆 Top 5 Users</h3></div>
             <div id="top-users-list" class="space-y-3"><div class="text-center py-4 text-slate-500">Loading...</div></div>
         </div>
-
         <button id="withdraw-home-btn" onclick="checkWithdrawEligibility()" class="w-full withdraw-btn py-5 text-lg font-bold rounded-xl">
             <i class="fas fa-wallet mr-2"></i> ငွေထုတ်ယူရန်
         </button>
     </div>
 
-    <!-- Quiz Section -->
     <div id="sec-quiz" class="section space-y-5">
         <div class="gold-card p-6 text-center">
             <div class="flex justify-center mb-3"><div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center"><i class="fas fa-brain text-3xl text-purple-400"></i></div></div>
@@ -246,12 +192,8 @@
             <input type="text" id="quiz-ans-input" placeholder="အဖြေရိုက်ထည့်ပါ" class="text-center">
             <button onclick="checkQuiz()" class="btn-yellow py-3 px-8 mt-3 rounded-xl text-lg font-bold">Submit</button>
         </div>
-
         <div class="quiz-counter">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-sm text-amber-300"><i class="fas fa-chart-line mr-2"></i>စုစုပေါင်းဖြေဆိုပြီး</span>
-                <span class="counter-value" id="total-quiz-count">0</span>
-            </div>
+            <div class="flex justify-between items-center mb-3"><span class="text-sm text-amber-300"><i class="fas fa-chart-line mr-2"></i>စုစုပေါင်းဖြေဆိုပြီး</span><span class="counter-value" id="total-quiz-count">0</span></div>
             <div class="flex flex-wrap justify-center gap-2">
                 <div class="milestone-item" id="milestone-50">50 → 50 PTS</div>
                 <div class="milestone-item" id="milestone-100">100 → 100 PTS</div>
@@ -259,7 +201,6 @@
                 <div class="milestone-item" id="milestone-500">500 → 550 PTS</div>
             </div>
         </div>
-        
         <div class="gold-card p-5">
             <div class="flex justify-between items-center mb-4"><div class="flex items-center gap-2"><div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-gamepad text-purple-400 text-xl"></i></div><h3 class="text-amber-400 font-bold text-lg">🎮 Coin Runner</h3></div><span class="text-xs bg-amber-500/20 px-3 py-1 rounded-full">1 Coin = 10 PTS</span></div>
             <div class="text-center mb-3"><span id="game-remaining" class="text-sm bg-slate-800 px-4 py-1.5 rounded-full">🎮 ယနေ့ကျန်ပွဲရေ: 5</span></div>
@@ -272,7 +213,6 @@
         </div>
     </div>
 
-    <!-- Invite Section -->
     <div id="sec-invite" class="section space-y-5">
         <div class="gold-card p-6 text-center">
             <div class="flex justify-center mb-4"><div class="w-20 h-20 bg-gradient-to-br from-green-500/30 to-emerald-600/30 rounded-2xl flex items-center justify-center"><i class="fas fa-users text-3xl text-green-400"></i></div></div>
@@ -297,7 +237,6 @@
         </div>
     </div>
 
-    <!-- Tasks Section -->
     <div id="sec-tasks" class="section space-y-5">
         <div id="task-list-display" class="space-y-3"></div>
         <div class="gold-card p-4">
@@ -306,7 +245,6 @@
         </div>
     </div>
 
-    <!-- Profile Section -->
     <div id="sec-profile" class="section space-y-5">
         <div class="gold-card p-6">
             <div class="flex items-center gap-3 mb-6"><div class="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center"><i class="fas fa-id-card text-2xl text-blue-400"></i></div><div><h3 class="text-white font-bold text-xl">My Profile</h3></div></div>
@@ -321,7 +259,6 @@
         <button onclick="showSec('sec-home')" class="w-full text-slate-500 mt-2 py-3">← Back to Home</button>
     </div>
 
-    <!-- Withdraw Section -->
     <div id="sec-withdraw" class="section">
         <div class="gold-card p-6">
             <div class="flex items-center gap-3 mb-6"><div class="w-14 h-14 bg-green-600/20 rounded-2xl flex items-center justify-center"><i class="fas fa-university text-2xl text-green-400"></i></div><div><h3 class="text-white font-bold text-xl">Withdrawal</h3><p class="text-[10px] text-green-400">ငွေထုတ်ယူရန် (အနည်းဆုံး 100,000 PTS)</p></div></div>
@@ -344,7 +281,6 @@
         </div>
     </div>
 
-    <!-- About & Admin Section -->
     <div id="sec-about" class="section space-y-5">
         <div class="gold-card p-6">
             <div class="text-center mb-6"><div onclick="handleSecret()" class="inline-block cursor-pointer"><i class="fas fa-crown text-5xl text-amber-400 mb-2"></i><h3 class="text-2xl font-black gradient-text">MM GOLDEN ELITE</h3><p class="text-[9px] text-slate-500 mt-1">Click logo for admin access</p></div></div>
@@ -364,26 +300,18 @@
             <div id="admin-panel" class="hidden mt-6">
                 <div class="bg-red-900/30 p-5 rounded-2xl border border-red-500">
                     <h4 class="text-white font-bold mb-4"><i class="fas fa-user-shield mr-2 text-red-400"></i>Admin Control Panel</h4>
-                    
-                    <!-- Add Task with Type Selection -->
                     <div class="mb-5"><h5 class="text-amber-300 text-sm font-bold mb-3">➕ Add Task</h5>
                         <div class="grid grid-cols-1 gap-2">
                             <input type="text" id="task-title" placeholder="Task Title" class="text-sm p-3">
                             <input type="text" id="task-link" placeholder="Link (https://...)" class="text-sm p-3">
                             <div class="flex gap-2">
-                                <select id="task-type" class="text-sm p-3 flex-1">
-                                    <option value="link">🔗 Link</option>
-                                    <option value="video">🎬 Video (YouTube)</option>
-                                    <option value="telegram">📱 Telegram Channel</option>
-                                </select>
+                                <select id="task-type" class="text-sm p-3 flex-1"><option value="link">🔗 Link</option><option value="video">🎬 Video (YouTube)</option><option value="telegram">📱 Telegram Channel</option></select>
                                 <input type="number" id="task-reward" placeholder="Points" class="text-sm p-3 w-28" value="50">
                             </div>
                             <button onclick="addAdminTask()" class="btn-yellow py-2 text-sm rounded-xl mt-1">Add Task</button>
                         </div>
                     </div>
                     <div id="admin-task-list" class="task-list mb-5"></div>
-                    
-                    <!-- Add Quiz -->
                     <div class="mb-5"><h5 class="text-amber-300 text-sm font-bold mb-3">📝 Add Quiz</h5>
                         <div class="grid grid-cols-1 gap-2">
                             <input type="text" id="quiz-question" placeholder="Question" class="text-sm p-3">
@@ -393,14 +321,8 @@
                         </div>
                     </div>
                     <div id="quiz-list" class="quiz-list mb-5"></div>
-                    
-                    <!-- User Table -->
                     <div class="overflow-x-auto mb-5"><table class="admin-table w-full"><thead><tr><th>User</th><th>Balance</th><th>Actions</th></tr></thead><tbody id="admin-user-table"></tbody></table></div>
-                    
-                    <!-- Point Adjustment -->
                     <div class="grid grid-cols-3 gap-2 mb-5"><input type="text" id="search-user" placeholder="User ID/Name" class="text-sm p-3"><input type="number" id="adjust-points" placeholder="Points" class="text-sm p-3"><select id="adjust-action" class="text-sm p-3"><option value="add">Add</option><option value="remove">Remove</option></select><button onclick="adjustUserPoints()" class="btn-yellow py-2 text-sm col-span-3 rounded-xl">Adjust Points</button></div>
-                    
-                    <!-- Withdrawals -->
                     <div id="admin-withdraw-list" class="space-y-3 max-h-60 overflow-y-auto"></div>
                 </div>
             </div>
@@ -428,7 +350,7 @@
 </div>
 
 <script>
-    // ========== CONFIGURATION ==========
+    // ========== CONFIGURATION (unchanged) ==========
     const MIN_WITHDRAW_POINTS = 100000;
     const USD_PER_POINT = 1 / 100000;
     const COIN_TO_POINTS = 10;
@@ -442,7 +364,7 @@
         { target: 500, reward: 550 }
     ];
     
-    // ========== GLOBAL STATE ==========
+    // ========== GLOBAL STATE (unchanged) ==========
     let currentUser = null;
     let userId = null;
     let balance = 0;
@@ -460,7 +382,12 @@
     let gameAnimationId = null, gamePlayerX = 155, gameObstacles = [], gameCoinsList = [], gameFrame = 0;
     const GAME_WIDTH = 340, GAME_HEIGHT = 420, PLAYER_WIDTH = 32, PLAYER_HEIGHT = 32, OBSTACLE_SIZE = 28, COIN_SIZE = 14;
     
-    let db = { users: {}, quizzes: [], tasks: [], withdrawals: [], logs: [] };
+    // In-memory cache for Firestore data
+    let quizzesCache = [];
+    let tasksCache = [];
+    let usersCache = {};
+    let withdrawalsCache = [];
+    let logsCache = [];
     
     const userRequestCounts = new Map();
     function checkRateLimit(uid, limit = 60, windowMs = 60000) {
@@ -475,22 +402,43 @@
     
     let saveTimeout = null;
     async function saveToFirebase() {
-        if (!window.firebaseDatabase || !userId) return;
+        if (!window.firestore || !userId) return;
         if (saveTimeout) clearTimeout(saveTimeout);
         saveTimeout = setTimeout(async () => {
             try {
-                await window.firebaseSet(window.firebaseRef(window.firebaseDatabase, `users/${userId}`), {
-                    id: userId, name: currentUser?.name || 'User', email: currentUser?.email || '', balance, totalEarned: currentUser?.totalEarned || 0,
-                    invitedFriends, completedTasks, completedQuizzes, totalQuizzesAnswered, claimedMilestones,
-                    dailyBonusClaimed, lastBonusDate, gamesPlayedToday, lastGameDate,
+                const userRef = window.fsDoc(window.firestore, 'users', userId);
+                await window.fsSetDoc(userRef, {
+                    id: userId,
+                    name: currentUser?.name || 'User',
+                    email: currentUser?.email || '',
+                    balance: balance,
+                    totalEarned: currentUser?.totalEarned || 0,
+                    invitedFriends: invitedFriends || [],
+                    completedTasks: completedTasks || [],
+                    completedQuizzes: completedQuizzes || [],
+                    totalQuizzesAnswered: totalQuizzesAnswered || 0,
+                    claimedMilestones: claimedMilestones || [],
+                    dailyBonusClaimed: dailyBonusClaimed || false,
+                    lastBonusDate: lastBonusDate || '',
+                    gamesPlayedToday: gamesPlayedToday || 0,
+                    lastGameDate: lastGameDate || '',
                     lastActive: new Date().toLocaleString()
-                });
-                await window.firebaseSet(window.firebaseRef(window.firebaseDatabase, `leaderboard/${userId}`), { name: currentUser?.name || 'User', totalEarned: currentUser?.totalEarned || 0 });
+                }, { merge: true });
+                
+                // Update leaderboard
+                const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', userId);
+                await window.fsSetDoc(leaderboardRef, {
+                    name: currentUser?.name || 'User',
+                    totalEarned: currentUser?.totalEarned || 0
+                }, { merge: true });
+                
+                // Update users cache
+                usersCache[userId] = currentUser;
             } catch(e) { console.error("Save error:", e); }
         }, 1000);
     }
     
-    // ========== GOOGLE LOGIN ==========
+    // ========== GOOGLE LOGIN (unchanged) ==========
     function showGoogleLogin() { document.getElementById('google-login-modal').style.display = 'flex'; }
     function closeGoogleModal() { document.getElementById('google-login-modal').style.display = 'none'; }
     
@@ -499,10 +447,12 @@
             const result = await window.firebaseSignInWithPopup(window.firebaseAuth, window.firebaseGoogleProvider);
             const user = result.user;
             userId = user.uid;
-            const userSnap = await window.firebaseGet(window.firebaseRef(window.firebaseDatabase, `users/${userId}`));
+            
+            const userRef = window.fsDoc(window.firestore, 'users', userId);
+            const userSnap = await window.fsGetDoc(userRef);
             
             if (userSnap.exists()) {
-                const data = userSnap.val();
+                const data = userSnap.data();
                 currentUser = { id: userId, name: data.name || user.displayName, email: user.email, balance: data.balance || 0, totalEarned: data.totalEarned || 0 };
                 balance = currentUser.balance;
                 invitedFriends = data.invitedFriends || [];
@@ -526,8 +476,10 @@
             document.getElementById('profile-btn').classList.remove('hidden');
             closeGoogleModal();
             
-            const adminSnap = await window.firebaseGet(window.firebaseRef(window.firebaseDatabase, 'admins'));
-            const adminList = adminSnap.exists() ? adminSnap.val() : [];
+            // Check admin
+            const adminRef = window.fsDoc(window.firestore, 'admins', 'list');
+            const adminSnap = await window.fsGetDoc(adminRef);
+            const adminList = adminSnap.exists() ? adminSnap.data().ids || [] : [];
             isAdmin = adminList.includes(userId);
             if (isAdmin) document.getElementById('admin-mode-btn').classList.remove('hidden');
             
@@ -544,9 +496,12 @@
     }
     
     async function loadUserData() {
-        const userSnap = await window.firebaseGet(window.firebaseRef(window.firebaseDatabase, `users/${userId}`));
+        if (!userId) return;
+        
+        const userRef = window.fsDoc(window.firestore, 'users', userId);
+        const userSnap = await window.fsGetDoc(userRef);
         if (userSnap.exists()) {
-            const data = userSnap.val();
+            const data = userSnap.data();
             balance = data.balance || 0;
             invitedFriends = data.invitedFriends || [];
             completedTasks = data.completedTasks || [];
@@ -558,25 +513,45 @@
             gamesPlayedToday = data.gamesPlayedToday || 0;
             lastGameDate = data.lastGameDate || '';
         }
+        
         const today = new Date().toDateString();
         if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
         
-        const [quizzesSnap, tasksSnap, leaderboardSnap] = await Promise.all([
-            window.firebaseGet(window.firebaseRef(window.firebaseDatabase, 'quizzes')),
-            window.firebaseGet(window.firebaseRef(window.firebaseDatabase, 'tasks')),
-            window.firebaseGet(window.firebaseQuery(window.firebaseRef(window.firebaseDatabase, 'leaderboard'), window.firebaseOrderByChild('totalEarned'), window.firebaseLimitToFirst(50)))
-        ]);
-        
-        if (quizzesSnap.exists()) db.quizzes = Object.values(quizzesSnap.val());
-        else { db.quizzes = [{ id: "q1", q: "မြန်မာနိုင်ငံ၏ မြို့တော်မှာ?", a: "နေပြည်တော်", p: 50 }]; await window.firebaseSet(window.firebaseRef(window.firebaseDatabase, 'quizzes'), db.quizzes); }
-        if (tasksSnap.exists()) db.tasks = Object.values(tasksSnap.val());
-        else { db.tasks = [{ id: "t1", title: "Join Telegram Channel", link: "https://t.me/MMGoldenChannel", reward: 50, type: "telegram" }]; await window.firebaseSet(window.firebaseRef(window.firebaseDatabase, 'tasks'), db.tasks); }
-        
-        if (leaderboardSnap.exists()) {
-            const leaders = [];
-            leaderboardSnap.forEach(child => leaders.push({ name: child.val().name, totalEarned: child.val().totalEarned }));
-            renderTopUsers(leaders.slice(0, 5));
+        // Load quizzes from Firestore
+        const quizzesCollection = window.fsCollection(window.firestore, 'quizzes');
+        const quizzesSnapshot = await window.fsGetDocs(quizzesCollection);
+        if (!quizzesSnapshot.empty) {
+            quizzesCache = [];
+            quizzesSnapshot.forEach(doc => quizzesCache.push({ id: doc.id, ...doc.data() }));
         }
+        if (quizzesCache.length === 0) {
+            const defaultQuiz = { q: "မြန်မာနိုင်ငံ၏ မြို့တော်မှာ?", a: "နေပြည်တော်", p: 50 };
+            const newQuizRef = window.fsDoc(window.firestore, 'quizzes', 'q1');
+            await window.fsSetDoc(newQuizRef, defaultQuiz);
+            quizzesCache = [{ id: 'q1', ...defaultQuiz }];
+        }
+        
+        // Load tasks from Firestore
+        const tasksCollection = window.fsCollection(window.firestore, 'tasks');
+        const tasksSnapshot = await window.fsGetDocs(tasksCollection);
+        if (!tasksSnapshot.empty) {
+            tasksCache = [];
+            tasksSnapshot.forEach(doc => tasksCache.push({ id: doc.id, ...doc.data() }));
+        }
+        if (tasksCache.length === 0) {
+            const defaultTask = { title: "Join Telegram Channel", link: "https://t.me/MMGoldenChannel", reward: 50, type: "telegram" };
+            const newTaskRef = window.fsDoc(window.firestore, 'tasks', 't1');
+            await window.fsSetDoc(newTaskRef, defaultTask);
+            tasksCache = [{ id: 't1', ...defaultTask }];
+        }
+        
+        // Load leaderboard
+        const leaderboardCollection = window.fsCollection(window.firestore, 'leaderboard');
+        const leaderboardQuery = window.fsQuery(leaderboardCollection, window.fsOrderBy('totalEarned', 'desc'), window.fsLimit(50));
+        const leaderboardSnapshot = await window.fsGetDocs(leaderboardQuery);
+        const leaders = [];
+        leaderboardSnapshot.forEach(doc => leaders.push({ name: doc.data().name, totalEarned: doc.data().totalEarned }));
+        renderTopUsers(leaders.slice(0, 5));
     }
     
     function renderTopUsers(users) {
@@ -632,13 +607,19 @@
     
     async function handleReferral(refId) {
         if (!checkRateLimit(userId, 10, 60000)) return;
-        const refSnap = await window.firebaseGet(window.firebaseRef(window.firebaseDatabase, `users/${refId}`));
-        if (refSnap.exists()) {
-            const refUser = refSnap.val();
+        const userRef = window.fsDoc(window.firestore, 'users', refId);
+        const userSnap = await window.fsGetDoc(userRef);
+        if (userSnap.exists()) {
+            const refUser = userSnap.data();
             const alreadyReferred = refUser.invitedFriends?.includes(userId);
             if (!alreadyReferred) {
-                await window.firebaseUpdate(window.firebaseRef(window.firebaseDatabase, `users/${refId}`), { balance: (refUser.balance || 0) + REFERRAL_POINTS, totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS, invitedFriends: [...(refUser.invitedFriends || []), userId] });
-                await window.firebaseUpdate(window.firebaseRef(window.firebaseDatabase, `leaderboard/${refId}`), { totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS });
+                await window.fsUpdateDoc(userRef, {
+                    balance: (refUser.balance || 0) + REFERRAL_POINTS,
+                    totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS,
+                    invitedFriends: window.fsArrayUnion(userId)
+                });
+                const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', refId);
+                await window.fsUpdateDoc(leaderboardRef, { totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS });
                 await addPointsOptimized(REFERRAL_POINTS, `Referral Bonus`);
                 showNotification(`🎉 +${REFERRAL_POINTS} PTS from referral!`);
             }
@@ -701,7 +682,7 @@
         setTimeout(() => { btn.innerHTML = '<i class="fas fa-gift mr-2"></i>Claim Daily Bonus (+100 PTS)'; btn.disabled = false; }, 3000);
     }
     
-    // ========== GAME ==========
+    // ========== GAME (unchanged) ==========
     function initGameCanvas() {
         const canvas = document.getElementById('gameCanvas');
         if(!canvas) return;
@@ -775,15 +756,15 @@
     function renderTasks() { 
         const c=document.getElementById('task-list-display'); 
         if(!c)return; 
-        if(db.tasks.length===0){ c.innerHTML='<div class="gold-card p-6 text-center text-slate-500">No tasks yet</div>'; return; } 
+        if(tasksCache.length===0){ c.innerHTML='<div class="gold-card p-6 text-center text-slate-500">No tasks yet</div>'; return; } 
         const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        c.innerHTML=db.tasks.map(t=>`<div class="gold-card p-4 ${completedTasks.includes(t.id)?'opacity-60':''}"><div class="flex justify-between items-start"><div><h4 class="font-bold text-white">${typeIcons[t.type] || '🔗'} ${t.title}</h4><p class="text-[10px] text-green-500">+${t.reward} PTS</p></div><button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg" ${completedTasks.includes(t.id)?'disabled':''}>${completedTasks.includes(t.id)?'✓ Completed':'DO TASK'}</button></div><a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2">${t.link.substring(0,45)}...</a></div>`).join('');
+        c.innerHTML=tasksCache.map(t=>`<div class="gold-card p-4 ${completedTasks.includes(t.id)?'opacity-60':''}"><div class="flex justify-between items-start"><div><h4 class="font-bold text-white">${typeIcons[t.type] || '🔗'} ${t.title}</h4><p class="text-[10px] text-green-500">+${t.reward} PTS</p></div><button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg" ${completedTasks.includes(t.id)?'disabled':''}>${completedTasks.includes(t.id)?'✓ Completed':'DO TASK'}</button></div><a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2">${t.link.substring(0,45)}...</a></div>`).join('');
         
         const completedContainer = document.getElementById('completed-tasks-list');
         if (completedContainer) {
-            const completedTaskItems = completedTasks.filter(taskId => db.tasks.some(t => t.id === taskId));
+            const completedTaskItems = completedTasks.filter(taskId => tasksCache.some(t => t.id === taskId));
             if (completedTaskItems.length === 0) { completedContainer.innerHTML = '<div class="text-center text-slate-500 py-3">ပြီးဆုံးပြီး Task မရှိသေးပါ</div>'; }
-            else { completedContainer.innerHTML = completedTaskItems.map(taskId => { const task = db.tasks.find(t => t.id === taskId); return task ? `<div class="completed-task-item"><i class="fas fa-check-circle text-green-400 mr-2"></i>${task.title} <span class="text-green-400 float-right">+${task.reward} PTS</span></div>` : ''; }).join(''); }
+            else { completedContainer.innerHTML = completedTaskItems.map(taskId => { const task = tasksCache.find(t => t.id === taskId); return task ? `<div class="completed-task-item"><i class="fas fa-check-circle text-green-400 mr-2"></i>${task.title} <span class="text-green-400 float-right">+${task.reward} PTS</span></div>` : ''; }).join(''); }
         }
     }
     
@@ -796,7 +777,7 @@
     }
     
     function renderQuiz(){ 
-        const availableQuizzes = db.quizzes.filter(q => !completedQuizzes.includes(q.id));
+        const availableQuizzes = quizzesCache.filter(q => !completedQuizzes.includes(q.id));
         if (availableQuizzes.length > 0) {
             document.getElementById('quiz-q-display').innerHTML = `<i class="fas fa-question-circle mr-2 text-purple-400"></i>${availableQuizzes[0].q}`;
         } else {
@@ -806,7 +787,7 @@
     
     async function checkQuiz(){ 
         const ans = document.getElementById('quiz-ans-input').value.trim(); 
-        const availableQuizzes = db.quizzes.filter(q => !completedQuizzes.includes(q.id));
+        const availableQuizzes = quizzesCache.filter(q => !completedQuizzes.includes(q.id));
         const q = availableQuizzes[0];
         if(q && ans === q.a){ 
             await addPointsOptimized(q.p, "Quiz"); 
@@ -825,6 +806,7 @@
     }
     
     function renderRefUI(){ 
+        if(!userId) return;
         document.getElementById('ref-link').innerHTML = `https://t.me/MMGoldenBot?start=${userId}`; 
         document.getElementById('ref-count').innerText = invitedFriends.length; 
         document.getElementById('ref-earned').innerText = (invitedFriends.length * REFERRAL_POINTS).toLocaleString(); 
@@ -847,34 +829,42 @@
     function checkWithdrawEligibility(){ if(!currentUser){ showGoogleLogin(); return false; } if(balance < MIN_WITHDRAW_POINTS){ alert(`Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`); return false; } showSec('sec-withdraw'); return true; }
     async function submitWithdraw(){ const name = document.getElementById('w-name').value.trim(), phone = document.getElementById('w-phone').value.trim(), amount = parseInt(document.getElementById('w-amt').value); if(!name || !phone || isNaN(amount)){ alert("Fill all fields"); return; } if(amount < MIN_WITHDRAW_POINTS || amount > balance){ alert("Invalid amount"); return; } const usdAmount = (amount * USD_PER_POINT).toFixed(4); if(!confirm(`${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n${name}\n${amount.toLocaleString()} PTS = $${usdAmount} USD\nConfirm?`)) return; balance -= amount; await saveToFirebase(); updateBalanceUI(); alert("✅ Withdrawal request submitted!"); showSec('sec-home'); }
     
-    // ========== ADMIN FUNCTIONS ==========
-    function renderAdminUserTable(){ 
+    // ========== ADMIN FUNCTIONS (Firestore versions) ==========
+    async function renderAdminUserTable(){ 
         const tbody = document.getElementById('admin-user-table'); 
         if(!tbody) return; 
-        const users = Object.values(db.users);
+        
+        const usersCollection = window.fsCollection(window.firestore, 'users');
+        const usersSnapshot = await window.fsGetDocs(usersCollection);
+        const users = [];
+        usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
+        
         if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
-        tbody.innerHTML = users.map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
+        tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
     }
     
     async function quickAdjustPoints(uid, amount){ 
         if(!confirm(`Add ${amount} points?`)) return; 
-        const userSnap = await window.firebaseGet(window.firebaseRef(window.firebaseDatabase, `users/${uid}`)); 
+        const userRef = window.fsDoc(window.firestore, 'users', uid);
+        const userSnap = await window.fsGetDoc(userRef);
         if(userSnap.exists()){ 
-            const userData = userSnap.val(); 
+            const userData = userSnap.data(); 
             const newBalance = (userData.balance || 0) + amount; 
             const newTotal = (userData.totalEarned || 0) + amount; 
-            await window.firebaseUpdate(window.firebaseRef(window.firebaseDatabase, `users/${uid}`), { balance: newBalance, totalEarned: newTotal }); 
+            await window.fsUpdateDoc(userRef, { balance: newBalance, totalEarned: newTotal });
             if(uid === userId){ balance = newBalance; updateBalanceUI(); } 
-            await window.firebaseUpdate(window.firebaseRef(window.firebaseDatabase, `leaderboard/${uid}`), { totalEarned: newTotal }); 
+            const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', uid);
+            await window.fsSetDoc(leaderboardRef, { totalEarned: newTotal, name: userData.name }, { merge: true });
             showNotification(`Added ${amount} points`); 
             renderAdminUserTable(); 
         } 
     }
     
     async function viewUserDetails(uid){ 
-        const userSnap = await window.firebaseGet(window.firebaseRef(window.firebaseDatabase, `users/${uid}`)); 
+        const userRef = window.fsDoc(window.firestore, 'users', uid);
+        const userSnap = await window.fsGetDoc(userRef);
         if(userSnap.exists()){ 
-            const user = userSnap.val(); 
+            const user = userSnap.data(); 
             alert(`📋 User Details\n\nName: ${user.name || 'N/A'}\nID: ${uid}\nBalance: ${(user.balance || 0).toLocaleString()}\nTotal Earned: ${(user.totalEarned || 0).toLocaleString()}\nTasks: ${(user.completedTasks || []).length}\nQuizzes: ${(user.completedQuizzes || []).length}\nReferrals: ${(user.invitedFriends || []).length}`); 
         } 
     }
@@ -884,20 +874,37 @@
         const points = parseInt(document.getElementById('adjust-points').value);
         const action = document.getElementById('adjust-action').value;
         if(!searchTerm || isNaN(points)){ alert("Enter user name/ID and points"); return; }
+        
+        const usersCollection = window.fsCollection(window.firestore, 'users');
+        const usersSnapshot = await window.fsGetDocs(usersCollection);
+        let foundUser = null;
         let foundUid = null;
-        for(let uid in db.users){ if(db.users[uid].name === searchTerm || db.users[uid].id === searchTerm || uid === searchTerm){ foundUid = uid; break; } }
-        if(!foundUid){ alert("User not found"); return; }
-        const userSnap = await window.firebaseGet(window.firebaseRef(window.firebaseDatabase, `users/${foundUid}`));
-        if(userSnap.exists()){
-            const userData = userSnap.val();
-            let newBalance = userData.balance || 0;
-            let newTotal = userData.totalEarned || 0;
-            if(action === 'add'){ newBalance += points; newTotal += points; await window.firebaseUpdate(window.firebaseRef(window.firebaseDatabase, `users/${foundUid}`), { balance: newBalance, totalEarned: newTotal }); showNotification(`Added ${points} points`); }
-            else{ if(points > newBalance){ alert("Not enough points!"); return; } newBalance -= points; await window.firebaseUpdate(window.firebaseRef(window.firebaseDatabase, `users/${foundUid}`), { balance: newBalance }); showNotification(`Removed ${points} points`); }
-            await window.firebaseUpdate(window.firebaseRef(window.firebaseDatabase, `leaderboard/${foundUid}`), { totalEarned: newTotal });
-            if(foundUid === userId){ balance = newBalance; updateBalanceUI(); }
-            renderAdminUserTable();
+        for (const doc of usersSnapshot.docs) {
+            const userData = doc.data();
+            if (userData.name === searchTerm || doc.id === searchTerm) {
+                foundUser = userData;
+                foundUid = doc.id;
+                break;
+            }
         }
+        if(!foundUser){ alert("User not found"); return; }
+        
+        let newBalance = foundUser.balance || 0;
+        let newTotal = foundUser.totalEarned || 0;
+        if(action === 'add'){ 
+            newBalance += points; 
+            newTotal += points; 
+            await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance, totalEarned: newTotal });
+            showNotification(`Added ${points} points`); 
+        } else { 
+            if(points > newBalance){ alert("Not enough points!"); return; } 
+            newBalance -= points; 
+            await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance });
+            showNotification(`Removed ${points} points`); 
+        }
+        await window.fsSetDoc(window.fsDoc(window.firestore, 'leaderboard', foundUid), { totalEarned: newTotal, name: foundUser.name }, { merge: true });
+        if(foundUid === userId){ balance = newBalance; updateBalanceUI(); }
+        renderAdminUserTable();
     }
     
     function renderAdminWithdrawals(){ const c = document.getElementById('admin-withdraw-list'); if(!c) return; c.innerHTML = '<p class="text-slate-500 text-center py-4">No pending withdrawal requests</p>'; }
@@ -910,8 +917,9 @@
         if(!title || !link || isNaN(reward)){ alert("Fill all fields"); return; } 
         const newId = Date.now().toString(); 
         const newTask = { id: newId, title, link, reward, type }; 
-        db.tasks.push(newTask); 
-        await window.firebaseSet(window.firebaseRef(window.firebaseDatabase, `tasks/${newId}`), newTask); 
+        tasksCache.push(newTask); 
+        const taskRef = window.fsDoc(window.firestore, 'tasks', newId);
+        await window.fsSetDoc(taskRef, newTask);
         renderAdminTaskList(); 
         renderTasks(); 
         document.getElementById('task-title').value = ''; 
@@ -922,12 +930,12 @@
     function renderAdminTaskList(){ 
         const c = document.getElementById('admin-task-list'); 
         if(!c) return; 
-        if(db.tasks.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No tasks</div>'; return; } 
+        if(tasksCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No tasks</div>'; return; } 
         const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        c.innerHTML = db.tasks.map(t => `<div class="task-item flex justify-between items-center"><div><p class="text-xs text-white">${typeIcons[t.type] || '🔗'} ${t.title}</p><p class="text-[9px] text-amber-400">+${t.reward} PTS</p></div><button onclick="deleteAdminTask('${t.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
+        c.innerHTML = tasksCache.map(t => `<div class="task-item flex justify-between items-center"><div><p class="text-xs text-white">${typeIcons[t.type] || '🔗'} ${t.title}</p><p class="text-[9px] text-amber-400">+${t.reward} PTS</p></div><button onclick="deleteAdminTask('${t.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
     }
     
-    async function deleteAdminTask(id){ if(confirm("Delete?")){ db.tasks = db.tasks.filter(t => t.id !== id); await window.firebaseRemove(window.firebaseRef(window.firebaseDatabase, `tasks/${id}`)); renderAdminTaskList(); renderTasks(); showNotification("Task deleted"); } }
+    async function deleteAdminTask(id){ if(confirm("Delete?")){ tasksCache = tasksCache.filter(t => t.id !== id); await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); renderAdminTaskList(); renderTasks(); showNotification("Task deleted"); } }
     
     async function addQuizQuestion(){ 
         const q = document.getElementById('quiz-question').value.trim(); 
@@ -936,8 +944,9 @@
         if(!q || !a || isNaN(p)){ alert("Fill all fields"); return; } 
         const newId = Date.now().toString(); 
         const newQuiz = { id: newId, q, a, p }; 
-        db.quizzes.push(newQuiz); 
-        await window.firebaseSet(window.firebaseRef(window.firebaseDatabase, `quizzes/${newId}`), newQuiz); 
+        quizzesCache.push(newQuiz); 
+        const quizRef = window.fsDoc(window.firestore, 'quizzes', newId);
+        await window.fsSetDoc(quizRef, { q, a, p });
         renderQuizList(); 
         renderQuiz(); 
         document.getElementById('quiz-question').value = ''; 
@@ -948,16 +957,24 @@
     function renderQuizList(){ 
         const c = document.getElementById('quiz-list'); 
         if(!c) return; 
-        if(db.quizzes.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No quizzes</div>'; return; } 
-        c.innerHTML = db.quizzes.map(q => `<div class="quiz-item flex justify-between items-center"><div><p class="text-xs text-white">${q.q}</p><p class="text-[9px] text-amber-400">+${q.p} PTS</p></div><button onclick="deleteQuizQuestion('${q.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
+        if(quizzesCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No quizzes</div>'; return; } 
+        c.innerHTML = quizzesCache.map(q => `<div class="quiz-item flex justify-between items-center"><div><p class="text-xs text-white">${q.q}</p><p class="text-[9px] text-amber-400">+${q.p} PTS</p></div><button onclick="deleteQuizQuestion('${q.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
     }
     
-    async function deleteQuizQuestion(id){ if(confirm("Delete?")){ db.quizzes = db.quizzes.filter(q => q.id !== id); await window.firebaseRemove(window.firebaseRef(window.firebaseDatabase, `quizzes/${id}`)); renderQuizList(); renderQuiz(); showNotification("Quiz deleted"); } }
+    async function deleteQuizQuestion(id){ if(confirm("Delete?")){ quizzesCache = quizzesCache.filter(q => q.id !== id); await window.fsDeleteDoc(window.fsDoc(window.firestore, 'quizzes', id)); renderQuizList(); renderQuiz(); showNotification("Quiz deleted"); } }
     
     let secretCount = 0;
     function handleSecret(){ secretCount++; setTimeout(() => secretCount = 0, 2000); if(secretCount === 3){ const pwd = prompt("Admin Password:"); if(pwd === "871033"){ document.getElementById('admin-panel').classList.toggle('hidden'); if(document.getElementById('admin-panel').classList.contains('hidden')){ document.body.classList.remove('admin-mode'); } } else alert("Wrong password!"); secretCount = 0; } }
     
-    async function setupAdminList() { if(!window.firebaseDatabase) return; const adminListRef = window.firebaseRef(window.firebaseDatabase, 'admins'); const snapshot = await window.firebaseGet(adminListRef); if(!snapshot.exists()){ const adminIds = ["5494834672"]; await window.firebaseSet(adminListRef, adminIds); console.log("Admin list initialized"); } }
+    async function setupAdminList() { 
+        if(!window.firestore) return; 
+        const adminRef = window.fsDoc(window.firestore, 'admins', 'list');
+        const adminSnap = await window.fsGetDoc(adminRef);
+        if(!adminSnap.exists()){ 
+            await window.fsSetDoc(adminRef, { ids: ["5494834672"] });
+            console.log("Admin list initialized"); 
+        } 
+    }
     
     // ========== INIT ==========
     setupAdminList();
@@ -968,9 +985,10 @@
             window.firebaseOnAuthStateChanged(window.firebaseAuth, async (user) => {
                 if (user) {
                     userId = user.uid;
-                    const userSnap = await window.firebaseGet(window.firebaseRef(window.firebaseDatabase, `users/${userId}`));
+                    const userRef = window.fsDoc(window.firestore, 'users', userId);
+                    const userSnap = await window.fsGetDoc(userRef);
                     if (userSnap.exists()) {
-                        const data = userSnap.val();
+                        const data = userSnap.data();
                         currentUser = { id: userId, name: data.name || user.displayName, email: user.email, balance: data.balance || 0, totalEarned: data.totalEarned || 0 };
                         balance = currentUser.balance;
                         invitedFriends = data.invitedFriends || [];
@@ -991,8 +1009,9 @@
                     document.getElementById('google-login-btn').innerHTML = '<i class="fas fa-user-check mr-1"></i> ' + currentUser.name.substring(0, 10);
                     document.getElementById('profile-btn').classList.remove('hidden');
                     
-                    const adminSnap = await window.firebaseGet(window.firebaseRef(window.firebaseDatabase, 'admins'));
-                    const adminList = adminSnap.exists() ? adminSnap.val() : [];
+                    const adminRef = window.fsDoc(window.firestore, 'admins', 'list');
+                    const adminSnap = await window.fsGetDoc(adminRef);
+                    const adminList = adminSnap.exists() ? adminSnap.data().ids || [] : [];
                     isAdmin = adminList.includes(userId);
                     if (isAdmin) document.getElementById('admin-mode-btn').classList.remove('hidden');
                     
