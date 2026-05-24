@@ -85,8 +85,8 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
-        .web-mode-badge { position: fixed; bottom: 70px; right: 10px; background: #334155; padding: 4px 8px; border-radius: 20px; font-size: 9px; z-index: 100; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0e1a; z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .error-message { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; padding: 20px; border-radius: 16px; text-align: center; z-index: 3000; border: 1px solid #f59e0b; }
     </style>
 </head>
 <body>
@@ -94,6 +94,13 @@
 <div class="loading-overlay" id="loadingOverlay">
     <i class="fas fa-spinner fa-spin text-4xl text-amber-400 mb-4"></i>
     <p class="text-white">Loading MM GOLDEN...</p>
+</div>
+
+<div class="error-message hidden" id="errorMessage">
+    <i class="fas fa-exclamation-triangle text-amber-400 text-3xl mb-3"></i>
+    <p class="text-white mb-2">⚠️ Please open this app from Telegram Bot!</p>
+    <p class="text-slate-400 text-xs">ကျေးဇူးပြု၍ Telegram Bot မှတစ်ဆင့် ဝင်ရောက်ပါ။</p>
+    <a href="https://t.me/MMGOLDEN_bot" target="_blank" class="btn-yellow inline-block mt-4 px-4 py-2 rounded-lg text-sm">Open @MMGOLDEN_bot</a>
 </div>
 
 <div class="fixed top-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm p-4 z-50 border-b border-amber-500/20">
@@ -323,8 +330,6 @@
     <button onclick="showSec('sec-about')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-cog text-xl"></i><span class="text-[9px] mt-0.5">Setting</span></button>
 </nav>
 
-<div id="webModeBadge" class="web-mode-badge hidden">🌐 Web Mode</div>
-
 <script>
     // ========== CONFIGURATION ==========
     const MIN_WITHDRAW_POINTS = 100000;
@@ -354,7 +359,6 @@
     let gamesPlayedToday = 0;
     let lastGameDate = '';
     let isAdmin = false;
-    let isWebMode = false;
     
     let gameRunning = false, gameCoins = 0, gameBest = parseInt(localStorage.getItem('game_best')) || 0;
     let gameAnimationId = null, gamePlayerX = 155, gameObstacles = [], gameCoinsList = [], gameFrame = 0;
@@ -364,15 +368,29 @@
     let tasksCache = [];
     let saveTimeout = null;
     
+    // Check if opened from Telegram
+    function checkTelegramWebApp() {
+        const tg = window.Telegram?.WebApp;
+        if (!tg || !tg.initDataUnsafe?.user) {
+            // Not in Telegram - show error message
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('errorMessage').classList.remove('hidden');
+            return false;
+        }
+        return true;
+    }
+    
     // Loading screen
     setTimeout(() => {
-        const loading = document.getElementById('loadingOverlay');
-        const mainContent = document.getElementById('mainContent');
-        if(loading && mainContent) {
-            loading.style.display = 'none';
-            mainContent.style.display = 'block';
+        if (checkTelegramWebApp()) {
+            const loading = document.getElementById('loadingOverlay');
+            const mainContent = document.getElementById('mainContent');
+            if(loading && mainContent) {
+                loading.style.display = 'none';
+                mainContent.style.display = 'block';
+            }
         }
-    }, 1500);
+    }, 1000);
     
     async function saveToFirebase() {
         if (!window.firestore || !userId) return;
@@ -409,14 +427,7 @@
         if (tg && tg.initDataUnsafe?.user) {
             return tg.initDataUnsafe.user.id.toString();
         }
-        isWebMode = true;
-        document.getElementById('webModeBadge').classList.remove('hidden');
-        let webId = localStorage.getItem('web_user_id');
-        if (!webId) {
-            webId = 'web_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
-            localStorage.setItem('web_user_id', webId);
-        }
-        return webId;
+        return null;
     }
     
     function getUserName() {
@@ -427,12 +438,7 @@
             if (user.last_name) name += ' ' + user.last_name;
             return name;
         }
-        let webName = localStorage.getItem('web_user_name');
-        if (!webName) {
-            webName = 'WebUser_' + Math.random().toString(36).substr(2, 4);
-            localStorage.setItem('web_user_name', webName);
-        }
-        return webName;
+        return 'User';
     }
     
     function getStartParam() {
@@ -440,11 +446,12 @@
         if (tg && tg.initDataUnsafe?.start_param) {
             return tg.initDataUnsafe.start_param;
         }
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('start') || urlParams.get('startapp');
+        return null;
     }
     
     async function initTelegramUser() {
+        if (!checkTelegramWebApp()) return;
+        
         userId = getUserId();
         userName = getUserName();
         
@@ -609,8 +616,7 @@
                     });
                     const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', refId);
                     await window.fsUpdateDoc(leaderboardRef, { totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS });
-                    await addPointsOptimized(REFERRAL_POINTS, `Referral Bonus (from ${refUser.name})`);
-                    showNotification(`🎉 +${REFERRAL_POINTS} PTS from referral!`);
+                    showNotification(`🎉 +${REFERRAL_POINTS} PTS from ${refUser.name}! Thank you for inviting!`);
                 }
             }
         } catch(e) { console.error("Referral error:", e); }
@@ -832,10 +838,17 @@
         if(!c)return; 
         if(tasksCache.length===0){ c.innerHTML='<div class="gold-card p-6 text-center text-slate-500">No tasks yet</div>'; return; } 
         const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        c.innerHTML=tasksCache.map(t=>`<div class="gold-card p-4 ${completedTasks.includes(t.id)?'opacity-60':''}"><div class="flex justify-between items-start"><div><h4 class="font-bold text-white">${typeIcons[t.type] || '🔗'} ${t.title}</h4><p class="text-[10px] text-green-500">+${t.reward} PTS</p></div><button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg" ${completedTasks.includes(t.id)?'disabled':''}>${completedTasks.includes(t.id)?'✓ Completed':'DO TASK'}</button></div><a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2">${t.link.substring(0,45)}...</a></div>`).join('');
+        // Only show tasks that are NOT completed AND exist in cache (not deleted)
+        const availableTasks = tasksCache.filter(t => !completedTasks.includes(t.id));
+        if(availableTasks.length === 0){
+            c.innerHTML='<div class="gold-card p-6 text-center text-green-400">✅ All tasks completed! New tasks coming soon.</div>';
+        } else {
+            c.innerHTML=availableTasks.map(t=>`<div class="gold-card p-4"><div class="flex justify-between items-start"><div><h4 class="font-bold text-white">${typeIcons[t.type] || '🔗'} ${t.title}</h4><p class="text-[10px] text-green-500">+${t.reward} PTS</p></div><button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg">DO TASK</button></div><a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2">${t.link.substring(0,45)}...</a></div>`).join('');
+        }
         
         const completedContainer = document.getElementById('completed-tasks-list');
         if (completedContainer) {
+            // Only show completed tasks that still exist in cache (not deleted)
             const completedTaskItems = completedTasks.filter(taskId => tasksCache.some(t => t.id === taskId));
             if (completedTaskItems.length === 0) { completedContainer.innerHTML = '<div class="text-center text-slate-500 py-3">ပြီးဆုံးပြီး Task မရှိသေးပါ</div>'; }
             else { completedContainer.innerHTML = completedTaskItems.map(taskId => { const task = tasksCache.find(t => t.id === taskId); return task ? `<div class="completed-task-item"><i class="fas fa-check-circle text-green-400 mr-2"></i>${task.title} <span class="text-green-400 float-right">+${task.reward} PTS</span></div>` : ''; }).join(''); }
@@ -843,11 +856,15 @@
     }
     
     async function completeTask(id,reward){ 
-        if(completedTasks.includes(id)){ showNotification("Task already completed!"); return; } 
+        if(completedTasks.includes(id)){ 
+            showNotification("Task already completed! You can only do each task once."); 
+            return; 
+        } 
         completedTasks.push(id); 
         await addPointsOptimized(reward,"Task"); 
         await saveToFirebase(); 
         renderTasks(); 
+        showNotification(`✅ Task completed! +${reward} PTS`);
     }
     
     function renderQuiz(){ 
@@ -881,7 +898,9 @@
   
     function renderRefUI() { 
         if(!userId) return;
-        document.getElementById('ref-link').innerHTML = `https://t.me/${BOT_USERNAME}?start=${userId}`; 
+        // Only Telegram bot link
+        const inviteLink = `https://t.me/${BOT_USERNAME}?start=${userId}`;
+        document.getElementById('ref-link').innerHTML = inviteLink; 
         document.getElementById('ref-count').innerText = invitedFriends.length; 
         document.getElementById('ref-earned').innerText = (invitedFriends.length * REFERRAL_POINTS).toLocaleString(); 
         const c = document.getElementById('ref-list'); 
@@ -893,7 +912,7 @@
     function copyRef(){ 
         const link = document.getElementById('ref-link').innerHTML;
         navigator.clipboard.writeText(link); 
-        showNotification("Referral link copied!"); 
+        showNotification("✅ Referral link copied! Share with friends to earn 500 PTS each!"); 
     }
     
     function showUserProfile(){ showSec('sec-profile'); }
@@ -998,7 +1017,7 @@
         c.innerHTML = tasksCache.map(t => `<div class="task-item flex justify-between items-center"><div><p class="text-xs text-white">${typeIcons[t.type] || '🔗'} ${t.title}</p><p class="text-[9px] text-amber-400">+${t.reward} PTS</p></div><button onclick="deleteAdminTask('${t.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
     }
     
-    async function deleteAdminTask(id){ if(confirm("Delete?")){ tasksCache = tasksCache.filter(t => t.id !== id); await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); renderAdminTaskList(); renderTasks(); showNotification("Task deleted"); } }
+    async function deleteAdminTask(id){ if(confirm("Delete this task permanently?")){ tasksCache = tasksCache.filter(t => t.id !== id); await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); renderAdminTaskList(); renderTasks(); showNotification("Task permanently deleted!"); } }
     
     async function addQuizQuestion(){ 
         const q = document.getElementById('quiz-question').value.trim(), a = document.getElementById('quiz-answer').value.trim(), p = parseInt(document.getElementById('quiz-points').value); 
