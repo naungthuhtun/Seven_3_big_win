@@ -8,7 +8,7 @@
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, orderBy, limit, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, orderBy, limit, arrayUnion, arrayRemove, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAou0HLlJEhcarQw0FocghOPw9AAMsZlq8",
@@ -37,6 +37,7 @@
         window.fsLimit = limit;
         window.fsArrayUnion = arrayUnion;
         window.fsArrayRemove = arrayRemove;
+        window.fsOnSnapshot = onSnapshot;
         
         console.log('✅ Firebase Firestore connected');
     </script>
@@ -87,6 +88,7 @@
         ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0e1a; z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
         .error-message { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; padding: 20px; border-radius: 16px; text-align: center; z-index: 3000; border: 1px solid #f59e0b; }
+        .real-time-badge { position: fixed; bottom: 70px; right: 10px; background: #10b981; padding: 4px 8px; border-radius: 20px; font-size: 8px; z-index: 100; }
     </style>
 </head>
 <body>
@@ -102,6 +104,8 @@
     <p class="text-slate-400 text-xs">ကျေးဇူးပြု၍ Telegram Bot မှတစ်ဆင့် ဝင်ရောက်ပါ။</p>
     <a href="https://t.me/MMGOLDEN_bot" target="_blank" class="btn-yellow inline-block mt-4 px-4 py-2 rounded-lg text-sm">Open @MMGOLDEN_bot</a>
 </div>
+
+<div class="real-time-badge hidden" id="realtimeBadge">🔴 Real-time Updates Active</div>
 
 <div class="fixed top-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm p-4 z-50 border-b border-amber-500/20">
     <div class="max-w-md mx-auto">
@@ -362,6 +366,11 @@
     let lastGameDate = '';
     let isAdmin = false;
     
+    // Unsubscribe functions for real-time listeners
+    let unsubscribeQuizzes = null;
+    let unsubscribeTasks = null;
+    let unsubscribeLeaderboard = null;
+    
     let gameRunning = false, gameCoins = 0, gameBest = parseInt(localStorage.getItem('game_best')) || 0;
     let gameAnimationId = null, gamePlayerX = 155, gameObstacles = [], gameCoinsList = [], gameFrame = 0;
     const GAME_WIDTH = 340, GAME_HEIGHT = 420, PLAYER_WIDTH = 32, PLAYER_HEIGHT = 32, OBSTACLE_SIZE = 28, COIN_SIZE = 14;
@@ -369,6 +378,9 @@
     let quizzesCache = [];
     let tasksCache = [];
     let saveTimeout = null;
+    
+    // Show real-time badge
+    document.getElementById('realtimeBadge').classList.remove('hidden');
     
     // Check if opened from Telegram
     function checkTelegramWebApp() {
@@ -450,6 +462,98 @@
         return null;
     }
     
+    // REAL-TIME: Listen to quizzes changes
+    function setupQuizzesListener() {
+        if (!window.firestore) return;
+        const quizzesCollection = window.fsCollection(window.firestore, 'quizzes');
+        unsubscribeQuizzes = window.fsOnSnapshot(quizzesCollection, (snapshot) => {
+            quizzesCache = [];
+            snapshot.forEach(doc => {
+                quizzesCache.push({ id: doc.id, ...doc.data() });
+            });
+            if (quizzesCache.length === 0) {
+                const defaultQuiz = { q: "မြန်မာနိုင်ငံ၏ မြို့တော်မှာ?", a: "နေပြည်တော်", p: 50 };
+                window.fsSetDoc(window.fsDoc(window.firestore, 'quizzes', 'default1'), defaultQuiz);
+            }
+            renderQuiz();
+            if (document.getElementById('sec-quiz').classList.contains('active')) {
+                updateQuizCounterUI();
+            }
+            if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) {
+                renderQuizList();
+            }
+            showNotification("📢 New quiz available!" , 2000);
+        }, (error) => {
+            console.error("Quizzes listener error:", error);
+        });
+    }
+    
+    // REAL-TIME: Listen to tasks changes
+    function setupTasksListener() {
+        if (!window.firestore) return;
+        const tasksCollection = window.fsCollection(window.firestore, 'tasks');
+        unsubscribeTasks = window.fsOnSnapshot(tasksCollection, (snapshot) => {
+            tasksCache = [];
+            snapshot.forEach(doc => {
+                tasksCache.push({ id: doc.id, ...doc.data() });
+            });
+            renderTasks();
+            if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) {
+                renderAdminTaskList();
+            }
+            showNotification("📢 New task available!" , 2000);
+        }, (error) => {
+            console.error("Tasks listener error:", error);
+        });
+    }
+    
+    // REAL-TIME: Listen to leaderboard changes (Top 5)
+    function setupLeaderboardListener() {
+        if (!window.firestore) return;
+        const leaderboardCollection = window.fsCollection(window.firestore, 'leaderboard');
+        const leaderboardQuery = window.fsQuery(leaderboardCollection, window.fsOrderBy('totalEarned', 'desc'), window.fsLimit(50));
+        unsubscribeLeaderboard = window.fsOnSnapshot(leaderboardQuery, (snapshot) => {
+            const leaders = [];
+            snapshot.forEach(doc => {
+                leaders.push({ name: doc.data().name, totalEarned: doc.data().totalEarned });
+            });
+            renderTopUsers(leaders.slice(0, 5));
+        }, (error) => {
+            console.error("Leaderboard listener error:", error);
+        });
+    }
+    
+    // REAL-TIME: Listen to user's own data changes
+    function setupUserListener() {
+        if (!window.firestore || !userId) return;
+        const userRef = window.fsDoc(window.firestore, 'users', userId);
+        window.fsOnSnapshot(userRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                balance = data.balance || 0;
+                invitedFriends = data.invitedFriends || [];
+                completedTasks = data.completedTasks || [];
+                completedQuizzes = data.completedQuizzes || [];
+                totalQuizzesAnswered = data.totalQuizzesAnswered || 0;
+                claimedMilestones = data.claimedMilestones || [];
+                gamesPlayedToday = data.gamesPlayedToday || 0;
+                lastGameDate = data.lastGameDate || '';
+                if (currentUser) {
+                    currentUser.balance = balance;
+                    currentUser.totalEarned = data.totalEarned || 0;
+                }
+                updateBalanceUI();
+                renderRefUI();
+                renderTasks();
+                renderQuiz();
+                updateGameRemainingUI();
+                updateQuizCounterUI();
+            }
+        }, (error) => {
+            console.error("User listener error:", error);
+        });
+    }
+    
     async function initTelegramUser() {
         if (!checkTelegramWebApp()) return;
         
@@ -498,14 +602,19 @@
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
             
-            await loadDataFromFirestore();
+            // Setup real-time listeners
+            setupQuizzesListener();
+            setupTasksListener();
+            setupLeaderboardListener();
+            setupUserListener();
+            
             updateBalanceUI();
             renderRefUI();
             renderTasks();
             renderQuiz();
             updateGameRemainingUI();
             updateQuizCounterUI();
-            showNotification(`Welcome ${userName}! 🎉`);
+            showNotification(`Welcome ${userName}! 🎉 Real-time updates active!`);
             
             const tg = window.Telegram?.WebApp;
             if (tg) {
@@ -515,36 +624,6 @@
         } catch(error) {
             console.error("Firebase error:", error);
             showNotification("Firebase connection issue. Please check console.");
-        }
-    }
-    
-    async function loadDataFromFirestore() {
-        if (!window.firestore) return;
-        
-        try {
-            const quizzesCollection = window.fsCollection(window.firestore, 'quizzes');
-            const quizzesSnapshot = await window.fsGetDocs(quizzesCollection);
-            quizzesCache = [];
-            quizzesSnapshot.forEach(doc => quizzesCache.push({ id: doc.id, ...doc.data() }));
-            if (quizzesCache.length === 0) {
-                const defaultQuiz = { q: "မြန်မာနိုင်ငံ၏ မြို့တော်မှာ?", a: "နေပြည်တော်", p: 50 };
-                await window.fsSetDoc(window.fsDoc(window.firestore, 'quizzes', 'default1'), defaultQuiz);
-                quizzesCache = [{ id: 'default1', ...defaultQuiz }];
-            }
-            
-            const tasksCollection = window.fsCollection(window.firestore, 'tasks');
-            const tasksSnapshot = await window.fsGetDocs(tasksCollection);
-            tasksCache = [];
-            tasksSnapshot.forEach(doc => tasksCache.push({ id: doc.id, ...doc.data() }));
-            
-            const leaderboardCollection = window.fsCollection(window.firestore, 'leaderboard');
-            const leaderboardQuery = window.fsQuery(leaderboardCollection, window.fsOrderBy('totalEarned', 'desc'), window.fsLimit(50));
-            const leaderboardSnapshot = await window.fsGetDocs(leaderboardQuery);
-            const leaders = [];
-            leaderboardSnapshot.forEach(doc => leaders.push({ name: doc.data().name, totalEarned: doc.data().totalEarned }));
-            renderTopUsers(leaders.slice(0, 5));
-        } catch(error) {
-            console.error("Load data error:", error);
         }
     }
     
@@ -614,7 +693,6 @@
                 const refUser = userSnap.data();
                 const alreadyReferred = refUser.invitedFriends?.includes(userId);
                 if (!alreadyReferred) {
-                    // Give points to the inviter (refId user)
                     await window.fsUpdateDoc(userRef, {
                         balance: (refUser.balance || 0) + REFERRAL_POINTS,
                         totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS,
@@ -651,12 +729,13 @@
         if (btn) { if (balance < MIN_WITHDRAW_POINTS) { btn.disabled = true; btn.innerHTML = `🔒 ငွေထုတ်ရန် ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS လိုအပ်သည်`; } else { btn.disabled = false; btn.innerHTML = '💰 ငွေထုတ်ယူရန်နေရာ'; } }
     }
     
-    function showNotification(msg) {
+    let notificationTimeout = null;
+    function showNotification(msg, duration = 2500) {
         const div = document.createElement('div');
         div.className = 'fixed top-24 left-1/2 transform -translate-x-1/2 z-[1000] bg-amber-600 text-white px-6 py-3 rounded-xl shadow-xl';
         div.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${msg}`;
         document.body.appendChild(div);
-        setTimeout(() => div.remove(), 2500);
+        setTimeout(() => div.remove(), duration);
     }
     
     function showSec(id) {
@@ -838,7 +917,6 @@
         if(!c)return; 
         if(tasksCache.length===0){ c.innerHTML='<div class="gold-card p-6 text-center text-slate-500">No tasks yet</div>'; return; } 
         const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        // Only show tasks that are NOT completed
         const availableTasks = tasksCache.filter(t => !completedTasks.includes(t.id));
         if(availableTasks.length === 0){
             c.innerHTML='<div class="gold-card p-6 text-center text-green-400">✅ All tasks completed! New tasks coming soon.</div>';
@@ -924,7 +1002,7 @@
     function checkWithdrawEligibility(){ if(!currentUser) return false; if(balance < MIN_WITHDRAW_POINTS){ alert(`Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`); return false; } showSec('sec-withdraw'); return true; }
     async function submitWithdraw(){ const name = document.getElementById('w-name').value.trim(), phone = document.getElementById('w-phone').value.trim(), amount = parseInt(document.getElementById('w-amt').value); if(!name || !phone || isNaN(amount)){ alert("Fill all fields"); return; } if(amount < MIN_WITHDRAW_POINTS || amount > balance){ alert("Invalid amount"); return; } const usdAmount = (amount * USD_PER_POINT).toFixed(4); if(!confirm(`${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n${name}\n${amount.toLocaleString()} PTS = $${usdAmount} USD\nConfirm?`)) return; balance -= amount; await saveToFirebase(); updateBalanceUI(); alert("✅ Withdrawal request submitted!"); showSec('sec-home'); }
     
-    // ========== ADMIN FUNCTIONS (Only for authorized admin) ==========
+    // ========== ADMIN FUNCTIONS ==========
     async function renderAdminUserTable(){ 
         if (!isAdmin) return;
         const tbody = document.getElementById('admin-user-table'); 
@@ -1015,9 +1093,8 @@
         const newTask = { id: newId, title, link, reward, type }; 
         tasksCache.push(newTask); 
         await window.fsSetDoc(window.fsDoc(window.firestore, 'tasks', newId), newTask);
-        renderAdminTaskList(); renderTasks(); 
-        document.getElementById('task-title').value = ''; document.getElementById('task-link').value = ''; 
-        showNotification("Task added! Users can now see it."); 
+        renderAdminTaskList(); 
+        showNotification("Task added! Users can now see it in real-time!"); 
     }
     
     function renderAdminTaskList(){ 
@@ -1035,10 +1112,7 @@
             return;
         }
         if(confirm("Delete this task permanently? Users will no longer see it.")){ 
-            tasksCache = tasksCache.filter(t => t.id !== id); 
             await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); 
-            renderAdminTaskList(); 
-            renderTasks(); 
             showNotification("Task permanently deleted! Users can no longer see it."); 
         } 
     }
@@ -1051,12 +1125,9 @@
         const q = document.getElementById('quiz-question').value.trim(), a = document.getElementById('quiz-answer').value.trim(), p = parseInt(document.getElementById('quiz-points').value); 
         if(!q || !a || isNaN(p)){ alert("Fill all fields"); return; } 
         const newId = Date.now().toString(); 
-        const newQuiz = { id: newId, q, a, p }; 
-        quizzesCache.push(newQuiz); 
         await window.fsSetDoc(window.fsDoc(window.firestore, 'quizzes', newId), { q, a, p });
-        renderQuizList(); renderQuiz(); 
         document.getElementById('quiz-question').value = ''; document.getElementById('quiz-answer').value = ''; 
-        showNotification("Quiz added! Users can now answer it."); 
+        showNotification("Quiz added! Users can now answer it in real-time!"); 
     }
     
     function renderQuizList(){ 
@@ -1073,18 +1144,13 @@
             return;
         }
         if(confirm("Delete this quiz?")){ 
-            quizzesCache = quizzesCache.filter(q => q.id !== id); 
             await window.fsDeleteDoc(window.fsDoc(window.firestore, 'quizzes', id)); 
-            renderQuizList(); 
-            renderQuiz(); 
             showNotification("Quiz deleted"); 
         } 
     }
     
     let secretCount = 0;
     function handleSecret(){ 
-        // Only admin can access by password, but even if non-admin enters password, they won't see admin panel
-        // because isAdmin is false for them
         secretCount++; 
         setTimeout(() => secretCount = 0, 2000); 
         if(secretCount === 3){ 
@@ -1093,7 +1159,11 @@
                 document.getElementById('admin-panel').classList.toggle('hidden'); 
                 if(document.getElementById('admin-panel').classList.contains('hidden')){ 
                     document.body.classList.remove('admin-mode'); 
-                } 
+                } else {
+                    renderQuizList();
+                    renderAdminTaskList();
+                    renderAdminUserTable();
+                }
             } else if(pwd === ADMIN_PASSWORD && !isAdmin) {
                 alert("❌ This device is not registered as admin device!");
             } else if(pwd !== ADMIN_PASSWORD) {
@@ -1103,13 +1173,7 @@
         } 
     }
     
-    async function setupAdminList() { 
-        // This is now handled by ADMIN_USER_IDS constant
-        console.log("Admin users:", ADMIN_USER_IDS);
-    }
-    
     // ========== INIT ==========
-    setupAdminList();
     setTimeout(() => {
         initGameCanvas();
         initTelegramUser();
