@@ -338,6 +338,8 @@
     const REFERRAL_POINTS = 500;
     const MAX_GAMES_PER_DAY = 5;
     const BOT_USERNAME = "MMGOLDEN_bot";
+    const ADMIN_PASSWORD = "871033";
+    const ADMIN_USER_IDS = ["6099430589"];  // Only this user ID can access admin panel
     
     const QUIZ_MILESTONES = [
         { target: 50, reward: 50 },
@@ -372,7 +374,6 @@
     function checkTelegramWebApp() {
         const tg = window.Telegram?.WebApp;
         if (!tg || !tg.initDataUnsafe?.user) {
-            // Not in Telegram - show error message
             document.getElementById('loadingOverlay').style.display = 'none';
             document.getElementById('errorMessage').classList.remove('hidden');
             return false;
@@ -459,6 +460,15 @@
         document.getElementById('profile-name').innerText = userName;
         document.getElementById('profile-user-id').innerText = userId;
         
+        // Check if this user is admin (by user ID)
+        isAdmin = ADMIN_USER_IDS.includes(userId);
+        if (isAdmin) {
+            document.getElementById('admin-mode-btn').classList.remove('hidden');
+            console.log('✅ Admin access granted for user:', userId);
+        } else {
+            console.log('❌ Not an admin user:', userId);
+        }
+        
         try {
             const userRef = window.fsDoc(window.firestore, 'users', userId);
             const userSnap = await window.fsGetDoc(userRef);
@@ -479,12 +489,6 @@
                 balance = 0;
                 await saveToFirebase();
             }
-            
-            const adminRef = window.fsDoc(window.firestore, 'admins', 'list');
-            const adminSnap = await window.fsGetDoc(adminRef);
-            const adminList = adminSnap.exists() ? (adminSnap.data().ids || []) : [];
-            isAdmin = adminList.includes(userId);
-            if (isAdmin) document.getElementById('admin-mode-btn').classList.remove('hidden');
             
             const startParam = getStartParam();
             if (startParam && startParam !== userId) {
@@ -532,11 +536,6 @@
             const tasksSnapshot = await window.fsGetDocs(tasksCollection);
             tasksCache = [];
             tasksSnapshot.forEach(doc => tasksCache.push({ id: doc.id, ...doc.data() }));
-            if (tasksCache.length === 0) {
-                const defaultTask = { title: "Join Telegram Channel", link: "https://t.me/MMGoldenChannel", reward: 50, type: "telegram" };
-                await window.fsSetDoc(window.fsDoc(window.firestore, 'tasks', 'default1'), defaultTask);
-                tasksCache = [{ id: 'default1', ...defaultTask }];
-            }
             
             const leaderboardCollection = window.fsCollection(window.firestore, 'leaderboard');
             const leaderboardQuery = window.fsQuery(leaderboardCollection, window.fsOrderBy('totalEarned', 'desc'), window.fsLimit(50));
@@ -557,11 +556,17 @@
     }
     
     function toggleAdminMode() { 
-        if (!isAdmin) return; 
+        if (!isAdmin) {
+            showNotification("You are not authorized to use admin panel!");
+            return;
+        }
         document.body.classList.toggle('admin-mode'); 
         if (document.body.classList.contains('admin-mode')) { 
             document.getElementById('admin-mode-btn').innerHTML = '<i class="fas fa-eye"></i> User'; 
-            renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); 
+            renderAdminUserTable(); 
+            renderAdminWithdrawals(); 
+            renderQuizList(); 
+            renderAdminTaskList(); 
             showNotification("Admin Mode ON"); 
         } else { 
             document.getElementById('admin-mode-btn').innerHTML = '<i class="fas fa-user-shield"></i> Admin'; 
@@ -609,6 +614,7 @@
                 const refUser = userSnap.data();
                 const alreadyReferred = refUser.invitedFriends?.includes(userId);
                 if (!alreadyReferred) {
+                    // Give points to the inviter (refId user)
                     await window.fsUpdateDoc(userRef, {
                         balance: (refUser.balance || 0) + REFERRAL_POINTS,
                         totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS,
@@ -616,7 +622,7 @@
                     });
                     const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', refId);
                     await window.fsUpdateDoc(leaderboardRef, { totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS });
-                    showNotification(`🎉 +${REFERRAL_POINTS} PTS from ${refUser.name}! Thank you for inviting!`);
+                    showNotification(`🎉 +${REFERRAL_POINTS} PTS has been given to ${refUser.name} for inviting you!`);
                 }
             }
         } catch(e) { console.error("Referral error:", e); }
@@ -680,10 +686,7 @@
     // ========== GAME ==========
     function initGameCanvas() {
         const canvas = document.getElementById('gameCanvas');
-        if(!canvas) {
-            console.error("Canvas not found");
-            return;
-        }
+        if(!canvas) return;
         canvas.width = GAME_WIDTH;
         canvas.height = GAME_HEIGHT;
         
@@ -725,10 +728,7 @@
             showNotification("Please wait for user data to load");
             return;
         }
-        if(gameRunning) {
-            showNotification("Game is already running!");
-            return;
-        }
+        if(gameRunning) return;
         const remaining = MAX_GAMES_PER_DAY - gamesPlayedToday;
         if(remaining <= 0) { 
             showNotification("ယနေ့အတွက် ဂိမ်းဆော့ခွင့် ကုန်သွားပါပြီ။"); 
@@ -838,7 +838,7 @@
         if(!c)return; 
         if(tasksCache.length===0){ c.innerHTML='<div class="gold-card p-6 text-center text-slate-500">No tasks yet</div>'; return; } 
         const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        // Only show tasks that are NOT completed AND exist in cache (not deleted)
+        // Only show tasks that are NOT completed
         const availableTasks = tasksCache.filter(t => !completedTasks.includes(t.id));
         if(availableTasks.length === 0){
             c.innerHTML='<div class="gold-card p-6 text-center text-green-400">✅ All tasks completed! New tasks coming soon.</div>';
@@ -848,7 +848,6 @@
         
         const completedContainer = document.getElementById('completed-tasks-list');
         if (completedContainer) {
-            // Only show completed tasks that still exist in cache (not deleted)
             const completedTaskItems = completedTasks.filter(taskId => tasksCache.some(t => t.id === taskId));
             if (completedTaskItems.length === 0) { completedContainer.innerHTML = '<div class="text-center text-slate-500 py-3">ပြီးဆုံးပြီး Task မရှိသေးပါ</div>'; }
             else { completedContainer.innerHTML = completedTaskItems.map(taskId => { const task = tasksCache.find(t => t.id === taskId); return task ? `<div class="completed-task-item"><i class="fas fa-check-circle text-green-400 mr-2"></i>${task.title} <span class="text-green-400 float-right">+${task.reward} PTS</span></div>` : ''; }).join(''); }
@@ -898,7 +897,6 @@
   
     function renderRefUI() { 
         if(!userId) return;
-        // Only Telegram bot link
         const inviteLink = `https://t.me/${BOT_USERNAME}?start=${userId}`;
         document.getElementById('ref-link').innerHTML = inviteLink; 
         document.getElementById('ref-count').innerText = invitedFriends.length; 
@@ -926,8 +924,9 @@
     function checkWithdrawEligibility(){ if(!currentUser) return false; if(balance < MIN_WITHDRAW_POINTS){ alert(`Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`); return false; } showSec('sec-withdraw'); return true; }
     async function submitWithdraw(){ const name = document.getElementById('w-name').value.trim(), phone = document.getElementById('w-phone').value.trim(), amount = parseInt(document.getElementById('w-amt').value); if(!name || !phone || isNaN(amount)){ alert("Fill all fields"); return; } if(amount < MIN_WITHDRAW_POINTS || amount > balance){ alert("Invalid amount"); return; } const usdAmount = (amount * USD_PER_POINT).toFixed(4); if(!confirm(`${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n${name}\n${amount.toLocaleString()} PTS = $${usdAmount} USD\nConfirm?`)) return; balance -= amount; await saveToFirebase(); updateBalanceUI(); alert("✅ Withdrawal request submitted!"); showSec('sec-home'); }
     
-    // ========== ADMIN FUNCTIONS ==========
+    // ========== ADMIN FUNCTIONS (Only for authorized admin) ==========
     async function renderAdminUserTable(){ 
+        if (!isAdmin) return;
         const tbody = document.getElementById('admin-user-table'); 
         if(!tbody) return; 
         try {
@@ -941,7 +940,11 @@
     }
     
     async function quickAdjustPoints(uid, amount){ 
-        if(!confirm(`Add ${amount} points?`)) return; 
+        if (!isAdmin) {
+            showNotification("You are not authorized!");
+            return;
+        }
+        if(!confirm(`Add ${amount} points to this user?`)) return; 
         try {
             const userRef = window.fsDoc(window.firestore, 'users', uid);
             const userSnap = await window.fsGetDoc(userRef);
@@ -953,7 +956,7 @@
                 if(uid === userId){ balance = newBalance; updateBalanceUI(); } 
                 const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', uid);
                 await window.fsSetDoc(leaderboardRef, { totalEarned: newTotal, name: userData.name }, { merge: true });
-                showNotification(`Added ${amount} points`); 
+                showNotification(`Added ${amount} points to user!`); 
                 renderAdminUserTable(); 
             } 
         } catch(e) { console.error(e); }
@@ -971,6 +974,10 @@
     }
     
     async function adjustUserPoints(){ 
+        if (!isAdmin) {
+            showNotification("You are not authorized!");
+            return;
+        }
         const searchTerm = document.getElementById('search-user').value.trim();
         const points = parseInt(document.getElementById('adjust-points').value);
         const action = document.getElementById('adjust-action').value;
@@ -987,8 +994,8 @@
             }
             if(!foundUser){ alert("User not found"); return; }
             let newBalance = foundUser.balance || 0, newTotal = foundUser.totalEarned || 0;
-            if(action === 'add'){ newBalance += points; newTotal += points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance, totalEarned: newTotal }); showNotification(`Added ${points} points`); }
-            else { if(points > newBalance){ alert("Not enough points!"); return; } newBalance -= points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Removed ${points} points`); }
+            if(action === 'add'){ newBalance += points; newTotal += points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance, totalEarned: newTotal }); showNotification(`Added ${points} points to ${foundUser.name}`); }
+            else { if(points > newBalance){ alert("Not enough points!"); return; } newBalance -= points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Removed ${points} points from ${foundUser.name}`); }
             await window.fsSetDoc(window.fsDoc(window.firestore, 'leaderboard', foundUid), { totalEarned: newTotal, name: foundUser.name }, { merge: true });
             if(foundUid === userId){ balance = newBalance; updateBalanceUI(); }
             renderAdminUserTable();
@@ -998,6 +1005,10 @@
     function renderAdminWithdrawals(){ const c = document.getElementById('admin-withdraw-list'); if(!c) return; c.innerHTML = '<p class="text-slate-500 text-center py-4">No pending withdrawal requests</p>'; }
     
     async function addAdminTask(){ 
+        if (!isAdmin) {
+            showNotification("You are not authorized!");
+            return;
+        }
         const title = document.getElementById('task-title').value.trim(), link = document.getElementById('task-link').value.trim(), type = document.getElementById('task-type').value, reward = parseInt(document.getElementById('task-reward').value); 
         if(!title || !link || isNaN(reward)){ alert("Fill all fields"); return; } 
         const newId = Date.now().toString(); 
@@ -1006,10 +1017,11 @@
         await window.fsSetDoc(window.fsDoc(window.firestore, 'tasks', newId), newTask);
         renderAdminTaskList(); renderTasks(); 
         document.getElementById('task-title').value = ''; document.getElementById('task-link').value = ''; 
-        showNotification("Task added!"); 
+        showNotification("Task added! Users can now see it."); 
     }
     
     function renderAdminTaskList(){ 
+        if (!isAdmin) return;
         const c = document.getElementById('admin-task-list'); 
         if(!c) return; 
         if(tasksCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No tasks</div>'; return; } 
@@ -1017,9 +1029,25 @@
         c.innerHTML = tasksCache.map(t => `<div class="task-item flex justify-between items-center"><div><p class="text-xs text-white">${typeIcons[t.type] || '🔗'} ${t.title}</p><p class="text-[9px] text-amber-400">+${t.reward} PTS</p></div><button onclick="deleteAdminTask('${t.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
     }
     
-    async function deleteAdminTask(id){ if(confirm("Delete this task permanently?")){ tasksCache = tasksCache.filter(t => t.id !== id); await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); renderAdminTaskList(); renderTasks(); showNotification("Task permanently deleted!"); } }
+    async function deleteAdminTask(id){ 
+        if (!isAdmin) {
+            showNotification("You are not authorized!");
+            return;
+        }
+        if(confirm("Delete this task permanently? Users will no longer see it.")){ 
+            tasksCache = tasksCache.filter(t => t.id !== id); 
+            await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); 
+            renderAdminTaskList(); 
+            renderTasks(); 
+            showNotification("Task permanently deleted! Users can no longer see it."); 
+        } 
+    }
     
     async function addQuizQuestion(){ 
+        if (!isAdmin) {
+            showNotification("You are not authorized!");
+            return;
+        }
         const q = document.getElementById('quiz-question').value.trim(), a = document.getElementById('quiz-answer').value.trim(), p = parseInt(document.getElementById('quiz-points').value); 
         if(!q || !a || isNaN(p)){ alert("Fill all fields"); return; } 
         const newId = Date.now().toString(); 
@@ -1032,27 +1060,52 @@
     }
     
     function renderQuizList(){ 
+        if (!isAdmin) return;
         const c = document.getElementById('quiz-list'); 
         if(!c) return; 
         if(quizzesCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No quizzes</div>'; return; } 
         c.innerHTML = quizzesCache.map(q => `<div class="quiz-item flex justify-between items-center"><div><p class="text-xs text-white">${q.q}</p><p class="text-[9px] text-amber-400">+${q.p} PTS</p></div><button onclick="deleteQuizQuestion('${q.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
     }
     
-    async function deleteQuizQuestion(id){ if(confirm("Delete?")){ quizzesCache = quizzesCache.filter(q => q.id !== id); await window.fsDeleteDoc(window.fsDoc(window.firestore, 'quizzes', id)); renderQuizList(); renderQuiz(); showNotification("Quiz deleted"); } }
+    async function deleteQuizQuestion(id){ 
+        if (!isAdmin) {
+            showNotification("You are not authorized!");
+            return;
+        }
+        if(confirm("Delete this quiz?")){ 
+            quizzesCache = quizzesCache.filter(q => q.id !== id); 
+            await window.fsDeleteDoc(window.fsDoc(window.firestore, 'quizzes', id)); 
+            renderQuizList(); 
+            renderQuiz(); 
+            showNotification("Quiz deleted"); 
+        } 
+    }
     
     let secretCount = 0;
-    function handleSecret(){ secretCount++; setTimeout(() => secretCount = 0, 2000); if(secretCount === 3){ const pwd = prompt("Admin Password:"); if(pwd === "871033"){ document.getElementById('admin-panel').classList.toggle('hidden'); if(document.getElementById('admin-panel').classList.contains('hidden')){ document.body.classList.remove('admin-mode'); } } else alert("Wrong password!"); secretCount = 0; } }
+    function handleSecret(){ 
+        // Only admin can access by password, but even if non-admin enters password, they won't see admin panel
+        // because isAdmin is false for them
+        secretCount++; 
+        setTimeout(() => secretCount = 0, 2000); 
+        if(secretCount === 3){ 
+            const pwd = prompt("Enter Admin Password:"); 
+            if(pwd === ADMIN_PASSWORD && isAdmin){ 
+                document.getElementById('admin-panel').classList.toggle('hidden'); 
+                if(document.getElementById('admin-panel').classList.contains('hidden')){ 
+                    document.body.classList.remove('admin-mode'); 
+                } 
+            } else if(pwd === ADMIN_PASSWORD && !isAdmin) {
+                alert("❌ This device is not registered as admin device!");
+            } else if(pwd !== ADMIN_PASSWORD) {
+                alert("Wrong password!");
+            }
+            secretCount = 0; 
+        } 
+    }
     
     async function setupAdminList() { 
-        if(!window.firestore) return; 
-        try {
-            const adminRef = window.fsDoc(window.firestore, 'admins', 'list');
-            const adminSnap = await window.fsGetDoc(adminRef);
-            if(!adminSnap.exists()){ 
-                await window.fsSetDoc(adminRef, { ids: ["6099430589"] });
-                console.log("Admin list initialized"); 
-            } 
-        } catch(e) { console.error("Setup admin error:", e); }
+        // This is now handled by ADMIN_USER_IDS constant
+        console.log("Admin users:", ADMIN_USER_IDS);
     }
     
     // ========== INIT ==========
