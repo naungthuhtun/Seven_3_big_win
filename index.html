@@ -50,84 +50,242 @@
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;500;600;700&display=swap');
         * { user-select: none; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Pyidaungsu', sans-serif; background: #0a0e1a; color: white; overflow-x: hidden; min-height: 100vh; }
-        .section { display: none; padding-bottom: 120px; animation: fadeInUp 0.4s ease; }
-        .section.active { display: block; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .gold-card { background: linear-gradient(145deg, #1a1f33, #0f1424); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); transition: transform 0.2s ease; }
-        .gold-card:hover { transform: translateY(-2px); border-color: rgba(251, 191, 36, 0.4); }
-        .btn-yellow { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); color: #0a0e1a; font-weight: 800; border-radius: 16px; transition: all 0.2s ease; border: none; cursor: pointer; }
+        
+        /* ========== NEON GLOW EFFECTS ========== */
+        .neon-text {
+            text-shadow: 0 0 5px #fbbf24, 0 0 10px #f59e0b, 0 0 20px #f59e0b, 0 0 40px #d97706;
+            animation: neonPulse 1.5s ease-in-out infinite alternate;
+        }
+        .neon-gold {
+            text-shadow: 0 0 5px #FFD700, 0 0 10px #FFA500, 0 0 15px #FF8C00;
+        }
+        .neon-green {
+            text-shadow: 0 0 5px #10b981, 0 0 10px #059669;
+        }
+        .neon-blue {
+            text-shadow: 0 0 5px #3b82f6, 0 0 10px #1d4ed8;
+        }
+        .neon-purple {
+            text-shadow: 0 0 5px #a855f7, 0 0 10px #7c3aed;
+        }
+        .neon-red {
+            text-shadow: 0 0 5px #ef4444, 0 0 10px #dc2626;
+        }
+        .glow-card {
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.2), 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .glow-card:hover {
+            border-color: rgba(251, 191, 36, 0.8);
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.4);
+            transform: translateY(-3px);
+        }
+        @keyframes neonPulse {
+            from { text-shadow: 0 0 5px #fbbf24, 0 0 10px #f59e0b; }
+            to { text-shadow: 0 0 15px #fbbf24, 0 0 25px #f59e0b, 0 0 35px #d97706; }
+        }
+        @keyframes borderGlow {
+            0% { border-color: rgba(251, 191, 36, 0.3); box-shadow: 0 0 5px rgba(251, 191, 36, 0.2); }
+            100% { border-color: rgba(251, 191, 36, 0.8); box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+        }
+        .gold-card {
+            background: linear-gradient(145deg, #1a1f33, #0f1424);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+            animation: borderGlow 3s ease-in-out infinite alternate;
+        }
+        .gold-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(251, 191, 36, 0.8);
+        }
+        .btn-yellow {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: #0a0e1a;
+            font-weight: 800;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
         .btn-yellow:active { transform: scale(0.97); }
-        .btn-yellow:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
-        .nav-active { color: #fbbf24 !important; border-top: 3px solid #fbbf24; background: rgba(245, 158, 11, 0.1); border-radius: 12px 12px 0 0; }
-        input, textarea, select { background: #1e293b !important; border: 1px solid #334155 !important; color: #fbbf24 !important; padding: 14px 16px; border-radius: 16px; width: 100%; margin-bottom: 12px; }
-        input:focus, textarea:focus, select:focus { border-color: #fbbf24 !important; outline: none; }
-        .withdraw-btn { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; border-radius: 18px; padding: 18px; font-weight: bold; cursor: pointer; width: 100%; }
-        .withdraw-btn:disabled { background: #4b5563; cursor: not-allowed; }
+        .btn-yellow:disabled { opacity: 0.5; transform: none; cursor: not-allowed; box-shadow: none; }
+        
+        .nav-active {
+            color: #fbbf24 !important;
+            border-top: 3px solid #fbbf24;
+            background: rgba(245, 158, 11, 0.15);
+            border-radius: 12px 12px 0 0;
+            text-shadow: 0 0 8px #fbbf24;
+        }
+        input, textarea, select {
+            background: #1e293b !important;
+            border: 1px solid #fbbf24 !important;
+            color: #fbbf24 !important;
+            padding: 14px 16px;
+            border-radius: 16px;
+            width: 100%;
+            margin-bottom: 12px;
+            box-shadow: 0 0 5px rgba(251, 191, 36, 0.3);
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #fbbf24 !important;
+            outline: none;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+        }
+        .withdraw-btn {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+            border-radius: 18px;
+            padding: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        .withdraw-btn:disabled { background: #4b5563; cursor: not-allowed; box-shadow: none; }
         .progress-bar { width: 100%; height: 8px; background: #334155; border-radius: 20px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 20px; transition: width 0.3s ease; }
-        .gradient-text { background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        #gameCanvas { background: linear-gradient(180deg, #1a472a 0%, #0d2818 100%); border-radius: 20px; display: block; margin: 0 auto; cursor: pointer; width: 100%; height: auto; max-width: 340px; }
-        .game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 20px; transition: width 0.3s ease; box-shadow: 0 0 5px #fbbf24; }
+        .gradient-text {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
+        }
+        #gameCanvas {
+            background: linear-gradient(180deg, #1a472a 0%, #0d2818 100%);
+            border-radius: 20px;
+            display: block;
+            margin: 0 auto;
+            cursor: pointer;
+            width: 100%;
+            height: auto;
+            max-width: 340px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        .game-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .admin-table { width: 100%; font-size: 10px; border-collapse: collapse; }
-        .admin-table th, .admin-table td { padding: 8px 6px; border-bottom: 1px solid rgba(251,191,36,0.15); }
-        .admin-table th { color: #fbbf24; background: rgba(0,0,0,0.3); }
-        .user-row:hover { background: rgba(251,191,36,0.1); cursor: pointer; }
+        .admin-table th, .admin-table td { padding: 8px 6px; border-bottom: 1px solid rgba(251,191,36,0.2); }
+        .admin-table th { color: #fbbf24; background: rgba(0,0,0,0.3); text-shadow: 0 0 5px #fbbf24; }
+        .user-row:hover { background: rgba(251,191,36,0.15); cursor: pointer; }
         .quiz-list, .task-list { max-height: 200px; overflow-y: auto; }
-        .quiz-item, .task-item { background: rgba(0,0,0,0.25); padding: 8px; margin-bottom: 6px; border-radius: 10px; }
-        .completed-tasks-list { max-height: 180px; overflow-y: auto; border-top: 1px solid rgba(251,191,36,0.2); margin-top: 12px; padding-top: 12px; }
-        .completed-task-item { background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 8px; margin-bottom: 5px; font-size: 11px; border-left: 2px solid #10b981; }
-        .quiz-counter { background: #1e293b; border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; }
-        .counter-value { font-size: 32px; font-weight: bold; color: #fbbf24; }
-        .milestone-item { display: inline-block; background: rgba(0,0,0,0.35); padding: 5px 12px; border-radius: 30px; margin: 4px; font-size: 10px; }
-        .milestone-completed { background: rgba(16,185,129,0.25); border: 1px solid #10b981; color: #10b981; }
+        .quiz-item, .task-item { background: rgba(0,0,0,0.3); padding: 8px; margin-bottom: 6px; border-radius: 10px; border-left: 3px solid #fbbf24; }
+        .completed-tasks-list { max-height: 180px; overflow-y: auto; border-top: 1px solid rgba(251,191,36,0.3); margin-top: 12px; padding-top: 12px; }
+        .completed-task-item { background: rgba(16,185,129,0.15); padding: 6px 10px; border-radius: 8px; margin-bottom: 5px; font-size: 11px; border-left: 2px solid #10b981; }
+        .quiz-counter { background: #1e293b; border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; border: 1px solid rgba(251,191,36,0.3); }
+        .counter-value { font-size: 32px; font-weight: bold; color: #fbbf24; text-shadow: 0 0 10px #fbbf24; }
+        .milestone-item {
+            display: inline-block;
+            background: rgba(0,0,0,0.35);
+            padding: 5px 12px;
+            border-radius: 30px;
+            margin: 4px;
+            font-size: 10px;
+            transition: all 0.3s;
+        }
+        .milestone-completed { background: rgba(16,185,129,0.3); border: 1px solid #10b981; color: #10b981; text-shadow: 0 0 5px #10b981; }
         .milestone-pending { background: #334155; color: #94a3b8; }
-        .milestone-ready { background: rgba(245,158,11,0.3); border: 1px solid #f59e0b; color: #fbbf24; cursor: pointer; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        .milestone-ready { background: rgba(245,158,11,0.4); border: 1px solid #f59e0b; color: #fbbf24; cursor: pointer; animation: pulse 1s infinite; text-shadow: 0 0 5px #fbbf24; }
+        @keyframes pulse { 0% { opacity: 0.6; box-shadow: 0 0 5px #fbbf24; } 50% { opacity: 1; box-shadow: 0 0 15px #fbbf24; } 100% { opacity: 0.6; box-shadow: 0 0 5px #fbbf24; } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0e1a; z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .error-message { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; padding: 20px; border-radius: 16px; text-align: center; z-index: 3000; border: 1px solid #f59e0b; }
-        .real-time-badge { position: fixed; bottom: 70px; right: 10px; background: #10b981; padding: 4px 8px; border-radius: 20px; font-size: 8px; z-index: 100; }
+        .error-message { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; padding: 20px; border-radius: 16px; text-align: center; z-index: 3000; border: 1px solid #f59e0b; box-shadow: 0 0 30px rgba(245,158,11,0.3); }
+        .real-time-badge { position: fixed; bottom: 70px; right: 10px; background: #10b981; padding: 4px 8px; border-radius: 20px; font-size: 8px; z-index: 100; box-shadow: 0 0 10px #10b981; animation: neonPulse 1s infinite; }
+        
+        /* Ref link copy button style */
+        .ref-container {
+            position: relative;
+            background: #1e293b;
+            border-radius: 16px;
+            border: 1px solid #fbbf24;
+            padding: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 0 10px rgba(251,191,36,0.3);
+        }
+        .ref-link-text {
+            font-size: 11px;
+            word-break: break-all;
+            color: #fbbf24;
+            font-family: monospace;
+            padding-right: 60px;
+            text-shadow: 0 0 3px #fbbf24;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            border: none;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #0a0e1a;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 0 8px rgba(251,191,36,0.5);
+        }
+        .copy-btn:active { transform: scale(0.95); }
+        .copy-success {
+            background: #10b981 !important;
+            color: white !important;
+            box-shadow: 0 0 10px #10b981 !important;
+        }
     </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
-    <i class="fas fa-spinner fa-spin text-4xl text-amber-400 mb-4"></i>
-    <p class="text-white">Loading MM GOLDEN...</p>
+    <i class="fas fa-spinner fa-spin text-4xl text-amber-400 mb-4" style="text-shadow: 0 0 10px #fbbf24;"></i>
+    <p class="text-white neon-text">Loading MM GOLDEN...</p>
 </div>
 
 <div class="error-message hidden" id="errorMessage">
-    <i class="fas fa-exclamation-triangle text-amber-400 text-3xl mb-3"></i>
-    <p class="text-white mb-2">⚠️ Please open this app from Telegram Bot!</p>
+    <i class="fas fa-exclamation-triangle text-amber-400 text-3xl mb-3" style="text-shadow: 0 0 10px #fbbf24;"></i>
+    <p class="text-white mb-2 neon-text">⚠️ Please open this app from Telegram Bot!</p>
     <p class="text-slate-400 text-xs">ကျေးဇူးပြု၍ Telegram Bot မှတစ်ဆင့် ဝင်ရောက်ပါ။</p>
     <a href="https://t.me/MMGOLDEN_bot" target="_blank" class="btn-yellow inline-block mt-4 px-4 py-2 rounded-lg text-sm">Open @MMGOLDEN_bot</a>
 </div>
 
 <div class="real-time-badge hidden" id="realtimeBadge">🔴 Real-time Updates Active</div>
 
-<div class="fixed top-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm p-4 z-50 border-b border-amber-500/20">
+<div class="fixed top-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm p-4 z-50 border-b border-amber-500/30" style="box-shadow: 0 0 15px rgba(251,191,36,0.2);">
     <div class="max-w-md mx-auto">
         <div class="flex justify-between items-center mb-2">
             <div class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center" style="box-shadow: 0 0 15px #f59e0b;">
                     <i class="fas fa-crown text-white text-lg"></i>
                 </div>
-                <h1 class="text-2xl font-black gradient-text">MM GOLDEN</h1>
+                <h1 class="text-2xl font-black gradient-text neon-gold">MM GOLDEN</h1>
             </div>
             <div class="text-right">
-                <span id="total-pts" class="text-2xl font-bold text-amber-400">0</span> 
+                <span id="total-pts" class="text-2xl font-bold text-amber-400 neon-gold">0</span> 
                 <span class="text-[10px] text-amber-500 font-bold">PTS</span>
             </div>
         </div>
         <div class="flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <i class="fas fa-user-circle text-amber-400"></i>
-                <span id="display-name" class="text-sm font-medium text-amber-300">Loading...</span>
+                <i class="fas fa-user-circle text-amber-400" style="text-shadow: 0 0 5px #fbbf24;"></i>
+                <span id="display-name" class="text-sm font-medium text-amber-300 neon-text">Loading...</span>
             </div>
             <div class="flex gap-2">
-                <button id="admin-mode-btn" onclick="toggleAdminMode()" class="text-xs text-red-400 bg-red-900/30 px-3 py-1.5 rounded-full hidden">
+                <button id="admin-mode-btn" onclick="toggleAdminMode()" class="text-xs text-red-400 bg-red-900/30 px-3 py-1.5 rounded-full hidden" style="box-shadow: 0 0 5px #ef4444;">
                     <i class="fas fa-user-shield"></i> Admin
                 </button>
             </div>
@@ -138,14 +296,14 @@
 <main class="max-w-md mx-auto pt-28 px-4" style="display: none;" id="mainContent">
     <!-- Home Section -->
     <div id="sec-home" class="section active space-y-5">
-        <div class="gold-card p-6 text-center">
+        <div class="gold-card glow-card p-6 text-center">
             <div class="flex items-center justify-between mb-4">
-                <p class="text-xs text-amber-400 font-bold uppercase"><i class="fas fa-calendar-day mr-2"></i>Daily Bonus</p>
-                <div class="text-[10px] text-green-400 bg-green-900/30 px-3 py-1 rounded-full"><i class="fas fa-coins mr-1"></i>+100 PTS</div>
+                <p class="text-xs text-amber-400 font-bold uppercase neon-text"><i class="fas fa-calendar-day mr-2"></i>Daily Bonus</p>
+                <div class="text-[10px] text-green-400 bg-green-900/30 px-3 py-1 rounded-full neon-green"><i class="fas fa-coins mr-1"></i>+100 PTS</div>
             </div>
             <div class="flex justify-center mb-6">
-                <div class="w-28 h-28 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-full flex items-center justify-center border-2 border-amber-500/50">
-                    <i class="fas fa-gift text-5xl text-amber-400"></i>
+                <div class="w-28 h-28 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-full flex items-center justify-center border-2 border-amber-500/50" style="box-shadow: 0 0 20px rgba(251,191,36,0.3);">
+                    <i class="fas fa-gift text-5xl text-amber-400 neon-gold"></i>
                 </div>
             </div>
             <button id="daily-bonus-btn" onclick="claimDailyBonus()" class="w-full btn-yellow py-4 text-sm font-bold rounded-xl">
@@ -153,20 +311,20 @@
             </button>
             <p id="bonus-status" class="text-[10px] text-slate-500 mt-3">တစ်နေ့တစ်ကြိမ်သာ ရယူနိုင်ပါသည်။</p>
         </div>
-        <div class="gold-card p-5 text-center">
+        <div class="gold-card glow-card p-5 text-center">
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-black/30 p-3 rounded-2xl"><p class="text-xs text-amber-300">Your Points</p><p id="current-points" class="text-2xl font-bold text-white">0</p></div>
-                <div class="bg-green-900/30 p-3 rounded-2xl"><p class="text-xs text-green-300">USD Value</p><p id="usd-equivalent" class="text-2xl font-bold text-green-400">$0.0000</p></div>
+                <div class="bg-black/30 p-3 rounded-2xl"><p class="text-xs text-amber-300 neon-text">Your Points</p><p id="current-points" class="text-2xl font-bold text-white neon-gold">0</p></div>
+                <div class="bg-green-900/30 p-3 rounded-2xl"><p class="text-xs text-green-300 neon-green">USD Value</p><p id="usd-equivalent" class="text-2xl font-bold text-green-400 neon-green">$0.0000</p></div>
             </div>
-            <p class="text-xs text-amber-300 mt-3">100,000 PTS = $1.00 USD</p>
+            <p class="text-xs text-amber-300 mt-3 neon-text">100,000 PTS = $1.00 USD</p>
         </div>
-        <div class="gold-card p-5">
-            <div class="flex justify-between mb-2"><span class="text-sm font-bold text-white"><i class="fas fa-chart-line mr-2 text-amber-400"></i>Withdrawal Progress</span><span class="text-sm font-bold text-amber-400">100,000 PTS</span></div>
+        <div class="gold-card glow-card p-5">
+            <div class="flex justify-between mb-2"><span class="text-sm font-bold text-white"><i class="fas fa-chart-line mr-2 text-amber-400 neon-gold"></i>Withdrawal Progress</span><span class="text-sm font-bold text-amber-400 neon-gold">100,000 PTS</span></div>
             <div class="progress-bar"><div id="withdraw-progress-fill" class="progress-fill" style="width: 0%"></div></div>
-            <div class="flex justify-between text-[10px] text-slate-500 mt-2"><span>လက်ရှိ:</span><span id="withdraw-progress-current" class="text-amber-300 font-bold">0</span><span>PTS</span></div>
+            <div class="flex justify-between text-[10px] text-slate-500 mt-2"><span>လက်ရှိ:</span><span id="withdraw-progress-current" class="text-amber-300 font-bold neon-text">0</span><span>PTS</span></div>
         </div>
-        <div class="gold-card p-6">
-            <div class="flex items-center gap-3 mb-5"><i class="fas fa-trophy text-2xl text-amber-400"></i><h3 class="text-amber-400 font-bold text-lg">🏆 Top 5 Users</h3></div>
+        <div class="gold-card glow-card p-6">
+            <div class="flex items-center gap-3 mb-5"><i class="fas fa-trophy text-2xl text-amber-400 neon-gold"></i><h3 class="text-amber-400 font-bold text-lg neon-text">🏆 Top 5 Users</h3></div>
             <div id="top-users-list" class="space-y-3"><div class="text-center py-4 text-slate-500">Loading...</div></div>
         </div>
         <button id="withdraw-home-btn" onclick="checkWithdrawEligibility()" class="w-full withdraw-btn py-5 text-lg font-bold rounded-xl">
@@ -176,15 +334,15 @@
 
     <!-- Quiz Section -->
     <div id="sec-quiz" class="section space-y-5">
-        <div class="gold-card p-6 text-center">
-            <div class="flex justify-center mb-3"><div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center"><i class="fas fa-brain text-3xl text-purple-400"></i></div></div>
-            <h3 class="text-white font-bold text-xl mb-2">Daily Quiz Challenge</h3>
-            <div id="quiz-q-display" class="bg-slate-800/80 p-6 rounded-2xl mb-4 text-lg font-medium text-white">Loading...</div>
+        <div class="gold-card glow-card p-6 text-center">
+            <div class="flex justify-center mb-3"><div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center" style="box-shadow: 0 0 15px #a855f7;"><i class="fas fa-brain text-3xl text-purple-400 neon-purple"></i></div></div>
+            <h3 class="text-white font-bold text-xl mb-2 neon-text">Daily Quiz Challenge</h3>
+            <div id="quiz-q-display" class="bg-slate-800/80 p-6 rounded-2xl mb-4 text-lg font-medium text-white neon-text" style="border: 1px solid rgba(168,85,247,0.3);">Loading...</div>
             <input type="text" id="quiz-ans-input" placeholder="အဖြေရိုက်ထည့်ပါ" class="text-center">
             <button onclick="checkQuiz()" class="btn-yellow py-3 px-8 mt-3 rounded-xl text-lg font-bold">Submit</button>
         </div>
         <div class="quiz-counter">
-            <div class="flex justify-between items-center mb-3"><span class="text-sm text-amber-300"><i class="fas fa-chart-line mr-2"></i>စုစုပေါင်းဖြေဆိုပြီး</span><span class="counter-value" id="total-quiz-count">0</span></div>
+            <div class="flex justify-between items-center mb-3"><span class="text-sm text-amber-300 neon-text"><i class="fas fa-chart-line mr-2"></i>စုစုပေါင်းဖြေဆိုပြီး</span><span class="counter-value" id="total-quiz-count">0</span></div>
             <div class="flex flex-wrap justify-center gap-2">
                 <div class="milestone-item" id="milestone-50">50 → 50 PTS</div>
                 <div class="milestone-item" id="milestone-100">100 → 100 PTS</div>
@@ -192,13 +350,13 @@
                 <div class="milestone-item" id="milestone-500">500 → 550 PTS</div>
             </div>
         </div>
-        <div class="gold-card p-5">
-            <div class="flex justify-between items-center mb-4"><div class="flex items-center gap-2"><div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-gamepad text-purple-400 text-xl"></i></div><h3 class="text-amber-400 font-bold text-lg">🎮 Coin Runner</h3></div><span class="text-xs bg-amber-500/20 px-3 py-1 rounded-full">1 Coin = 10 PTS</span></div>
-            <div class="text-center mb-3"><span id="game-remaining" class="text-sm bg-slate-800 px-4 py-1.5 rounded-full">🎮 ယနေ့ကျန်ပွဲရေ: 5</span></div>
+        <div class="gold-card glow-card p-5">
+            <div class="flex justify-between items-center mb-4"><div class="flex items-center gap-2"><div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center" style="box-shadow: 0 0 10px #a855f7;"><i class="fas fa-gamepad text-purple-400 text-xl"></i></div><h3 class="text-amber-400 font-bold text-lg neon-text">🎮 Coin Runner</h3></div><span class="text-xs bg-amber-500/20 px-3 py-1 rounded-full neon-text">1 Coin = 10 PTS</span></div>
+            <div class="text-center mb-3"><span id="game-remaining" class="text-sm bg-slate-800 px-4 py-1.5 rounded-full neon-text">🎮 ယနေ့ကျန်ပွဲရေ: 5</span></div>
             <canvas id="gameCanvas" width="340" height="420"></canvas>
             <div class="flex justify-between mt-4 gap-3">
-                <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Coins</span><p id="game-coins" class="text-2xl font-bold text-amber-400">0</p></div>
-                <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Best</span><p id="game-best" class="text-2xl font-bold text-green-400">0</p></div>
+                <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Coins</span><p id="game-coins" class="text-2xl font-bold text-amber-400 neon-gold">0</p></div>
+                <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Best</span><p id="game-best" class="text-2xl font-bold text-green-400 neon-green">0</p></div>
                 <button id="game-play-btn" onclick="startGame()" class="btn-yellow px-5 py-2 text-sm font-bold rounded-xl"><i class="fas fa-play mr-1"></i> Play</button>
             </div>
         </div>
@@ -206,24 +364,26 @@
 
     <!-- Invite Section -->
     <div id="sec-invite" class="section space-y-5">
-        <div class="gold-card p-6 text-center">
-            <div class="flex justify-center mb-4"><div class="w-20 h-20 bg-gradient-to-br from-green-500/30 to-emerald-600/30 rounded-2xl flex items-center justify-center"><i class="fas fa-users text-3xl text-green-400"></i></div></div>
-            <h3 class="text-white font-bold text-xl mb-2">သူငယ်ချင်းဖိတ်ခေါ်ပါ</h3>
+        <div class="gold-card glow-card p-6 text-center">
+            <div class="flex justify-center mb-4"><div class="w-20 h-20 bg-gradient-to-br from-green-500/30 to-emerald-600/30 rounded-2xl flex items-center justify-center" style="box-shadow: 0 0 20px #10b981;"><i class="fas fa-users text-3xl text-green-400 neon-green"></i></div></div>
+            <h3 class="text-white font-bold text-xl mb-2 neon-text">သူငယ်ချင်းဖိတ်ခေါ်ပါ</h3>
             <p class="text-xs text-slate-500 mb-4">သင့်မိတ်ဆက်ကုဒ်ကို မျှဝေပါ</p>
-            <div class="mb-6 bg-gradient-to-r from-amber-900/20 to-orange-900/20 p-5 rounded-2xl">
+            <div class="mb-6 bg-gradient-to-r from-amber-900/20 to-orange-900/20 p-5 rounded-2xl" style="border: 1px solid rgba(251,191,36,0.3);">
                 <div class="inline-flex items-center gap-4 p-4 bg-black/40 rounded-xl">
-                    <div><div class="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center"><i class="fas fa-user-plus text-green-400 text-xl"></i></div><p class="text-sm font-bold">1 ယောက် ဖိတ်</p></div>
-                    <div class="text-3xl text-amber-400">=</div>
-                    <div><div class="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center"><i class="fas fa-coins text-amber-400 text-xl"></i></div><p class="text-sm font-bold">500 PTS</p></div>
+                    <div><div class="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center"><i class="fas fa-user-plus text-green-400 text-xl"></i></div><p class="text-sm font-bold neon-text">1 ယောက် ဖိတ်</p></div>
+                    <div class="text-3xl text-amber-400 neon-gold">=</div>
+                    <div><div class="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center"><i class="fas fa-coins text-amber-400 text-xl"></i></div><p class="text-sm font-bold neon-text">500 PTS</p></div>
                 </div>
             </div>
-            <div class="relative mb-4">
-                <div id="ref-link" class="text-xs break-all p-4 bg-slate-800 rounded-xl border border-amber-500/30 font-mono text-amber-300">Loading...</div>
-                <button onclick="copyRef()" class="absolute top-2 right-2 btn-yellow px-3 py-1.5 text-xs rounded-lg">Copy</button>
+            <div class="ref-container" id="refContainer">
+                <div id="ref-link" class="ref-link-text">Loading...</div>
+                <button id="copyRefBtn" class="copy-btn" onclick="copyRef()">
+                    <i class="fas fa-copy mr-1"></i> Copy
+                </button>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-slate-800/70 p-4 rounded-xl text-center"><p class="text-2xl font-bold text-amber-400" id="ref-count">0</p><p class="text-[9px] text-slate-500">ဖိတ်ခေါ်ထားသူ</p></div>
-                <div class="bg-emerald-900/30 p-4 rounded-xl text-center"><p class="text-2xl font-bold text-green-400" id="ref-earned">0</p><p class="text-[9px] text-green-400">ရရှိပြီး PTS</p></div>
+                <div class="bg-slate-800/70 p-4 rounded-xl text-center"><p class="text-2xl font-bold text-amber-400 neon-gold" id="ref-count">0</p><p class="text-[9px] text-slate-500">ဖိတ်ခေါ်ထားသူ</p></div>
+                <div class="bg-emerald-900/30 p-4 rounded-xl text-center"><p class="text-2xl font-bold text-green-400 neon-green" id="ref-earned">0</p><p class="text-[9px] text-green-400">ရရှိပြီး PTS</p></div>
             </div>
             <div id="ref-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
         </div>
@@ -232,39 +392,39 @@
     <!-- Tasks Section -->
     <div id="sec-tasks" class="section space-y-5">
         <div id="task-list-display" class="space-y-3"></div>
-        <div class="gold-card p-4">
-            <h4 class="text-amber-400 font-bold text-sm mb-3"><i class="fas fa-check-circle mr-2 text-green-400"></i>ပြီးဆုံးပြီး Task များ</h4>
+        <div class="gold-card glow-card p-4">
+            <h4 class="text-amber-400 font-bold text-sm mb-3 neon-text"><i class="fas fa-check-circle mr-2 text-green-400"></i>ပြီးဆုံးပြီး Task များ</h4>
             <div id="completed-tasks-list" class="completed-tasks-list"></div>
         </div>
     </div>
 
     <!-- Profile Section -->
     <div id="sec-profile" class="section space-y-5">
-        <div class="gold-card p-6">
-            <div class="flex items-center gap-3 mb-6"><div class="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center"><i class="fas fa-id-card text-2xl text-blue-400"></i></div><div><h3 class="text-white font-bold text-xl">My Profile</h3></div></div>
+        <div class="gold-card glow-card p-6">
+            <div class="flex items-center gap-3 mb-6"><div class="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center" style="box-shadow: 0 0 15px #3b82f6;"><i class="fas fa-id-card text-2xl text-blue-400 neon-blue"></i></div><div><h3 class="text-white font-bold text-xl neon-text">My Profile</h3></div></div>
             <div class="space-y-3">
-                <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded-xl"><span class="text-slate-500 text-sm">User ID:</span><code id="profile-user-id" class="text-amber-300 text-sm font-mono">-</code><button onclick="copyUserId()" class="text-xs text-blue-400 bg-blue-900/30 px-2 py-1 rounded">Copy</button></div>
-                <div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-slate-500">Name:</span><span id="profile-name" class="text-white font-medium">-</span></div>
-                <div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-slate-500">Total Earned:</span><span id="profile-total" class="text-green-400 font-bold text-lg">0</span></div>
+                <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded-xl"><span class="text-slate-500 text-sm">User ID:</span><code id="profile-user-id" class="text-amber-300 text-sm font-mono neon-text">-</code><button onclick="copyUserId()" class="text-xs text-blue-400 bg-blue-900/30 px-2 py-1 rounded" style="box-shadow: 0 0 5px #3b82f6;">Copy</button></div>
+                <div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-slate-500">Name:</span><span id="profile-name" class="text-white font-medium neon-text">-</span></div>
+                <div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-slate-500">Total Earned:</span><span id="profile-total" class="text-green-400 font-bold text-lg neon-green">0</span></div>
             </div>
         </div>
-        <div class="gold-card p-6"><h3 class="text-white font-bold text-lg mb-4"><i class="fas fa-history mr-2 text-amber-400"></i>Withdrawal History</h3><div id="user-withdrawal-history" class="space-y-2 max-h-64 overflow-y-auto"></div></div>
+        <div class="gold-card glow-card p-6"><h3 class="text-white font-bold text-lg mb-4 neon-text"><i class="fas fa-history mr-2 text-amber-400"></i>Withdrawal History</h3><div id="user-withdrawal-history" class="space-y-2 max-h-64 overflow-y-auto"></div></div>
         <button onclick="showSec('sec-home')" class="w-full text-slate-500 mt-2 py-3">← Back to Home</button>
     </div>
 
     <!-- Withdraw Section -->
     <div id="sec-withdraw" class="section">
-        <div class="gold-card p-6">
-            <div class="flex items-center gap-3 mb-6"><div class="w-14 h-14 bg-green-600/20 rounded-2xl flex items-center justify-center"><i class="fas fa-university text-2xl text-green-400"></i></div><div><h3 class="text-white font-bold text-xl">Withdrawal</h3><p class="text-[10px] text-green-400">ငွေထုတ်ယူရန် (အနည်းဆုံး 100,000 PTS)</p></div></div>
+        <div class="gold-card glow-card p-6">
+            <div class="flex items-center gap-3 mb-6"><div class="w-14 h-14 bg-green-600/20 rounded-2xl flex items-center justify-center" style="box-shadow: 0 0 15px #10b981;"><i class="fas fa-university text-2xl text-green-400"></i></div><div><h3 class="text-white font-bold text-xl neon-text">Withdrawal</h3><p class="text-[10px] text-green-400 neon-green">ငွေထုတ်ယူရန် (အနည်းဆုံး 100,000 PTS)</p></div></div>
             <div class="mb-6 p-5 bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-2xl">
-                <div class="flex justify-between mb-3"><span class="text-amber-300">လက်ရှိ Point</span><span id="withdraw-current-points" class="text-2xl text-amber-400 font-bold">0</span></div>
-                <div class="flex justify-between mb-4"><span class="text-green-300">USD တန်ဖိုး</span><span id="withdraw-usd-value" class="text-2xl text-green-400 font-bold">$0.0000</span></div>
+                <div class="flex justify-between mb-3"><span class="text-amber-300 neon-text">လက်ရှိ Point</span><span id="withdraw-current-points" class="text-2xl text-amber-400 font-bold neon-gold">0</span></div>
+                <div class="flex justify-between mb-4"><span class="text-green-300 neon-green">USD တန်ဖိုး</span><span id="withdraw-usd-value" class="text-2xl text-green-400 font-bold neon-green">$0.0000</span></div>
                 <div class="progress-bar mt-2"><div id="withdraw-progress-fill-modal" class="progress-fill" style="width:0%"></div></div>
             </div>
-            <div class="mb-6"><label class="block mb-3 text-sm text-amber-300 font-medium"><i class="fas fa-credit-card mr-2"></i>ငွေထုတ်နည်းလမ်း ရွေးပါ</label>
+            <div class="mb-6"><label class="block mb-3 text-sm text-amber-300 font-medium neon-text"><i class="fas fa-credit-card mr-2"></i>ငွေထုတ်နည်းလမ်း ရွေးပါ</label>
                 <div class="grid grid-cols-2 gap-4">
-                    <label class="cursor-pointer"><input type="radio" name="withdraw-method" value="kapy" checked class="hidden peer" onchange="updateWithdrawMethod('kapy')"><div class="p-4 text-center border border-amber-500/30 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-500/10 transition"><i class="fas fa-wallet text-blue-400 text-2xl"></i><div class="font-bold text-sm mt-1">Kpay</div></div></label>
-                    <label class="cursor-pointer"><input type="radio" name="withdraw-method" value="wave" class="hidden peer" onchange="updateWithdrawMethod('wave')"><div class="p-4 text-center border border-amber-500/30 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-500/10 transition"><i class="fas fa-mobile-alt text-green-400 text-2xl"></i><div class="font-bold text-sm mt-1">Wave</div></div></label>
+                    <label class="cursor-pointer"><input type="radio" name="withdraw-method" value="kapy" checked class="hidden peer" onchange="updateWithdrawMethod('kapy')"><div class="p-4 text-center border border-amber-500/30 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-500/10 transition" style="box-shadow: 0 0 5px rgba(59,130,246,0.3);"><i class="fas fa-wallet text-blue-400 text-2xl"></i><div class="font-bold text-sm mt-1">Kpay</div></div></label>
+                    <label class="cursor-pointer"><input type="radio" name="withdraw-method" value="wave" class="hidden peer" onchange="updateWithdrawMethod('wave')"><div class="p-4 text-center border border-amber-500/30 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-500/10 transition" style="box-shadow: 0 0 5px rgba(16,185,129,0.3);"><i class="fas fa-mobile-alt text-green-400 text-2xl"></i><div class="font-bold text-sm mt-1">Wave</div></div></label>
                 </div>
             </div>
             <input type="text" id="w-name" placeholder="အမည်">
@@ -277,10 +437,10 @@
 
     <!-- About & Admin Section -->
     <div id="sec-about" class="section space-y-5">
-        <div class="gold-card p-6">
-            <div class="text-center mb-6"><div onclick="handleSecret()" class="inline-block cursor-pointer"><i class="fas fa-crown text-5xl text-amber-400 mb-2"></i><h3 class="text-2xl font-black gradient-text">MM GOLDEN ELITE</h3><p class="text-[9px] text-slate-500 mt-1">Click logo for admin access</p></div></div>
-            <div class="p-5 bg-blue-900/20 rounded-2xl">
-                <p class="text-amber-300 font-bold mb-3"><i class="fas fa-dollar-sign mr-2"></i>ငွေရှာနည်းများ</p>
+        <div class="gold-card glow-card p-6">
+            <div class="text-center mb-6"><div onclick="handleSecret()" class="inline-block cursor-pointer"><i class="fas fa-crown text-5xl text-amber-400 mb-2 neon-gold" style="text-shadow: 0 0 20px #fbbf24;"></i><h3 class="text-2xl font-black gradient-text neon-gold">MM GOLDEN ELITE</h3><p class="text-[9px] text-slate-500 mt-1">Click logo for admin access</p></div></div>
+            <div class="p-5 bg-blue-900/20 rounded-2xl" style="border: 1px solid rgba(59,130,246,0.3);">
+                <p class="text-amber-300 font-bold mb-3 neon-text"><i class="fas fa-dollar-sign mr-2"></i>ငွေရှာနည်းများ</p>
                 <ul class="text-slate-300 text-sm space-y-2">
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>မေးခွန်းများဖြေဆိုခြင်း</li>
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>Coin Runner ဂိမ်း (1 coin = 10 PTS, တစ်နေ့ 5 ပွဲသာ)</li>
@@ -288,14 +448,14 @@
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>နေ့စဉ် Bonus (+100 PTS)</li>
                 </ul>
             </div>
-            <div class="p-5 bg-amber-900/20 rounded-2xl mt-4">
-                <p class="text-green-300 font-bold mb-3"><i class="fas fa-exchange-alt mr-2"></i>ငွေထုတ်ယူနည်း</p>
+            <div class="p-5 bg-amber-900/20 rounded-2xl mt-4" style="border: 1px solid rgba(251,191,36,0.3);">
+                <p class="text-green-300 font-bold mb-3 neon-green"><i class="fas fa-exchange-alt mr-2"></i>ငွေထုတ်ယူနည်း</p>
                 <p class="text-slate-300 text-sm">100,000 Point = $1.00 USD (KPay/Wave)</p>
             </div>
             <div id="admin-panel" class="hidden mt-6">
-                <div class="bg-red-900/30 p-5 rounded-2xl border border-red-500">
-                    <h4 class="text-white font-bold mb-4"><i class="fas fa-user-shield mr-2 text-red-400"></i>Admin Control Panel</h4>
-                    <div class="mb-5"><h5 class="text-amber-300 text-sm font-bold mb-3">➕ Add Task</h5>
+                <div class="bg-red-900/30 p-5 rounded-2xl border border-red-500" style="box-shadow: 0 0 15px rgba(239,68,68,0.3);">
+                    <h4 class="text-white font-bold mb-4 neon-red"><i class="fas fa-user-shield mr-2 text-red-400"></i>Admin Control Panel</h4>
+                    <div class="mb-5"><h5 class="text-amber-300 text-sm font-bold mb-3 neon-text">➕ Add Task</h5>
                         <div class="grid grid-cols-1 gap-2">
                             <input type="text" id="task-title" placeholder="Task Title" class="text-sm p-3">
                             <input type="text" id="task-link" placeholder="Link (https://...)" class="text-sm p-3">
@@ -307,7 +467,7 @@
                         </div>
                     </div>
                     <div id="admin-task-list" class="task-list mb-5"></div>
-                    <div class="mb-5"><h5 class="text-amber-300 text-sm font-bold mb-3">📝 Add Quiz</h5>
+                    <div class="mb-5"><h5 class="text-amber-300 text-sm font-bold mb-3 neon-text">📝 Add Quiz</h5>
                         <div class="grid grid-cols-1 gap-2">
                             <input type="text" id="quiz-question" placeholder="Question" class="text-sm p-3">
                             <input type="text" id="quiz-answer" placeholder="Answer" class="text-sm p-3">
@@ -321,12 +481,12 @@
                     <div id="admin-withdraw-list" class="space-y-3 max-h-60 overflow-y-auto"></div>
                 </div>
             </div>
-            <a href="https://t.me/Naungthu1610" target="_blank" class="gold-card p-4 flex justify-between items-center mt-5 rounded-2xl"><div class="flex items-center gap-3"><i class="fab fa-telegram text-blue-400 text-xl"></i><span class="text-sm font-bold">အကူညီယူရန် @Naungthu1610</span></div><i class="fas fa-arrow-right text-amber-500"></i></a>
+            <a href="https://t.me/Naungthu1610" target="_blank" class="gold-card p-4 flex justify-between items-center mt-5 rounded-2xl"><div class="flex items-center gap-3"><i class="fab fa-telegram text-blue-400 text-xl"></i><span class="text-sm font-bold neon-text">အကူညီယူရန် @Naungthu1610</span></div><i class="fas fa-arrow-right text-amber-500"></i></a>
         </div>
     </div>
 </main>
 
-<nav class="fixed bottom-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm border-t border-white/10 flex justify-around py-3 z-50">
+<nav class="fixed bottom-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm border-t border-white/10 flex justify-around py-3 z-50" style="box-shadow: 0 -5px 20px rgba(0,0,0,0.3);">
     <button onclick="showSec('sec-home')" class="nav-btn flex flex-col items-center text-amber-500 nav-active py-1"><i class="fas fa-home text-xl"></i><span class="text-[9px] mt-0.5">Home</span></button>
     <button onclick="showSec('sec-quiz')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-brain text-xl"></i><span class="text-[9px] mt-0.5">Quiz</span></button>
     <button onclick="showSec('sec-invite')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-user-plus text-xl"></i><span class="text-[9px] mt-0.5">Invite</span></button>
@@ -343,7 +503,7 @@
     const MAX_GAMES_PER_DAY = 5;
     const BOT_USERNAME = "MMGOLDEN_bot";
     const ADMIN_PASSWORD = "871033";
-    const ADMIN_USER_IDS = ["6099430589"];  // Only this user ID can access admin panel
+    const ADMIN_USER_IDS = ["6099430589"];
     
     const QUIZ_MILESTONES = [
         { target: 50, reward: 50 },
@@ -366,7 +526,6 @@
     let lastGameDate = '';
     let isAdmin = false;
     
-    // Unsubscribe functions for real-time listeners
     let unsubscribeQuizzes = null;
     let unsubscribeTasks = null;
     let unsubscribeLeaderboard = null;
@@ -379,10 +538,8 @@
     let tasksCache = [];
     let saveTimeout = null;
     
-    // Show real-time badge
     document.getElementById('realtimeBadge').classList.remove('hidden');
     
-    // Check if opened from Telegram
     function checkTelegramWebApp() {
         const tg = window.Telegram?.WebApp;
         if (!tg || !tg.initDataUnsafe?.user) {
@@ -393,7 +550,6 @@
         return true;
     }
     
-    // Loading screen
     setTimeout(() => {
         if (checkTelegramWebApp()) {
             const loading = document.getElementById('loadingOverlay');
@@ -462,7 +618,67 @@
         return null;
     }
     
-    // REAL-TIME: Listen to quizzes changes
+    // ========== COPY FUNCTION (FIXED FOR TELEGRAM) ==========
+    function copyRef() {
+        const link = document.getElementById('ref-link').innerHTML;
+        const copyBtn = document.getElementById('copyRefBtn');
+        
+        // Method 1: Try clipboard API
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(() => {
+                copySuccess(copyBtn);
+            }).catch(() => {
+                fallbackCopy(link, copyBtn);
+            });
+        } else {
+            fallbackCopy(link, copyBtn);
+        }
+    }
+    
+    function fallbackCopy(text, btn) {
+        // Create temporary textarea
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-9999px';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, text.length);
+        
+        try {
+            const success = document.execCommand('copy');
+            if (success) {
+                copySuccess(btn);
+            } else {
+                // If execCommand fails, show alert with the link
+                if (window.Telegram?.WebApp) {
+                    window.Telegram.WebApp.showAlert("🔗 Your referral link:\n\n" + text + "\n\n👉 Please long press and copy manually!");
+                } else {
+                    alert("Copy this link: " + text);
+                }
+            }
+        } catch (err) {
+            if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.showAlert("🔗 Your referral link:\n\n" + text + "\n\n👉 Please long press and copy manually!");
+            } else {
+                alert("Copy this link: " + text);
+            }
+        }
+        document.body.removeChild(textarea);
+    }
+    
+    function copySuccess(btn) {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+        btn.classList.add('copy-success');
+        showNotification("✅ Referral link copied! Share with friends to earn 500 PTS each!");
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.classList.remove('copy-success');
+        }, 2000);
+    }
+    
     function setupQuizzesListener() {
         if (!window.firestore) return;
         const quizzesCollection = window.fsCollection(window.firestore, 'quizzes');
@@ -482,13 +698,11 @@
             if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) {
                 renderQuizList();
             }
-            showNotification("📢 New quiz available!" , 2000);
         }, (error) => {
             console.error("Quizzes listener error:", error);
         });
     }
     
-    // REAL-TIME: Listen to tasks changes
     function setupTasksListener() {
         if (!window.firestore) return;
         const tasksCollection = window.fsCollection(window.firestore, 'tasks');
@@ -501,13 +715,11 @@
             if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) {
                 renderAdminTaskList();
             }
-            showNotification("📢 New task available!" , 2000);
         }, (error) => {
             console.error("Tasks listener error:", error);
         });
     }
     
-    // REAL-TIME: Listen to leaderboard changes (Top 5)
     function setupLeaderboardListener() {
         if (!window.firestore) return;
         const leaderboardCollection = window.fsCollection(window.firestore, 'leaderboard');
@@ -523,7 +735,6 @@
         });
     }
     
-    // REAL-TIME: Listen to user's own data changes
     function setupUserListener() {
         if (!window.firestore || !userId) return;
         const userRef = window.fsDoc(window.firestore, 'users', userId);
@@ -564,13 +775,10 @@
         document.getElementById('profile-name').innerText = userName;
         document.getElementById('profile-user-id').innerText = userId;
         
-        // Check if this user is admin (by user ID)
         isAdmin = ADMIN_USER_IDS.includes(userId);
         if (isAdmin) {
             document.getElementById('admin-mode-btn').classList.remove('hidden');
             console.log('✅ Admin access granted for user:', userId);
-        } else {
-            console.log('❌ Not an admin user:', userId);
         }
         
         try {
@@ -602,7 +810,6 @@
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
             
-            // Setup real-time listeners
             setupQuizzesListener();
             setupTasksListener();
             setupLeaderboardListener();
@@ -631,7 +838,7 @@
         const container = document.getElementById('top-users-list');
         if (!container) return;
         if (!users || users.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-4">No users yet</div>'; return; }
-        container.innerHTML = users.map((u, i) => `<div class="flex justify-between items-center p-3 bg-slate-800/50 rounded-xl"><div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center"><span class="text-xs font-bold text-amber-400">${i+1}</span></div><span class="text-white">${u.name}</span></div><span class="text-amber-400 font-bold">${(u.totalEarned || 0).toLocaleString()}</span></div>`).join('');
+        container.innerHTML = users.map((u, i) => `<div class="flex justify-between items-center p-3 bg-slate-800/50 rounded-xl" style="border-left: 3px solid #fbbf24;"><div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center"><span class="text-xs font-bold text-amber-400">${i+1}</span></div><span class="text-white neon-text">${u.name}</span></div><span class="text-amber-400 font-bold neon-gold">${(u.totalEarned || 0).toLocaleString()}</span></div>`).join('');
     }
     
     function toggleAdminMode() { 
@@ -729,7 +936,6 @@
         if (btn) { if (balance < MIN_WITHDRAW_POINTS) { btn.disabled = true; btn.innerHTML = `🔒 ငွေထုတ်ရန် ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS လိုအပ်သည်`; } else { btn.disabled = false; btn.innerHTML = '💰 ငွေထုတ်ယူရန်နေရာ'; } }
     }
     
-    let notificationTimeout = null;
     function showNotification(msg, duration = 2500) {
         const div = document.createElement('div');
         div.className = 'fixed top-24 left-1/2 transform -translate-x-1/2 z-[1000] bg-amber-600 text-white px-6 py-3 rounded-xl shadow-xl';
@@ -919,16 +1125,16 @@
         const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
         const availableTasks = tasksCache.filter(t => !completedTasks.includes(t.id));
         if(availableTasks.length === 0){
-            c.innerHTML='<div class="gold-card p-6 text-center text-green-400">✅ All tasks completed! New tasks coming soon.</div>';
+            c.innerHTML='<div class="gold-card p-6 text-center text-green-400 neon-green">✅ All tasks completed! New tasks coming soon.</div>';
         } else {
-            c.innerHTML=availableTasks.map(t=>`<div class="gold-card p-4"><div class="flex justify-between items-start"><div><h4 class="font-bold text-white">${typeIcons[t.type] || '🔗'} ${t.title}</h4><p class="text-[10px] text-green-500">+${t.reward} PTS</p></div><button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg">DO TASK</button></div><a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2">${t.link.substring(0,45)}...</a></div>`).join('');
+            c.innerHTML=availableTasks.map(t=>`<div class="gold-card glow-card p-4"><div class="flex justify-between items-start"><div><h4 class="font-bold text-white neon-text">${typeIcons[t.type] || '🔗'} ${t.title}</h4><p class="text-[10px] text-green-500 neon-green">+${t.reward} PTS</p></div><button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg">DO TASK</button></div><a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2 neon-text">${t.link.substring(0,45)}...</a></div>`).join('');
         }
         
         const completedContainer = document.getElementById('completed-tasks-list');
         if (completedContainer) {
             const completedTaskItems = completedTasks.filter(taskId => tasksCache.some(t => t.id === taskId));
             if (completedTaskItems.length === 0) { completedContainer.innerHTML = '<div class="text-center text-slate-500 py-3">ပြီးဆုံးပြီး Task မရှိသေးပါ</div>'; }
-            else { completedContainer.innerHTML = completedTaskItems.map(taskId => { const task = tasksCache.find(t => t.id === taskId); return task ? `<div class="completed-task-item"><i class="fas fa-check-circle text-green-400 mr-2"></i>${task.title} <span class="text-green-400 float-right">+${task.reward} PTS</span></div>` : ''; }).join(''); }
+            else { completedContainer.innerHTML = completedTaskItems.map(taskId => { const task = tasksCache.find(t => t.id === taskId); return task ? `<div class="completed-task-item"><i class="fas fa-check-circle text-green-400 mr-2"></i>${task.title} <span class="text-green-400 float-right neon-green">+${task.reward} PTS</span></div>` : ''; }).join(''); }
         }
     }
     
@@ -947,7 +1153,7 @@
     function renderQuiz(){ 
         const availableQuizzes = quizzesCache.filter(q => !completedQuizzes.includes(q.id));
         if (availableQuizzes.length > 0) {
-            document.getElementById('quiz-q-display').innerHTML = `<i class="fas fa-question-circle mr-2 text-purple-400"></i>${availableQuizzes[0].q}`;
+            document.getElementById('quiz-q-display').innerHTML = `<i class="fas fa-question-circle mr-2 text-purple-400 neon-purple"></i>${availableQuizzes[0].q}`;
         } else {
             document.getElementById('quiz-q-display').innerHTML = '🎉 ဂုဏ်ယူပါတယ်! မေးခွန်းအားလုံးဖြေပြီးပါပြီ။';
         }
@@ -982,13 +1188,7 @@
         const c = document.getElementById('ref-list'); 
         if(!c) return; 
         if(invitedFriends.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-6">No referrals yet</div>'; return; } 
-        c.innerHTML = invitedFriends.map(id => `<div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-xs">${id.substring(0,15)}...</span><span class="text-green-400 font-bold">+${REFERRAL_POINTS} PTS</span></div>`).join(''); 
-    }
-    
-    function copyRef(){ 
-        const link = document.getElementById('ref-link').innerHTML;
-        navigator.clipboard.writeText(link); 
-        showNotification("✅ Referral link copied! Share with friends to earn 500 PTS each!"); 
+        c.innerHTML = invitedFriends.map(id => `<div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-xs neon-text">${id.substring(0,15)}...</span><span class="text-green-400 font-bold neon-green">+${REFERRAL_POINTS} PTS</span></div>`).join(''); 
     }
     
     function showUserProfile(){ showSec('sec-profile'); }
@@ -1012,8 +1212,8 @@
             const usersSnapshot = await window.fsGetDocs(usersCollection);
             const users = [];
             usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
-            tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
+            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td><tr>'; return; }
+            tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px] neon-text">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400 neon-gold">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
         } catch(e) { console.error(e); }
     }
     
@@ -1091,7 +1291,6 @@
         if(!title || !link || isNaN(reward)){ alert("Fill all fields"); return; } 
         const newId = Date.now().toString(); 
         const newTask = { id: newId, title, link, reward, type }; 
-        tasksCache.push(newTask); 
         await window.fsSetDoc(window.fsDoc(window.firestore, 'tasks', newId), newTask);
         renderAdminTaskList(); 
         showNotification("Task added! Users can now see it in real-time!"); 
@@ -1103,7 +1302,7 @@
         if(!c) return; 
         if(tasksCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No tasks</div>'; return; } 
         const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        c.innerHTML = tasksCache.map(t => `<div class="task-item flex justify-between items-center"><div><p class="text-xs text-white">${typeIcons[t.type] || '🔗'} ${t.title}</p><p class="text-[9px] text-amber-400">+${t.reward} PTS</p></div><button onclick="deleteAdminTask('${t.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
+        c.innerHTML = tasksCache.map(t => `<div class="task-item flex justify-between items-center"><div><p class="text-xs text-white neon-text">${typeIcons[t.type] || '🔗'} ${t.title}</p><p class="text-[9px] text-amber-400 neon-gold">+${t.reward} PTS</p></div><button onclick="deleteAdminTask('${t.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
     }
     
     async function deleteAdminTask(id){ 
@@ -1135,7 +1334,7 @@
         const c = document.getElementById('quiz-list'); 
         if(!c) return; 
         if(quizzesCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No quizzes</div>'; return; } 
-        c.innerHTML = quizzesCache.map(q => `<div class="quiz-item flex justify-between items-center"><div><p class="text-xs text-white">${q.q}</p><p class="text-[9px] text-amber-400">+${q.p} PTS</p></div><button onclick="deleteQuizQuestion('${q.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
+        c.innerHTML = quizzesCache.map(q => `<div class="quiz-item flex justify-between items-center"><div><p class="text-xs text-white neon-text">${q.q}</p><p class="text-[9px] text-amber-400 neon-gold">+${q.p} PTS</p></div><button onclick="deleteQuizQuestion('${q.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
     }
     
     async function deleteQuizQuestion(id){ 
