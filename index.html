@@ -96,6 +96,36 @@
         .admin-action-btn { background: #334155; border: none; padding: 4px 10px; border-radius: 8px; font-size: 10px; cursor: pointer; margin-left: 5px; }
         .admin-action-btn.approve { background: #10b981; }
         .admin-action-btn.reject { background: #ef4444; }
+        .ref-container {
+            position: relative;
+            background: #1e293b;
+            border-radius: 16px;
+            border: 1px solid #fbbf24;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .ref-link-text {
+            font-size: 11px;
+            word-break: break-all;
+            color: #fbbf24;
+            font-family: monospace;
+            padding-right: 60px;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            border: none;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #0a0e1a;
+            cursor: pointer;
+        }
+        .copy-btn:active { transform: scale(0.95); }
+        .copy-success { background: #10b981 !important; color: white !important; }
     </style>
 </head>
 <body>
@@ -224,9 +254,11 @@
                     <div><div class="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center"><i class="fas fa-coins text-amber-400 text-xl"></i></div><p class="text-sm font-bold">500 PTS</p></div>
                 </div>
             </div>
-            <div class="relative mb-4">
-                <div id="ref-link" class="text-xs break-all p-4 bg-slate-800 rounded-xl border border-amber-500/30 font-mono text-amber-300">Loading...</div>
-                <button onclick="copyRef()" class="absolute top-2 right-2 btn-yellow px-3 py-1.5 text-xs rounded-lg">Copy</button>
+            <div class="ref-container">
+                <div id="ref-link" class="ref-link-text">Loading...</div>
+                <button id="copyRefBtn" class="copy-btn" onclick="copyRef()">
+                    <i class="fas fa-copy mr-1"></i> Copy
+                </button>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="bg-slate-800/70 p-4 rounded-xl text-center"><p class="text-2xl font-bold text-amber-400" id="ref-count">0</p><p class="text-[9px] text-slate-500">ဖိတ်ခေါ်ထားသူ</p></div>
@@ -467,66 +499,92 @@
         return null;
     }
     
-    // REAL-TIME: Listen to quizzes changes
+    function copyRef() {
+        const link = document.getElementById('ref-link').innerHTML;
+        const copyBtn = document.getElementById('copyRefBtn');
+        const originalText = copyBtn.innerHTML;
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(() => {
+                copySuccess(copyBtn, originalText);
+            }).catch(() => {
+                fallbackCopy(link, copyBtn, originalText);
+            });
+        } else {
+            fallbackCopy(link, copyBtn, originalText);
+        }
+    }
+    
+    function fallbackCopy(text, btn, originalText) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-9999px';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        
+        try {
+            document.execCommand('copy');
+            copySuccess(btn, originalText);
+        } catch (err) {
+            if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.showAlert("🔗 Your referral link:\n\n" + text);
+            } else {
+                alert("Copy: " + text);
+            }
+        }
+        document.body.removeChild(textarea);
+    }
+    
+    function copySuccess(btn, originalText) {
+        btn.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+        btn.classList.add('copy-success');
+        showNotification("✅ Referral link copied! Share with friends!");
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('copy-success');
+        }, 2000);
+    }
+    
     function setupQuizzesListener() {
         if (!window.firestore) return;
         const quizzesCollection = window.fsCollection(window.firestore, 'quizzes');
         unsubscribeQuizzes = window.fsOnSnapshot(quizzesCollection, (snapshot) => {
             quizzesCache = [];
-            snapshot.forEach(doc => {
-                quizzesCache.push({ id: doc.id, ...doc.data() });
-            });
+            snapshot.forEach(doc => { quizzesCache.push({ id: doc.id, ...doc.data() }); });
             if (quizzesCache.length === 0) {
                 const defaultQuiz = { q: "မြန်မာနိုင်ငံ၏ မြို့တော်မှာ?", a: "နေပြည်တော်", p: 50 };
                 window.fsSetDoc(window.fsDoc(window.firestore, 'quizzes', 'default1'), defaultQuiz);
             }
             renderQuiz();
-            if (document.getElementById('sec-quiz').classList.contains('active')) {
-                updateQuizCounterUI();
-            }
-            if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) {
-                renderQuizList();
-            }
-        }, (error) => {
-            console.error("Quizzes listener error:", error);
+            if (document.getElementById('sec-quiz').classList.contains('active')) updateQuizCounterUI();
+            if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) renderQuizList();
         });
     }
     
-    // REAL-TIME: Listen to tasks changes
     function setupTasksListener() {
         if (!window.firestore) return;
         const tasksCollection = window.fsCollection(window.firestore, 'tasks');
         unsubscribeTasks = window.fsOnSnapshot(tasksCollection, (snapshot) => {
             tasksCache = [];
-            snapshot.forEach(doc => {
-                tasksCache.push({ id: doc.id, ...doc.data() });
-            });
+            snapshot.forEach(doc => { tasksCache.push({ id: doc.id, ...doc.data() }); });
             renderTasks();
-            if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) {
-                renderAdminTaskList();
-            }
-        }, (error) => {
-            console.error("Tasks listener error:", error);
+            if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) renderAdminTaskList();
         });
     }
     
-    // REAL-TIME: Listen to leaderboard changes (Top 5)
     function setupLeaderboardListener() {
         if (!window.firestore) return;
         const leaderboardCollection = window.fsCollection(window.firestore, 'leaderboard');
         const leaderboardQuery = window.fsQuery(leaderboardCollection, window.fsOrderBy('totalEarned', 'desc'), window.fsLimit(50));
         unsubscribeLeaderboard = window.fsOnSnapshot(leaderboardQuery, (snapshot) => {
             const leaders = [];
-            snapshot.forEach(doc => {
-                leaders.push({ name: doc.data().name, totalEarned: doc.data().totalEarned });
-            });
+            snapshot.forEach(doc => { leaders.push({ name: doc.data().name, totalEarned: doc.data().totalEarned }); });
             renderTopUsers(leaders.slice(0, 5));
-        }, (error) => {
-            console.error("Leaderboard listener error:", error);
         });
     }
     
-    // REAL-TIME: Listen to user's own data changes
     function setupUserListener() {
         if (!window.firestore || !userId) return;
         const userRef = window.fsDoc(window.firestore, 'users', userId);
@@ -552,29 +610,19 @@
                 updateGameRemainingUI();
                 updateQuizCounterUI();
             }
-        }, (error) => {
-            console.error("User listener error:", error);
         });
     }
     
-    // REAL-TIME: Listen to withdrawals for admin
     function setupWithdrawalsListener() {
         if (!window.firestore) return;
         const withdrawalsCollection = window.fsCollection(window.firestore, 'withdrawals');
         unsubscribeWithdrawals = window.fsOnSnapshot(withdrawalsCollection, (snapshot) => {
             withdrawalsCache = [];
-            snapshot.forEach(doc => {
-                withdrawalsCache.push({ id: doc.id, ...doc.data() });
-            });
+            snapshot.forEach(doc => { withdrawalsCache.push({ id: doc.id, ...doc.data() }); });
             if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) {
                 renderAdminWithdrawals();
             }
-            // Also update user's withdrawal history
-            if (userId) {
-                renderUserWithdrawalHistory();
-            }
-        }, (error) => {
-            console.error("Withdrawals listener error:", error);
+            renderUserWithdrawalHistory();
         });
     }
     
@@ -589,10 +637,7 @@
         document.getElementById('profile-user-id').innerText = userId;
         
         isAdmin = ADMIN_USER_IDS.includes(userId);
-        if (isAdmin) {
-            document.getElementById('admin-mode-btn').classList.remove('hidden');
-            console.log('✅ Admin access granted for user:', userId);
-        }
+        if (isAdmin) document.getElementById('admin-mode-btn').classList.remove('hidden');
         
         try {
             const userRef = window.fsDoc(window.firestore, 'users', userId);
@@ -635,16 +680,13 @@
             renderQuiz();
             updateGameRemainingUI();
             updateQuizCounterUI();
-            showNotification(`Welcome ${userName}! 🎉 Real-time updates active!`);
+            showNotification(`Welcome ${userName}! 🎉`);
             
             const tg = window.Telegram?.WebApp;
-            if (tg) {
-                tg.ready();
-                tg.expand();
-            }
+            if (tg) { tg.ready(); tg.expand(); }
         } catch(error) {
             console.error("Firebase error:", error);
-            showNotification("Firebase connection issue. Please check console.");
+            showNotification("Firebase connection issue.");
         }
     }
     
@@ -656,10 +698,7 @@
     }
     
     function toggleAdminMode() { 
-        if (!isAdmin) {
-            showNotification("You are not authorized to use admin panel!");
-            return;
-        }
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
         document.body.classList.toggle('admin-mode'); 
         if (document.body.classList.contains('admin-mode')) { 
             document.getElementById('admin-mode-btn').innerHTML = '<i class="fas fa-eye"></i> User'; 
@@ -689,13 +728,13 @@
     }
     
     async function claimMilestoneReward(target, reward) {
-        if (claimedMilestones.includes(target)) { showNotification("ဒီဆုကို ရယူပြီးသားပါ။"); return; }
-        if (totalQuizzesAnswered < target) { showNotification(`${target} မေးခွန်းဖြေမှ ဆုရမှာပါ။`); return; }
-        await addPointsOptimized(reward, `Quiz Milestone (${target})`);
+        if (claimedMilestones.includes(target)) { showNotification("Already claimed!"); return; }
+        if (totalQuizzesAnswered < target) { showNotification(`Need ${target} answers!`); return; }
+        await addPointsOptimized(reward, `Milestone ${target}`);
         claimedMilestones.push(target);
         await saveToFirebase();
         updateQuizCounterUI();
-        showNotification(`🎉 +${reward} PTS for ${target} questions!`);
+        showNotification(`🎉 +${reward} PTS!`);
     }
     
     function updateGameRemainingUI() {
@@ -705,23 +744,36 @@
         if (playBtn) { if (remaining <= 0) { playBtn.disabled = true; playBtn.innerHTML = '🔒 ယနေ့ပွဲစဉ်ကုန်ပြီ'; } else { playBtn.disabled = false; playBtn.innerHTML = '▶️ Play'; } }
     }
     
+    // ========== FIXED REFERRAL - INVITER GETS 500 PTS ==========
     async function handleReferral(refId) {
         if (refId === userId) return;
         try {
-            const userRef = window.fsDoc(window.firestore, 'users', refId);
-            const userSnap = await window.fsGetDoc(userRef);
-            if (userSnap.exists()) {
-                const refUser = userSnap.data();
-                const alreadyReferred = refUser.invitedFriends?.includes(userId);
+            const inviterRef = window.fsDoc(window.firestore, 'users', refId);
+            const inviterSnap = await window.fsGetDoc(inviterRef);
+            
+            if (inviterSnap.exists()) {
+                const inviterData = inviterSnap.data();
+                const alreadyReferred = inviterData.invitedFriends?.includes(userId);
+                
                 if (!alreadyReferred) {
-                    await window.fsUpdateDoc(userRef, {
-                        balance: (refUser.balance || 0) + REFERRAL_POINTS,
-                        totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS,
+                    // Give 500 PTS to the inviter
+                    const newInviterBalance = (inviterData.balance || 0) + REFERRAL_POINTS;
+                    const newInviterTotal = (inviterData.totalEarned || 0) + REFERRAL_POINTS;
+                    
+                    await window.fsUpdateDoc(inviterRef, {
+                        balance: newInviterBalance,
+                        totalEarned: newInviterTotal,
                         invitedFriends: window.fsArrayUnion(userId)
                     });
+                    
+                    // Update leaderboard for inviter
                     const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', refId);
-                    await window.fsUpdateDoc(leaderboardRef, { totalEarned: (refUser.totalEarned || 0) + REFERRAL_POINTS });
-                    showNotification(`🎉 +${REFERRAL_POINTS} PTS has been given to ${refUser.name} for inviting you!`);
+                    await window.fsSetDoc(leaderboardRef, { 
+                        totalEarned: newInviterTotal, 
+                        name: inviterData.name 
+                    }, { merge: true });
+                    
+                    showNotification(`🎉 +${REFERRAL_POINTS} PTS given to ${inviterData.name} for inviting you!`);
                 }
             }
         } catch(e) { console.error("Referral error:", e); }
@@ -747,7 +799,7 @@
         document.getElementById('withdraw-progress-current').innerText = balance.toLocaleString();
         document.getElementById('profile-total').innerText = (currentUser?.totalEarned || 0).toLocaleString();
         const btn = document.getElementById('withdraw-home-btn');
-        if (btn) { if (balance < MIN_WITHDRAW_POINTS) { btn.disabled = true; btn.innerHTML = `🔒 ငွေထုတ်ရန် ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS လိုအပ်သည်`; } else { btn.disabled = false; btn.innerHTML = '💰 ငွေထုတ်ယူရန်နေရာ'; } }
+        if (btn) { if (balance < MIN_WITHDRAW_POINTS) { btn.disabled = true; btn.innerHTML = `🔒 Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`; } else { btn.disabled = false; btn.innerHTML = '💰 ငွေထုတ်ယူရန်'; } }
     }
     
     function showNotification(msg, duration = 2500) {
@@ -823,16 +875,10 @@
     }
     
     function startGame() { 
-        if(!currentUser) {
-            showNotification("Please wait for user data to load");
-            return;
-        }
+        if(!currentUser) { showNotification("Please wait"); return; }
         if(gameRunning) return;
         const remaining = MAX_GAMES_PER_DAY - gamesPlayedToday;
-        if(remaining <= 0) { 
-            showNotification("ယနေ့အတွက် ဂိမ်းဆော့ခွင့် ကုန်သွားပါပြီ။"); 
-            return; 
-        }
+        if(remaining <= 0) { showNotification("ယနေ့ပွဲစဉ်ကုန်ပြီ"); return; }
         gameRunning = true; 
         gameCoins = 0; 
         gameFrame = 0; 
@@ -917,7 +963,7 @@
             gamesPlayedToday++; 
             await saveToFirebase(); 
             updateGameRemainingUI(); 
-            await addPointsOptimized(earned,"Coin Runner Game"); 
+            await addPointsOptimized(earned,"Coin Runner"); 
         }
         if(gameCoins>gameBest){ 
             gameBest=gameCoins; 
@@ -939,7 +985,7 @@
         const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
         const availableTasks = tasksCache.filter(t => !completedTasks.includes(t.id));
         if(availableTasks.length === 0){
-            c.innerHTML='<div class="gold-card p-6 text-center text-green-400">✅ All tasks completed! New tasks coming soon.</div>';
+            c.innerHTML='<div class="gold-card p-6 text-center text-green-400">✅ All tasks completed!</div>';
         } else {
             c.innerHTML=availableTasks.map(t=>`<div class="gold-card p-4"><div class="flex justify-between items-start"><div><h4 class="font-bold text-white">${typeIcons[t.type] || '🔗'} ${t.title}</h4><p class="text-[10px] text-green-500">+${t.reward} PTS</p></div><button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg">DO TASK</button></div><a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2">${t.link.substring(0,45)}...</a></div>`).join('');
         }
@@ -953,15 +999,12 @@
     }
     
     async function completeTask(id,reward){ 
-        if(completedTasks.includes(id)){ 
-            showNotification("Task already completed! You can only do each task once."); 
-            return; 
-        } 
+        if(completedTasks.includes(id)){ showNotification("Already completed!"); return; } 
         completedTasks.push(id); 
         await addPointsOptimized(reward,"Task"); 
         await saveToFirebase(); 
         renderTasks(); 
-        showNotification(`✅ Task completed! +${reward} PTS`);
+        showNotification(`✅ +${reward} PTS!`);
     }
     
     function renderQuiz(){ 
@@ -985,9 +1028,9 @@
             document.getElementById('quiz-ans-input').value = ""; 
             renderQuiz(); 
             updateQuizCounterUI();
-            showNotification(`✅ အဖြေမှန်ပါသည်! +${q.p} PTS (စုစုပေါင်း: ${totalQuizzesAnswered})`); 
+            showNotification(`✅ Correct! +${q.p} PTS (Total: ${totalQuizzesAnswered})`); 
         } else if(q) { 
-            alert("အဖြေမှားနေပါသည်။ ထပ်မံကြိုးစားကြည့်ပါ။"); 
+            alert("အဖြေမှားပါသည်။"); 
         } else { 
             alert("မေးခွန်းအားလုံးဖြေပြီးပါပြီ။"); 
         } 
@@ -1005,67 +1048,6 @@
         c.innerHTML = invitedFriends.map(id => `<div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-xs">${id.substring(0,15)}...</span><span class="text-green-400 font-bold">+${REFERRAL_POINTS} PTS</span></div>`).join(''); 
     }
     
-    function copyRef(){ 
-        const link = document.getElementById('ref-link').innerHTML;
-        const copyBtn = event.currentTarget;
-        const originalText = copyBtn.innerHTML;
-        
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(link).then(() => {
-                copySuccess(copyBtn, originalText);
-            }).catch(() => {
-                fallbackCopy(link, copyBtn, originalText);
-            });
-        } else {
-            fallbackCopy(link, copyBtn, originalText);
-        }
-    }
-    
-    function fallbackCopy(text, btn, originalText) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.top = '-9999px';
-        textarea.style.left = '-9999px';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        textarea.setSelectionRange(0, text.length);
-        
-        let copied = false;
-        try {
-            copied = document.execCommand('copy');
-        } catch (err) {
-            copied = false;
-        }
-        document.body.removeChild(textarea);
-        
-        if (copied) {
-            copySuccess(btn, originalText);
-        } else {
-            if (window.Telegram?.WebApp) {
-                window.Telegram.WebApp.showAlert(
-                    "🔗 YOUR REFERRAL LINK\n\n" + text + "\n\n━━━━━━━━━━━━━━━━\n👉 Long press on the link above to copy!\n👉 Share with friends to earn 500 PTS each!"
-                );
-            } else {
-                alert("Copy this link: " + text);
-            }
-            showNotification("👉 Long press the link to copy manually!");
-        }
-    }
-    
-    function copySuccess(btn, originalText) {
-        btn.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
-        btn.style.background = '#10b981';
-        btn.style.color = 'white';
-        showNotification("✅ Referral link copied! Share with friends to earn 500 PTS each!");
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.style.background = '';
-            btn.style.color = '';
-        }, 2000);
-    }
-    
     function showUserProfile(){ showSec('sec-profile'); }
     function renderUserProfile(){ document.getElementById('profile-name').innerText = userName || 'User'; document.getElementById('profile-total').innerText = (currentUser?.totalEarned || 0).toLocaleString(); }
     
@@ -1073,22 +1055,8 @@
         const c = document.getElementById('user-withdrawal-history'); 
         if(!c) return; 
         const userWithdrawals = withdrawalsCache.filter(w => w.userId === userId);
-        if(userWithdrawals.length === 0){ 
-            c.innerHTML = '<div class="text-center text-slate-500 py-4">No withdrawal requests yet</div>'; 
-            return; 
-        }
-        c.innerHTML = userWithdrawals.map(w => `
-            <div class="withdrawal-item">
-                <div class="flex justify-between text-xs">
-                    <span>💰 ${w.amount.toLocaleString()} PTS</span>
-                    <span class="${w.status === 'pending' ? 'status-pending' : (w.status === 'approved' ? 'status-approved' : 'status-rejected')}">
-                        ${w.status === 'pending' ? '⏳ Pending' : (w.status === 'approved' ? '✅ Approved' : '❌ Rejected')}
-                    </span>
-                </div>
-                <div class="text-[9px] text-slate-500 mt-1">${w.method === 'kapy' ? 'Kpay' : 'Wave'} | ${w.name} | ${w.phone}</div>
-                <div class="text-[8px] text-slate-600">${new Date(w.timestamp).toLocaleString()}</div>
-            </div>
-        `).join('');
+        if(userWithdrawals.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-4">No withdrawal requests yet</div>'; return; }
+        c.innerHTML = userWithdrawals.map(w => `<div class="withdrawal-item"><div class="flex justify-between text-xs"><span>💰 ${w.amount.toLocaleString()} PTS</span><span class="${w.status === 'pending' ? 'status-pending' : (w.status === 'approved' ? 'status-approved' : 'status-rejected')}">${w.status === 'pending' ? '⏳ Pending' : (w.status === 'approved' ? '✅ Approved' : '❌ Rejected')}</span></div><div class="text-[9px] text-slate-500 mt-1">${w.method === 'kapy' ? 'Kpay' : 'Wave'} | ${w.name}</div><div class="text-[8px] text-slate-600">${new Date(w.timestamp).toLocaleString()}</div></div>`).join('');
     }
     
     function copyUserId(){ if(userId){ navigator.clipboard.writeText(userId); showNotification("User ID copied!"); } }
@@ -1105,9 +1073,8 @@
         if(!name || !phone || isNaN(amount)){ alert("Fill all fields"); return; } 
         if(amount < MIN_WITHDRAW_POINTS || amount > balance){ alert("Invalid amount"); return; } 
         const usdAmount = (amount * USD_PER_POINT).toFixed(4); 
-        if(!confirm(`${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n${name}\n${amount.toLocaleString()} PTS = $${usdAmount} USD\nConfirm withdrawal request?`)) return; 
+        if(!confirm(`${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n${name}\n${amount.toLocaleString()} PTS = $${usdAmount} USD\nConfirm withdrawal?`)) return; 
         
-        // Save withdrawal request to Firebase
         const withdrawalId = Date.now().toString();
         const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', withdrawalId);
         await window.fsSetDoc(withdrawalRef, {
@@ -1122,11 +1089,10 @@
             timestamp: new Date().toISOString()
         });
         
-        // Deduct points from user balance
         balance -= amount; 
         await saveToFirebase(); 
         updateBalanceUI(); 
-        alert("✅ Withdrawal request submitted! Admin will review it.");
+        alert("✅ Withdrawal request submitted!");
         document.getElementById('w-name').value = '';
         document.getElementById('w-phone').value = '';
         document.getElementById('w-amt').value = '';
@@ -1149,11 +1115,8 @@
     }
     
     async function quickAdjustPoints(uid, amount){ 
-        if (!isAdmin) {
-            showNotification("You are not authorized!");
-            return;
-        }
-        if(!confirm(`Add ${amount} points to this user?`)) return; 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        if(!confirm(`Add ${amount} points?`)) return; 
         try {
             const userRef = window.fsDoc(window.firestore, 'users', uid);
             const userSnap = await window.fsGetDoc(userRef);
@@ -1165,7 +1128,7 @@
                 if(uid === userId){ balance = newBalance; updateBalanceUI(); } 
                 const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', uid);
                 await window.fsSetDoc(leaderboardRef, { totalEarned: newTotal, name: userData.name }, { merge: true });
-                showNotification(`Added ${amount} points to user!`); 
+                showNotification(`Added ${amount} points!`); 
                 renderAdminUserTable(); 
             } 
         } catch(e) { console.error(e); }
@@ -1183,10 +1146,7 @@
     }
     
     async function adjustUserPoints(){ 
-        if (!isAdmin) {
-            showNotification("You are not authorized!");
-            return;
-        }
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
         const searchTerm = document.getElementById('search-user').value.trim();
         const points = parseInt(document.getElementById('adjust-points').value);
         const action = document.getElementById('adjust-action').value;
@@ -1203,8 +1163,8 @@
             }
             if(!foundUser){ alert("User not found"); return; }
             let newBalance = foundUser.balance || 0, newTotal = foundUser.totalEarned || 0;
-            if(action === 'add'){ newBalance += points; newTotal += points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance, totalEarned: newTotal }); showNotification(`Added ${points} points to ${foundUser.name}`); }
-            else { if(points > newBalance){ alert("Not enough points!"); return; } newBalance -= points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Removed ${points} points from ${foundUser.name}`); }
+            if(action === 'add'){ newBalance += points; newTotal += points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance, totalEarned: newTotal }); showNotification(`Added ${points} points`); }
+            else { if(points > newBalance){ alert("Not enough points!"); return; } newBalance -= points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Removed ${points} points`); }
             await window.fsSetDoc(window.fsDoc(window.firestore, 'leaderboard', foundUid), { totalEarned: newTotal, name: foundUser.name }, { merge: true });
             if(foundUid === userId){ balance = newBalance; updateBalanceUI(); }
             renderAdminUserTable();
@@ -1214,11 +1174,7 @@
     function renderAdminWithdrawals(){ 
         const c = document.getElementById('admin-withdraw-list'); 
         if(!c) return; 
-        if(withdrawalsCache.length === 0){ 
-            c.innerHTML = '<p class="text-slate-500 text-center py-4">No withdrawal requests</p>'; 
-            return; 
-        }
-        // Show pending first, then others
+        if(withdrawalsCache.length === 0){ c.innerHTML = '<p class="text-slate-500 text-center py-4">No withdrawal requests</p>'; return; }
         const pending = withdrawalsCache.filter(w => w.status === 'pending');
         const others = withdrawalsCache.filter(w => w.status !== 'pending');
         const allWithdrawals = [...pending, ...others];
@@ -1228,19 +1184,14 @@
                 <div class="flex justify-between items-center">
                     <div>
                         <div class="font-bold text-sm">${w.userName || w.userId.substring(0,10)}</div>
-                        <div class="text-xs">💰 ${w.amount.toLocaleString()} PTS (${(w.amount * USD_PER_POINT).toFixed(2)} USD)</div>
+                        <div class="text-xs">💰 ${w.amount.toLocaleString()} PTS ($${(w.amount * USD_PER_POINT).toFixed(2)})</div>
                         <div class="text-[9px] text-slate-400">${w.method === 'kapy' ? 'Kpay' : 'Wave'} | ${w.name} | ${w.phone}</div>
                     </div>
                     <div class="text-right">
                         <div class="text-[10px] ${w.status === 'pending' ? 'status-pending' : (w.status === 'approved' ? 'status-approved' : 'status-rejected')}">
                             ${w.status === 'pending' ? '⏳ Pending' : (w.status === 'approved' ? '✅ Approved' : '❌ Rejected')}
                         </div>
-                        ${w.status === 'pending' ? `
-                            <div class="mt-1">
-                                <button onclick="approveWithdrawal('${w.id}', ${w.amount}, '${w.userId}')" class="admin-action-btn approve text-[8px]">✓ Approve</button>
-                                <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.userId}')" class="admin-action-btn reject text-[8px]">✗ Reject</button>
-                            </div>
-                        ` : ''}
+                        ${w.status === 'pending' ? `<div class="mt-1"><button onclick="approveWithdrawal('${w.id}', ${w.amount}, '${w.userId}')" class="admin-action-btn approve text-[8px]">✓ Approve</button><button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.userId}')" class="admin-action-btn reject text-[8px]">✗ Reject</button></div>` : ''}
                     </div>
                 </div>
                 <div class="text-[8px] text-slate-600 mt-1">${new Date(w.timestamp).toLocaleString()}</div>
@@ -1254,16 +1205,15 @@
         try {
             const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', withdrawalId);
             await window.fsUpdateDoc(withdrawalRef, { status: 'approved' });
-            showNotification(`Withdrawal approved!`);
+            showNotification(`✅ Withdrawal approved!`);
             renderAdminWithdrawals();
         } catch(e) { console.error(e); }
     }
     
     async function rejectWithdrawal(withdrawalId, amount, uid){
         if (!isAdmin) return;
-        if(!confirm(`Reject withdrawal of ${amount.toLocaleString()} PTS? Points will be returned to user.`)) return;
+        if(!confirm(`Reject withdrawal? Points will be returned.`)) return;
         try {
-            // Return points to user
             const userRef = window.fsDoc(window.firestore, 'users', uid);
             const userSnap = await window.fsGetDoc(userRef);
             if(userSnap.exists()){
@@ -1274,23 +1224,19 @@
             }
             const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', withdrawalId);
             await window.fsUpdateDoc(withdrawalRef, { status: 'rejected' });
-            showNotification(`Withdrawal rejected! Points returned to user.`);
+            showNotification(`❌ Withdrawal rejected. Points returned.`);
             renderAdminWithdrawals();
         } catch(e) { console.error(e); }
     }
     
     async function addAdminTask(){ 
-        if (!isAdmin) {
-            showNotification("You are not authorized!");
-            return;
-        }
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
         const title = document.getElementById('task-title').value.trim(), link = document.getElementById('task-link').value.trim(), type = document.getElementById('task-type').value, reward = parseInt(document.getElementById('task-reward').value); 
         if(!title || !link || isNaN(reward)){ alert("Fill all fields"); return; } 
         const newId = Date.now().toString(); 
-        const newTask = { id: newId, title, link, reward, type }; 
-        await window.fsSetDoc(window.fsDoc(window.firestore, 'tasks', newId), newTask);
+        await window.fsSetDoc(window.fsDoc(window.firestore, 'tasks', newId), { id: newId, title, link, reward, type });
         renderAdminTaskList(); 
-        showNotification("Task added! Users can now see it in real-time!"); 
+        showNotification("Task added!"); 
     }
     
     function renderAdminTaskList(){ 
@@ -1303,27 +1249,21 @@
     }
     
     async function deleteAdminTask(id){ 
-        if (!isAdmin) {
-            showNotification("You are not authorized!");
-            return;
-        }
-        if(confirm("Delete this task permanently? Users will no longer see it.")){ 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        if(confirm("Delete permanently?")){ 
             await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); 
-            showNotification("Task permanently deleted! Users can no longer see it."); 
+            showNotification("Task deleted!"); 
         } 
     }
     
     async function addQuizQuestion(){ 
-        if (!isAdmin) {
-            showNotification("You are not authorized!");
-            return;
-        }
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
         const q = document.getElementById('quiz-question').value.trim(), a = document.getElementById('quiz-answer').value.trim(), p = parseInt(document.getElementById('quiz-points').value); 
         if(!q || !a || isNaN(p)){ alert("Fill all fields"); return; } 
         const newId = Date.now().toString(); 
         await window.fsSetDoc(window.fsDoc(window.firestore, 'quizzes', newId), { q, a, p });
         document.getElementById('quiz-question').value = ''; document.getElementById('quiz-answer').value = ''; 
-        showNotification("Quiz added! Users can now answer it in real-time!"); 
+        showNotification("Quiz added!"); 
     }
     
     function renderQuizList(){ 
@@ -1335,11 +1275,8 @@
     }
     
     async function deleteQuizQuestion(id){ 
-        if (!isAdmin) {
-            showNotification("You are not authorized!");
-            return;
-        }
-        if(confirm("Delete this quiz?")){ 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        if(confirm("Delete quiz?")){ 
             await window.fsDeleteDoc(window.fsDoc(window.firestore, 'quizzes', id)); 
             showNotification("Quiz deleted"); 
         } 
@@ -1362,7 +1299,7 @@
                     renderAdminWithdrawals();
                 }
             } else if(pwd === ADMIN_PASSWORD && !isAdmin) {
-                alert("❌ This device is not registered as admin device!");
+                alert("❌ Not registered as admin!");
             } else if(pwd !== ADMIN_PASSWORD) {
                 alert("Wrong password!");
             }
@@ -1370,7 +1307,6 @@
         } 
     }
     
-    // ========== INIT ==========
     setTimeout(() => {
         initGameCanvas();
         initTelegramUser();
