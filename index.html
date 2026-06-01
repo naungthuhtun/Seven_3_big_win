@@ -383,8 +383,10 @@
     const BOT_USERNAME = "MMGOLDEN_bot";
     const ADMIN_PASSWORD = "871033";
     const ADMIN_USER_IDS = ["6099430589"];
+    
+    // ✅ YOUR BOT TOKEN IS HERE - FIXED
+    const BOT_TOKEN = "8662694868:AAFtj7O1suiZ20b2PNOoRtldf57x0ogFNgk";
     const ADMIN_CHAT_ID = "6099430589";
-    const BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";  //8662694868:AAFtj7O1suiZ20b2PNOoRtldf57x0ogFNgk
     
     const QUIZ_MILESTONES = [
         { target: 50, reward: 50 },
@@ -628,15 +630,32 @@
         });
     }
     
+    // ✅ Send notification to admin bot
     async function sendToAdminBot(message) {
-        if (!BOT_TOKEN || BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") return;
+        if (!BOT_TOKEN || BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") {
+            console.log("⚠️ Bot token not configured!");
+            return;
+        }
         try {
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            console.log("📤 Sending to bot...");
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: message })
+                body: JSON.stringify({ 
+                    chat_id: ADMIN_CHAT_ID, 
+                    text: message,
+                    parse_mode: 'HTML'
+                })
             });
-        } catch(e) { console.error("Bot send error:", e); }
+            const result = await response.json();
+            if (result.ok) {
+                console.log("✅ Notification sent to admin bot!");
+            } else {
+                console.error("❌ Bot error:", result.description);
+            }
+        } catch(e) { 
+            console.error("❌ Bot send error:", e); 
+        }
     }
     
     async function initTelegramUser() {
@@ -970,7 +989,7 @@
     async function gameOver(){ 
         gameRunning=false; 
         if(gameAnimationId) cancelAnimationFrame(gameAnimationId); 
-        const earned=gameCoins*COIN_TO_POINTS; 
+        const earned = gameCoins >= 10 ? gameCoins * COIN_TO_POINTS : 0;
         if(earned>0) { 
             gamesPlayedToday++; 
             await saveToFirebase(); 
@@ -1101,14 +1120,14 @@
             timestamp: new Date().toISOString()
         });
         
-        // Send notification to admin bot
+        // ✅ Send notification to admin bot
         const message = `🆕 NEW WITHDRAWAL REQUEST!\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💰 Amount: ${amount.toLocaleString()} PTS ($${usdAmount})\n📱 Method: ${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n👤 Name: ${name}\n📞 Phone: ${phone}`;
         await sendToAdminBot(message);
         
         balance -= amount; 
         await saveToFirebase(); 
         updateBalanceUI(); 
-        alert("✅ Withdrawal request submitted!");
+        alert("✅ Withdrawal request submitted! Admin will review it.");
         document.getElementById('w-name').value = '';
         document.getElementById('w-phone').value = '';
         document.getElementById('w-amt').value = '';
@@ -1125,7 +1144,7 @@
             const usersSnapshot = await window.fsGetDocs(usersCollection);
             const users = [];
             usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<td><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
+            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></td>'; return; }
             tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
         } catch(e) { console.error(e); }
     }
