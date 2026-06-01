@@ -383,6 +383,8 @@
     const BOT_USERNAME = "MMGOLDEN_bot";
     const ADMIN_PASSWORD = "871033";
     const ADMIN_USER_IDS = ["6099430589"];
+    const ADMIN_CHAT_ID = "6099430589";
+    const BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";  //8662694868:AAFtj7O1suiZ20b2PNOoRtldf57x0ogFNgk
     
     const QUIZ_MILESTONES = [
         { target: 50, reward: 50 },
@@ -626,6 +628,17 @@
         });
     }
     
+    async function sendToAdminBot(message) {
+        if (!BOT_TOKEN || BOT_TOKEN === "YOUR_BOT_TOKEN_HERE") return;
+        try {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: message })
+            });
+        } catch(e) { console.error("Bot send error:", e); }
+    }
+    
     async function initTelegramUser() {
         if (!checkTelegramWebApp()) return;
         
@@ -748,27 +761,14 @@
     async function handleReferral(refId) {
         if (refId === userId) return;
         try {
-            console.log("🔗 Referral: Inviter=", refId, "New User=", userId);
-            
-            // Get inviter (referrer) data
             const inviterRef = window.fsDoc(window.firestore, 'users', refId);
             const inviterSnap = await window.fsGetDoc(inviterRef);
             
-            if (!inviterSnap.exists()) {
-                console.log("Inviter not found:", refId);
-                return;
-            }
+            if (!inviterSnap.exists()) return;
             
             const inviterData = inviterSnap.data();
-            
-            // Check if already referred
             const alreadyReferred = inviterData.invitedFriends?.includes(userId);
-            if (alreadyReferred) {
-                console.log("Already referred before");
-                return;
-            }
-            
-            console.log("Adding referral bonus to inviter...");
+            if (alreadyReferred) return;
             
             // Give 500 PTS to inviter
             const newInviterBalance = (inviterData.balance || 0) + REFERRAL_POINTS;
@@ -780,7 +780,6 @@
                 invitedFriends: window.fsArrayUnion(userId)
             });
             
-            // Update leaderboard for inviter
             const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', refId);
             await window.fsSetDoc(leaderboardRef, { 
                 totalEarned: newInviterTotal, 
@@ -789,10 +788,7 @@
             
             showNotification(`🎉 +${REFERRAL_POINTS} PTS given to ${inviterData.name} for inviting you!`);
             
-        } catch(e) { 
-            console.error("Referral error:", e); 
-            showNotification("Referral processing, but you can still use the app!");
-        }
+        } catch(e) { console.error("Referral error:", e); }
     }
     
     async function addPointsOptimized(pts, source) {
@@ -989,7 +985,7 @@
         const overlayStars = '⭐'.repeat(Math.min(5, Math.floor(gameCoins/20)));
         const overlay=document.createElement('div'); 
         overlay.className='game-overlay'; 
-        overlay.innerHTML=`<div class="bg-slate-900 p-6 rounded-2xl text-center border border-amber-500 max-w-[300px]"><i class="fas fa-trophy text-5xl text-amber-400 mb-3"></i><p class="text-xl font-bold text-white">${gameCoins>=30?'Great!':'Game Over!'}</p><p class="text-amber-400 mt-2">Coins: ${gameCoins}</p><p class="text-green-400">Earned: +${earned} PTS</p><p class="text-yellow-400 text-sm mt-1">${overlayStars}</p><button onclick="this.parentElement.parentElement.remove(); startGame()" class="btn-yellow px-6 py-2 mt-4 rounded-xl"><i class="fas fa-redo-alt mr-2"></i>Play Again</button><button onclick="this.parentElement.parentElement.remove()" class="bg-slate-700 px-6 py-2 mt-2 rounded-xl ml-2">Close</button></div>`; 
+        overlay.innerHTML=`<div class="bg-slate-900 p-6 rounded-2xl text-center border border-amber-500 max-w-[300px]"><i class="fas fa-trophy text-5xl text-amber-400 mb-3"></i><p class="text-xl font-bold text-white">${gameCoins>=10?'Great!':'Game Over!'}</p><p class="text-amber-400 mt-2">Coins: ${gameCoins}</p><p class="text-green-400">Earned: +${earned} PTS</p><p class="text-red-400 text-sm mt-1">${gameCoins<10?'❌ You collected less than 10 coins! No points awarded!':'✅ You got 10+ coins!'}</p><p class="text-yellow-400 text-sm mt-1">${overlayStars}</p><button onclick="this.parentElement.parentElement.remove(); startGame()" class="btn-yellow px-6 py-2 mt-4 rounded-xl"><i class="fas fa-redo-alt mr-2"></i>Play Again</button><button onclick="this.parentElement.parentElement.remove()" class="bg-slate-700 px-6 py-2 mt-2 rounded-xl ml-2">Close</button></div>`; 
         document.body.appendChild(overlay); 
     }
     
@@ -1015,29 +1011,12 @@
     }
     
     async function completeTask(id,reward){ 
-        if(completedTasks.includes(id)){ 
-            showNotification("Task already completed! You can only do each task once."); 
-            return; 
-        } 
-        
-        const task = tasksCache.find(t => t.id === id);
-        if (task && task.link) {
-            window.open(task.link, '_blank');
-            showNotification(`🔗 Opening task link... Complete it then come back!`, 3000);
-        }
-        
-        // Ask for confirmation after opening link
-        setTimeout(async () => {
-            if (confirm(`✅ Did you complete the task?\n\nTask: ${task?.title || 'Task'}\nReward: +${reward} PTS\n\nClick OK to claim reward.`)) {
-                completedTasks.push(id); 
-                await addPointsOptimized(reward, "Task"); 
-                await saveToFirebase(); 
-                renderTasks(); 
-                showNotification(`✅ Task completed! +${reward} PTS`);
-            } else {
-                showNotification("❌ Please complete the task first, then try again!");
-            }
-        }, 2000);
+        if(completedTasks.includes(id)){ showNotification("Already completed!"); return; } 
+        completedTasks.push(id); 
+        await addPointsOptimized(reward,"Task"); 
+        await saveToFirebase(); 
+        renderTasks(); 
+        showNotification(`✅ +${reward} PTS!`);
     }
     
     function renderQuiz(){ 
@@ -1122,6 +1101,10 @@
             timestamp: new Date().toISOString()
         });
         
+        // Send notification to admin bot
+        const message = `🆕 NEW WITHDRAWAL REQUEST!\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💰 Amount: ${amount.toLocaleString()} PTS ($${usdAmount})\n📱 Method: ${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n👤 Name: ${name}\n📞 Phone: ${phone}`;
+        await sendToAdminBot(message);
+        
         balance -= amount; 
         await saveToFirebase(); 
         updateBalanceUI(); 
@@ -1142,7 +1125,7 @@
             const usersSnapshot = await window.fsGetDocs(usersCollection);
             const users = [];
             usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td><tr>'; return; }
+            if(users.length === 0){ tbody.innerHTML='<td><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
             tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
         } catch(e) { console.error(e); }
     }
