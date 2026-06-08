@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MM GOLDEN - Telegram Mini App</title>
     
+    <!-- OnClicka Ad Network Script -->
+    <script src="https://js.onclckvd.com/in-stream-ad-admanager/tma.js"></script>
+    
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
@@ -446,7 +449,12 @@
     const MAX_GAMES_PER_DAY = 5;
     const BOT_USERNAME = "MMGOLDEN_bot";
     const ADMIN_PASSWORD = "871033";
-    const ADMIN_USER_IDS = ["6099430589"];  // Only this user can access admin panel
+    const ADMIN_USER_IDS = ["6099430589"];
+    
+    // OnClicka Ad Settings
+    const ONCLICKA_SPOT_ID = "6120803";
+    let onClickaAdLoaded = false;
+    let onClickaShowAd = null;
     
     const QUIZ_MILESTONES = [
         { target: 50, reward: 50 },
@@ -512,6 +520,78 @@
             }
         }
     }, 1000);
+    
+    // Initialize OnClicka Ad
+    async function initOnClickaAd() {
+        if (onClickaAdLoaded) return;
+        try {
+            if (window.initCdTma) {
+                onClickaShowAd = await window.initCdTma({ id: ONCLICKA_SPOT_ID });
+                onClickaAdLoaded = true;
+                console.log("✅ OnClicka Ad initialized");
+            }
+        } catch(e) {
+            console.error("OnClicka init error:", e);
+        }
+    }
+    
+    // Show OnClicka Rewarded Ad
+    function showOnClickaAd(callback) {
+        if (onClickaShowAd) {
+            onClickaShowAd().then(() => {
+                if (callback) callback();
+            }).catch((e) => {
+                console.error("Ad show error:", e);
+                if (callback) callback();
+            });
+        } else {
+            // Fallback: show ad container with timer
+            showAdFallback(callback);
+        }
+    }
+    
+    function showAdFallback(callback) {
+        pendingAdCallback = callback;
+        const adDiv = document.createElement('div');
+        adDiv.className = 'ad-overlay';
+        adDiv.innerHTML = `
+            <div class="ad-box">
+                <i class="fas fa-video text-5xl text-amber-400 mb-3"></i>
+                <h3 class="text-xl font-bold mb-2">Watch Ad to Continue</h3>
+                <p class="text-sm text-slate-300 mb-4">Please wait a moment...</p>
+                <div class="w-full h-32 bg-slate-700 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-play-circle text-4xl text-amber-400"></i>
+                    <span class="ml-2">Loading advertisement...</span>
+                </div>
+                <button id="closeAdBtn" class="ad-close" disabled style="opacity:0.5;">⏳ Please wait 5s...</button>
+            </div>
+        `;
+        document.body.appendChild(adDiv);
+        
+        let timer = 5;
+        const closeBtn = document.getElementById('closeAdBtn');
+        const interval = setInterval(() => {
+            timer--;
+            if (timer <= 0) {
+                clearInterval(interval);
+                closeBtn.disabled = false;
+                closeBtn.style.opacity = '1';
+                closeBtn.style.cursor = 'pointer';
+                closeBtn.innerHTML = '✓ Continue';
+            } else {
+                closeBtn.innerHTML = `⏳ Please wait ${timer}s...`;
+            }
+        }, 1000);
+        
+        closeBtn.onclick = () => {
+            if (closeBtn.disabled) return;
+            adDiv.remove();
+            if (pendingAdCallback) {
+                pendingAdCallback();
+                pendingAdCallback = null;
+            }
+        };
+    }
     
     async function saveToFirebase() {
         if (!window.firestore || !userId) return;
@@ -621,22 +701,57 @@
     // ========== AD SYSTEM ==========
     function showAd(callback) {
         pendingAdCallback = callback;
+        // Use OnClicka ad if available
+        if (onClickaShowAd) {
+            onClickaShowAd().then(() => {
+                if (pendingAdCallback) {
+                    pendingAdCallback();
+                    pendingAdCallback = null;
+                }
+            }).catch(() => {
+                showAdFallback(pendingAdCallback);
+                pendingAdCallback = null;
+            });
+        } else {
+            showAdFallback(callback);
+        }
+    }
+    
+    function showAdFallback(callback) {
+        pendingAdCallback = callback;
         const adDiv = document.createElement('div');
         adDiv.className = 'ad-overlay';
-        adDiv.id = 'adOverlay';
-        
-        // Check if there's a custom ad code for current quiz
-        let adHtml = `<div class="ad-box"><i class="fas fa-video text-5xl text-amber-400 mb-3"></i><h3 class="text-xl font-bold mb-2">Watch Ad to Continue</h3><p class="text-sm text-slate-300 mb-4">Please watch this advertisement to claim your reward.</p><div class="w-full h-32 bg-slate-700 rounded-lg flex items-center justify-center mb-4"><i class="fas fa-play-circle text-4xl text-amber-400"></i><span class="ml-2">Advertisement Placeholder</span></div><button id="closeAdBtn" class="ad-close">✓ I watched the ad</button></div>`;
-        
-        // If there's a custom ad code from admin
-        if (currentQuiz && currentQuiz.adCode) {
-            adHtml = `<div class="ad-box"><div class="mb-4">${currentQuiz.adCode}</div><button id="closeAdBtn" class="ad-close">✓ I watched the ad</button></div>`;
-        }
-        
-        adDiv.innerHTML = adHtml;
+        adDiv.innerHTML = `
+            <div class="ad-box">
+                <i class="fas fa-video text-5xl text-amber-400 mb-3"></i>
+                <h3 class="text-xl font-bold mb-2">Watch Ad to Continue</h3>
+                <p class="text-sm text-slate-300 mb-4">Please wait a moment...</p>
+                <div class="w-full h-32 bg-slate-700 rounded-lg flex items-center justify-center mb-4">
+                    <i class="fas fa-play-circle text-4xl text-amber-400"></i>
+                    <span class="ml-2">Loading advertisement...</span>
+                </div>
+                <button id="closeAdBtn" class="ad-close" disabled style="opacity:0.5;">⏳ Please wait 5s...</button>
+            </div>
+        `;
         document.body.appendChild(adDiv);
         
-        document.getElementById('closeAdBtn').onclick = () => {
+        let timer = 5;
+        const closeBtn = document.getElementById('closeAdBtn');
+        const interval = setInterval(() => {
+            timer--;
+            if (timer <= 0) {
+                clearInterval(interval);
+                closeBtn.disabled = false;
+                closeBtn.style.opacity = '1';
+                closeBtn.style.cursor = 'pointer';
+                closeBtn.innerHTML = '✓ Continue';
+            } else {
+                closeBtn.innerHTML = `⏳ Please wait ${timer}s...`;
+            }
+        }, 1000);
+        
+        closeBtn.onclick = () => {
+            if (closeBtn.disabled) return;
             adDiv.remove();
             if (pendingAdCallback) {
                 pendingAdCallback();
@@ -645,7 +760,7 @@
         };
     }
     
-    // ========== QUIZ FUNCTIONS (Multiple Choice) ==========
+    // ========== QUIZ FUNCTIONS ==========
     function renderQuiz() {
         const availableQuizzes = quizzesCache.filter(q => !completedQuizzes.includes(q.id));
         if (availableQuizzes.length > 0) {
@@ -688,7 +803,6 @@
         const isCorrect = (selectedChoice == currentQuiz.correct);
         
         if (isCorrect) {
-            // Show ad before giving points
             showAd(async () => {
                 await addPointsOptimized(currentQuiz.p, "Quiz");
                 completedQuizzes.push(currentQuiz.id);
@@ -700,7 +814,6 @@
                 selectedChoice = null;
             });
         } else {
-            // Wrong answer - show ad as penalty
             showAd(() => {
                 showNotification("❌ Wrong answer! Better luck next time!");
                 renderQuiz();
@@ -856,6 +969,9 @@
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
             
+            // Initialize OnClicka Ad
+            await initOnClickaAd();
+            
             setupQuizzesListener();
             setupTasksListener();
             setupLeaderboardListener();
@@ -908,7 +1024,7 @@
         if (playBtn) { if (remaining <= 0) { playBtn.disabled = true; playBtn.innerHTML = '🔒 ယနေ့ပွဲစဉ်ကုန်ပြီ'; } else { playBtn.disabled = false; playBtn.innerHTML = '▶️ Play'; } }
     }
     
-    // ========== REFERRAL SYSTEM - INVITER GETS 500 PTS ==========
+    // ========== REFERRAL SYSTEM ==========
     async function handleReferral(refId) {
         if (refId === userId) return;
         try {
@@ -921,7 +1037,6 @@
             const alreadyReferred = inviterData.invitedFriends?.includes(userId);
             if (alreadyReferred) return;
             
-            // Give 500 PTS to inviter
             const newInviterBalance = (inviterData.balance || 0) + REFERRAL_POINTS;
             const newInviterTotal = (inviterData.totalEarned || 0) + REFERRAL_POINTS;
             
@@ -989,7 +1104,6 @@
         const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
         if (lastBonus === today) { alert("နောက်တစ်နေ့မှ ထပ်မံရယူနိုင်ပါသည်။"); return; }
         
-        // Show ad before claiming daily bonus
         showAd(async () => {
             await addPointsOptimized(100, "Daily Bonus");
             localStorage.setItem(`daily_bonus_${userId}`, today);
@@ -1130,7 +1244,6 @@
         const earned = gameCoins * COIN_TO_POINTS;
         
         if(earned > 0) { 
-            // Show ad after game before giving points
             showAd(async () => {
                 gamesPlayedToday++; 
                 await saveToFirebase(); 
@@ -1151,7 +1264,7 @@
         document.body.appendChild(overlay); 
     }
     
-    // ========== TASKS & QUIZ ==========
+    // ========== TASKS ==========
     function renderTasks() { 
         const c=document.getElementById('task-list-display'); 
         if(!c)return; 
@@ -1254,7 +1367,7 @@
             const usersSnapshot = await window.fsGetDocs(usersCollection);
             const users = [];
             usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
+            if(users.length === 0){ tbody.innerHTML='</table><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
             tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
         } catch(e) { console.error(e); }
     }
