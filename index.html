@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MM GOLDEN - Telegram Mini App</title>
     
-    <!-- OnClicka Ad Network Script -->
-    <script src="https://js.onclckvd.com/in-stream-ad-admanager/tma.js"></script>
+    <!-- NEW AD NETWORK (RichInfo) -->
+    <script src="https://richinfo.co/richpartners/in-page/js/richads-ob.js?pubid=1014061&siteid=399047" async></script>
     
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (same as before) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, orderBy, limit, arrayUnion, arrayRemove, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
@@ -50,6 +50,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
+        /* Your existing styles remain the same */
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;500;600;700&display=swap');
         * { user-select: none; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Pyidaungsu', sans-serif; background: #0a0e1a; color: white; overflow-x: hidden; min-height: 100vh; }
@@ -99,110 +100,22 @@
         .admin-action-btn { background: #334155; border: none; padding: 4px 10px; border-radius: 8px; font-size: 10px; cursor: pointer; margin-left: 5px; }
         .admin-action-btn.approve { background: #10b981; }
         .admin-action-btn.reject { background: #ef4444; }
-        .ref-container {
-            position: relative;
-            background: #1e293b;
-            border-radius: 16px;
-            border: 1px solid #fbbf24;
-            padding: 12px;
-            margin-bottom: 16px;
-        }
-        .ref-link-text {
-            font-size: 11px;
-            word-break: break-all;
-            color: #fbbf24;
-            font-family: monospace;
-            padding-right: 60px;
-        }
-        .copy-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: linear-gradient(135deg, #f59e0b, #fbbf24);
-            border: none;
-            border-radius: 10px;
-            padding: 6px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            color: #0a0e1a;
-            cursor: pointer;
-        }
+        .ref-container { position: relative; background: #1e293b; border-radius: 16px; border: 1px solid #fbbf24; padding: 12px; margin-bottom: 16px; }
+        .ref-link-text { font-size: 11px; word-break: break-all; color: #fbbf24; font-family: monospace; padding-right: 60px; }
+        .copy-btn { position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #f59e0b, #fbbf24); border: none; border-radius: 10px; padding: 6px 12px; font-size: 11px; font-weight: bold; color: #0a0e1a; cursor: pointer; }
         .copy-btn:active { transform: scale(0.95); }
         .copy-success { background: #10b981 !important; color: white !important; }
-        
-        /* Quiz choice buttons */
-        .quiz-choice {
-            background: #1e293b;
-            border: 1px solid #fbbf24;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-        }
-        .quiz-choice:hover {
-            background: #2d3a5e;
-            transform: scale(1.01);
-        }
-        .quiz-choice.selected {
-            background: #fbbf24;
-            color: #0a0e1a;
-            border-color: #f59e0b;
-        }
-        
-        /* Ad overlay */
-        .ad-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        .ad-box {
-            background: linear-gradient(145deg, #1a1f33, #0f1424);
-            border: 2px solid #fbbf24;
-            border-radius: 24px;
-            padding: 25px;
-            max-width: 320px;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(251,191,36,0.3);
-        }
-        .ad-close {
-            background: #fbbf24;
-            color: #0a0e1a;
-            border: none;
-            border-radius: 40px;
-            padding: 12px 24px;
-            font-weight: bold;
-            margin-top: 20px;
-            cursor: pointer;
-        }
+        .quiz-choice { background: #1e293b; border: 1px solid #fbbf24; border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; text-align: left; }
+        .quiz-choice:hover { background: #2d3a5e; transform: scale(1.01); }
+        .quiz-choice.selected { background: #fbbf24; color: #0a0e1a; border-color: #f59e0b; }
+        .ad-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        .ad-box { background: linear-gradient(145deg, #1a1f33, #0f1424); border: 2px solid #fbbf24; border-radius: 24px; padding: 25px; max-width: 320px; text-align: center; box-shadow: 0 0 30px rgba(251,191,36,0.3); }
+        .ad-close { background: #fbbf24; color: #0a0e1a; border: none; border-radius: 40px; padding: 12px 24px; font-weight: bold; margin-top: 20px; cursor: pointer; }
         .ad-close:active { transform: scale(0.97); }
-        
-        /* Nav button styles */
         .nav-btn { transition: all 0.2s; }
         .nav-btn:active { transform: scale(0.95); }
-        
-        /* Activity log styles */
-        .activity-item {
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            border-left: 3px solid #fbbf24;
-        }
-        .activity-time {
-            font-size: 9px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
+        .activity-item { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid #fbbf24; }
+        .activity-time { font-size: 9px; color: #6b7280; margin-top: 4px; }
         .activity-earn { color: #10b981; }
         .activity-spend { color: #ef4444; }
     </style>
@@ -459,11 +372,11 @@
 </main>
 
 <nav class="fixed bottom-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm border-t border-white/10 flex justify-around py-3 z-50">
-    <button onclick="showSecWithAd('sec-home')" class="nav-btn flex flex-col items-center text-amber-500 nav-active py-1"><i class="fas fa-home text-xl"></i><span class="text-[9px] mt-0.5">Home</span></button>
-    <button onclick="showSecWithAd('sec-quiz')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-brain text-xl"></i><span class="text-[9px] mt-0.5">Quiz</span></button>
-    <button onclick="showSecWithAd('sec-invite')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-user-plus text-xl"></i><span class="text-[9px] mt-0.5">Invite</span></button>
-    <button onclick="showSecWithAd('sec-tasks')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-tasks text-xl"></i><span class="text-[9px] mt-0.5">Tasks</span></button>
-    <button onclick="showSecWithAd('sec-about')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-cog text-xl"></i><span class="text-[9px] mt-0.5">Setting</span></button>
+    <button onclick="showSec('sec-home')" class="nav-btn flex flex-col items-center text-amber-500 nav-active py-1"><i class="fas fa-home text-xl"></i><span class="text-[9px] mt-0.5">Home</span></button>
+    <button onclick="showSec('sec-quiz')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-brain text-xl"></i><span class="text-[9px] mt-0.5">Quiz</span></button>
+    <button onclick="showSec('sec-invite')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-user-plus text-xl"></i><span class="text-[9px] mt-0.5">Invite</span></button>
+    <button onclick="showSec('sec-tasks')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-tasks text-xl"></i><span class="text-[9px] mt-0.5">Tasks</span></button>
+    <button onclick="showSec('sec-about')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-cog text-xl"></i><span class="text-[9px] mt-0.5">Setting</span></button>
 </nav>
 
 <script>
@@ -477,14 +390,9 @@
     const ADMIN_PASSWORD = "871033";
     const ADMIN_USER_IDS = ["6099430589"];
     
-    // OnClicka Ad Settings
-    const ONCLICKA_SPOT_ID = "6120803";
-    let onClickaAdLoaded = false;
-    let onClickaShowAd = null;
+    // No ad function - using external network RichInfo
     
-    // Quiz counter for ad trigger (show ad every 2 quizzes)
     let quizAttemptCount = 0;
-    const QUIZ_ATTEMPTS_BEFORE_AD = 2;
     
     const QUIZ_MILESTONES = [
         { target: 50, reward: 50 },
@@ -524,7 +432,6 @@
     
     let currentQuiz = null;
     let selectedChoice = null;
-    let pendingAdCallback = null;
     
     document.getElementById('realtimeBadge').classList.remove('hidden');
     
@@ -548,81 +455,6 @@
             }
         }
     }, 1000);
-    
-    async function initOnClickaAd() {
-        if (onClickaAdLoaded) return;
-        try {
-            if (window.initCdTma) {
-                onClickaShowAd = await window.initCdTma({ id: ONCLICKA_SPOT_ID });
-                onClickaAdLoaded = true;
-                console.log("✅ OnClicka Ad initialized");
-            }
-        } catch(e) { console.error("OnClicka init error:", e); }
-    }
-    
-    function showAdFallback(callback) {
-        pendingAdCallback = callback;
-        const adDiv = document.createElement('div');
-        adDiv.className = 'ad-overlay';
-        adDiv.innerHTML = `
-            <div class="ad-box">
-                <i class="fas fa-video text-5xl text-amber-400 mb-3"></i>
-                <h3 class="text-xl font-bold mb-2">Watch Ad to Continue</h3>
-                <p class="text-sm text-slate-300 mb-4">Please wait a moment...</p>
-                <div class="w-full h-32 bg-slate-700 rounded-lg flex items-center justify-center mb-4">
-                    <i class="fas fa-play-circle text-4xl text-amber-400"></i>
-                    <span class="ml-2">Loading advertisement...</span>
-                </div>
-                <button id="closeAdBtn" class="ad-close" disabled style="opacity:0.5;">⏳ Please wait 5s...</button>
-            </div>
-        `;
-        document.body.appendChild(adDiv);
-        
-        let timer = 5;
-        const closeBtn = document.getElementById('closeAdBtn');
-        const interval = setInterval(() => {
-            timer--;
-            if (timer <= 0) {
-                clearInterval(interval);
-                closeBtn.disabled = false;
-                closeBtn.style.opacity = '1';
-                closeBtn.style.cursor = 'pointer';
-                closeBtn.innerHTML = '✓ Continue';
-            } else {
-                closeBtn.innerHTML = `⏳ Please wait ${timer}s...`;
-            }
-        }, 1000);
-        
-        closeBtn.onclick = () => {
-            if (closeBtn.disabled) return;
-            adDiv.remove();
-            if (pendingAdCallback) {
-                pendingAdCallback();
-                pendingAdCallback = null;
-            }
-        };
-    }
-    
-    function showAd(callback) {
-        pendingAdCallback = callback;
-        if (onClickaShowAd) {
-            onClickaShowAd().then(() => {
-                if (pendingAdCallback) {
-                    pendingAdCallback();
-                    pendingAdCallback = null;
-                }
-            }).catch(() => {
-                showAdFallback(pendingAdCallback);
-                pendingAdCallback = null;
-            });
-        } else {
-            showAdFallback(callback);
-        }
-    }
-    
-    function showSecWithAd(id) {
-        showAd(() => { showSec(id); });
-    }
     
     // Activity Log Functions
     async function addActivityLog(action, amount, type) {
@@ -848,42 +680,23 @@
         });
     }
     
-    function submitQuizAnswer() {
+    async function submitQuizAnswer() {
         if (!currentQuiz) { alert("No quiz available!"); return; }
         if (!selectedChoice) { alert("Please select an answer!"); return; }
         const isCorrect = (selectedChoice == currentQuiz.correct);
-        quizAttemptCount++;
         if (isCorrect) {
-            if (quizAttemptCount >= QUIZ_ATTEMPTS_BEFORE_AD) {
-                quizAttemptCount = 0;
-                showAd(async () => {
-                    await addPointsOptimized(currentQuiz.p, "Quiz");
-                    completedQuizzes.push(currentQuiz.id);
-                    totalQuizzesAnswered++;
-                    await saveToFirebase();
-                    renderQuiz();
-                    updateQuizCounterUI();
-                    showNotification(`✅ Correct! +${currentQuiz.p} PTS (Total: ${totalQuizzesAnswered})`);
-                    selectedChoice = null;
-                });
-            } else {
-                (async () => {
-                    await addPointsOptimized(currentQuiz.p, "Quiz");
-                    completedQuizzes.push(currentQuiz.id);
-                    totalQuizzesAnswered++;
-                    await saveToFirebase();
-                    renderQuiz();
-                    updateQuizCounterUI();
-                    showNotification(`✅ Correct! +${currentQuiz.p} PTS (Total: ${totalQuizzesAnswered})`);
-                    selectedChoice = null;
-                })();
-            }
+            await addPointsOptimized(currentQuiz.p, "Quiz");
+            completedQuizzes.push(currentQuiz.id);
+            totalQuizzesAnswered++;
+            await saveToFirebase();
+            renderQuiz();
+            updateQuizCounterUI();
+            showNotification(`✅ Correct! +${currentQuiz.p} PTS (Total: ${totalQuizzesAnswered})`);
+            selectedChoice = null;
         } else {
-            showAd(() => {
-                showNotification("❌ Wrong answer! Better luck next time!");
-                renderQuiz();
-                selectedChoice = null;
-            });
+            showNotification("❌ Wrong answer! Better luck next time!");
+            renderQuiz();
+            selectedChoice = null;
         }
     }
     
@@ -1028,7 +841,6 @@
             }
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
-            await initOnClickaAd();
             setupQuizzesListener();
             setupTasksListener();
             setupLeaderboardListener();
@@ -1137,9 +949,7 @@
         if(gameAnimationId) cancelAnimationFrame(gameAnimationId); 
         const earned = gameCoins * COIN_TO_POINTS;
         if(earned > 0) { 
-            showAd(async () => {
-                gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
-            });
+            gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
         }
         if(gameCoins>gameBest){ gameBest=gameCoins; localStorage.setItem('game_best',gameBest); document.getElementById('game-best').innerText=gameBest; } 
         const overlayStars = '⭐'.repeat(Math.min(5, Math.floor(gameCoins/20)));
@@ -1228,15 +1038,12 @@
         const today = new Date().toDateString();
         const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
         if (lastBonus === today) { alert("နောက်တစ်နေ့မှ ထပ်မံရယူနိုင်ပါသည်။"); return; }
-        showAd(async () => {
-            await addPointsOptimized(100, "Daily Bonus");
-            localStorage.setItem(`daily_bonus_${userId}`, today);
-            const btn = document.getElementById('daily-bonus-btn');
-            btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Claimed! +100 PTS';
-            document.getElementById('bonus-status').innerHTML = '<i class="fas fa-check-circle text-green-400"></i> Today\'s bonus claimed!';
-            setTimeout(() => { btn.innerHTML = '<i class="fas fa-gift mr-2"></i>Claim Daily Bonus (+100 PTS)'; btn.disabled = false; }, 3000);
-        });
+        await addPointsOptimized(100, "Daily Bonus");
+        localStorage.setItem(`daily_bonus_${userId}`, today);
         const btn = document.getElementById('daily-bonus-btn');
+        btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Claimed! +100 PTS';
+        document.getElementById('bonus-status').innerHTML = '<i class="fas fa-check-circle text-green-400"></i> Today\'s bonus claimed!';
+        setTimeout(() => { btn.innerHTML = '<i class="fas fa-gift mr-2"></i>Claim Daily Bonus (+100 PTS)'; btn.disabled = false; }, 3000);
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     }
     
