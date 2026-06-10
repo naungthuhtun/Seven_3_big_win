@@ -47,7 +47,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* All existing styles remain the same */
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;500;600;700&display=swap');
         * { user-select: none; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Pyidaungsu', sans-serif; background: #0a0e1a; color: white; overflow-x: hidden; min-height: 100vh; }
@@ -59,6 +58,9 @@
         .btn-yellow { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); color: #0a0e1a; font-weight: 800; border-radius: 16px; transition: all 0.2s ease; border: none; cursor: pointer; }
         .btn-yellow:active { transform: scale(0.97); }
         .btn-yellow:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+        .btn-bonus { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: white; font-weight: 800; border-radius: 16px; transition: all 0.2s ease; border: none; cursor: pointer; }
+        .btn-bonus:active { transform: scale(0.97); }
+        .btn-bonus:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
         .nav-active { color: #fbbf24 !important; border-top: 3px solid #fbbf24; background: rgba(245, 158, 11, 0.1); border-radius: 12px 12px 0 0; }
         input, textarea, select { background: #1e293b !important; border: 1px solid #334155 !important; color: #fbbf24 !important; padding: 14px 16px; border-radius: 16px; width: 100%; margin-bottom: 12px; }
         input:focus, textarea:focus, select:focus { border-color: #fbbf24 !important; outline: none; }
@@ -288,8 +290,18 @@
         </div>
     </div>
 
-    <!-- Tasks Section -->
+    <!-- Tasks Section with Bonus Button -->
     <div id="sec-tasks" class="section space-y-5">
+        <!-- Bonus Button Row -->
+        <div class="flex gap-3">
+            <button onclick="claimBonusAd()" id="bonus-ad-btn" class="flex-1 btn-bonus py-4 rounded-xl text-lg font-bold">
+                <i class="fas fa-gift mr-2"></i>🎁 BONUS +50 PTS
+            </button>
+        </div>
+        <div id="bonus-cooldown-timer" class="text-center text-xs text-slate-500 hidden">
+            ⏱️ Next bonus available in <span id="bonus-cooldown-seconds">30</span> seconds
+        </div>
+        
         <div class="ad-container">
             <div class="ad-label">💪 COMPLETE TASKS & WATCH ADS 💪</div>
         </div>
@@ -348,6 +360,7 @@
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>Coin Runner ဂိမ်း (Watch ad for double reward)</li>
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>သူငယ်ချင်းဖိတ်ခေါ်ခြင်း (+500 PTS)</li>
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>နေ့စဉ် Bonus (Watch ad +100 PTS)</li>
+                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>🎁 Bonus Ad (Watch ad +50 PTS, 30s cooldown)</li>
                 </ul>
             </div>
             <div class="p-5 bg-amber-900/20 rounded-2xl mt-4">
@@ -407,9 +420,14 @@
     // ========== ADSTERRA SMARTLINK ==========
     const ADSTERRA_LINK = "https://www.effectivecpmnetwork.com/jy1nnez9i?key=7ef36a05482f0d144335daeabb0cb584";
     
-    // Ad cooldown system - 10 seconds between ads
+    // Main ad cooldown system - 10 seconds between ads
     let lastAdTime = 0;
     const AD_COOLDOWN = 10000; // 10 seconds
+    
+    // Bonus ad cooldown system - 30 seconds between bonus ads
+    let lastBonusAdTime = 0;
+    const BONUS_AD_COOLDOWN = 30000; // 30 seconds
+    let bonusCooldownInterval = null;
     
     function canShowAd() {
         const now = Date.now();
@@ -417,9 +435,15 @@
         return timeSinceLastAd >= AD_COOLDOWN;
     }
     
-    function getAdCooldownRemaining() {
+    function canShowBonusAd() {
         const now = Date.now();
-        const remaining = AD_COOLDOWN - (now - lastAdTime);
+        const timeSinceLastBonus = now - lastBonusAdTime;
+        return timeSinceLastBonus >= BONUS_AD_COOLDOWN;
+    }
+    
+    function getBonusCooldownRemaining() {
+        const now = Date.now();
+        const remaining = BONUS_AD_COOLDOWN - (now - lastBonusAdTime);
         return remaining > 0 ? remaining : 0;
     }
     
@@ -433,7 +457,6 @@
         
         lastAdTime = Date.now();
         
-        // Open ad in Telegram WebView
         const tg = window.Telegram?.WebApp;
         if (tg) {
             tg.openLink(ADSTERRA_LINK);
@@ -442,6 +465,87 @@
             window.open(ADSTERRA_LINK, '_blank');
             if (callback) callback(true);
         }
+    }
+    
+    function getAdCooldownRemaining() {
+        const now = Date.now();
+        const remaining = AD_COOLDOWN - (now - lastAdTime);
+        return remaining > 0 ? remaining : 0;
+    }
+    
+    // ========== BONUS AD FUNCTION ==========
+    async function claimBonusAd() {
+        if (!currentUser) {
+            showNotification("Please wait for app to load!");
+            return;
+        }
+        
+        if (!canShowBonusAd()) {
+            const remaining = Math.ceil(getBonusCooldownRemaining() / 1000);
+            showNotification(`⏱️ Please wait ${remaining} seconds before claiming another bonus!`);
+            return;
+        }
+        
+        const btn = document.getElementById('bonus-ad-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading ad...';
+        
+        showAdsterraAd(async (success) => {
+            if (success) {
+                lastBonusAdTime = Date.now();
+                await addPointsOptimized(50, "Bonus Ad");
+                showNotification("🎁 Bonus claimed! +50 PTS");
+                startBonusCooldownTimer();
+            } else {
+                showNotification("Ad failed to load, please try again!");
+            }
+            btn.innerHTML = '<i class="fas fa-gift mr-2"></i>🎁 BONUS +50 PTS';
+            btn.disabled = false;
+        });
+    }
+    
+    function startBonusCooldownTimer() {
+        const timerDiv = document.getElementById('bonus-cooldown-timer');
+        const secondsSpan = document.getElementById('bonus-cooldown-seconds');
+        
+        if (bonusCooldownInterval) clearInterval(bonusCooldownInterval);
+        
+        function updateTimer() {
+            const remaining = getBonusCooldownRemaining();
+            if (remaining <= 0) {
+                if (timerDiv) timerDiv.classList.add('hidden');
+                if (bonusCooldownInterval) clearInterval(bonusCooldownInterval);
+                const btn = document.getElementById('bonus-ad-btn');
+                if (btn) btn.disabled = false;
+            } else {
+                if (timerDiv) timerDiv.classList.remove('hidden');
+                if (secondsSpan) secondsSpan.innerText = Math.ceil(remaining / 1000);
+            }
+        }
+        
+        updateTimer();
+        bonusCooldownInterval = setInterval(updateTimer, 1000);
+    }
+    
+    // ========== COPY INVITE LINK FUNCTION ==========
+    function copyRef() {
+        const link = document.getElementById('ref-link').innerHTML;
+        navigator.clipboard.writeText(link).then(() => {
+            showNotification("✅ Invite link copied to clipboard!");
+            
+            const copyBtn = document.querySelector('#copyRefBtn');
+            if (copyBtn) {
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                copyBtn.classList.add('copy-success');
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.classList.remove('copy-success');
+                }, 2000);
+            }
+        }).catch(() => {
+            showNotification("Failed to copy. Please copy manually.");
+        });
     }
     
     // ========== CONFIGURATION ==========
@@ -457,7 +561,7 @@
     const ADMIN_CHAT_ID = "6099430589";
     
     let quizAttemptCount = 0;
-    const QUIZ_ATTEMPTS_BEFORE_AD = 2; // Show ad every 2 quiz answers
+    const QUIZ_ATTEMPTS_BEFORE_AD = 2;
     
     const QUIZ_MILESTONES = [
         { target: 50, reward: 50 },
@@ -502,7 +606,7 @@
     
     document.getElementById('realtimeBadge').classList.remove('hidden');
     
-    // ========== TELEGRAM NOTIFICATION (Direct to Bot Chat) ==========
+    // ========== TELEGRAM NOTIFICATION ==========
     async function sendTelegramNotification(message) {
         if (!BOT_TOKEN) return;
         try {
@@ -576,6 +680,7 @@
         if(id === 'sec-about') { renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); }
         if(id === 'sec-quiz') updateQuizCounterUI();
         if(id === 'sec-history') renderHistoryLog();
+        if(id === 'sec-tasks') startBonusCooldownTimer();
     }
     
     async function addPointsOptimized(pts, source) {
@@ -692,12 +797,6 @@
     }
     
     // ========== REFERRAL FUNCTIONS ==========
-    function copyRef() {
-        const link = document.getElementById('ref-link').innerHTML;
-        navigator.clipboard.writeText(link);
-        showNotification("✅ Referral link copied!");
-    }
-    
     function shareRef() {
         const link = document.getElementById('ref-link').innerHTML;
         if (window.Telegram?.WebApp) {
@@ -1018,7 +1117,6 @@
         await saveToFirebase(); 
         updateBalanceUI(); 
         
-        // Send directly to Bot Chat (no need to open admin panel)
         await sendTelegramNotification(`
 🆕 <b>💰 NEW WITHDRAWAL REQUEST!</b>
 
@@ -1029,9 +1127,6 @@
 📞 <b>Phone:</b> ${phone}
 🏦 <b>Name:</b> ${name}
 🕐 <b>Time:</b> ${new Date().toLocaleString()}
-
-❌ To reject: /reject ${withdrawalId}
-✅ To approve: /approve ${withdrawalId}
 `);
         
         alert("✅ Withdrawal request submitted! Admin will be notified via Telegram.");
@@ -1049,7 +1144,7 @@
         c.innerHTML = userWithdrawals.map(w => `<div class="withdrawal-item"><div class="flex justify-between text-xs"><span>💰 ${w.amount.toLocaleString()} PTS</span><span class="${w.status === 'pending' ? 'status-pending' : (w.status === 'approved' ? 'status-approved' : 'status-rejected')}">${w.status === 'pending' ? '⏳ Pending' : (w.status === 'approved' ? '✅ Approved' : '❌ Rejected')}</span></div><div class="text-[9px] text-slate-500 mt-1">${w.method === 'kapy' ? 'Kpay' : 'Wave'} | ${w.name}</div><div class="text-[8px] text-slate-600">${new Date(w.timestamp).toLocaleString()}</div></div>`).join('');
     }
     
-    // ========== ADMIN FUNCTIONS (Keep for managing, but withdrawals go to bot) ==========
+    // ========== ADMIN FUNCTIONS ==========
     function toggleAdminMode() { 
         if (!isAdmin) { showNotification("Not authorized!"); return; }
         document.body.classList.toggle('admin-mode'); 
@@ -1071,7 +1166,7 @@
             const usersSnapshot = await window.fsGetDocs(usersCollection);
             const users = [];
             usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
+            if(users.length === 0){ tbody.innerHTML='</tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
             tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
         } catch(e) { console.error(e); }
     }
@@ -1358,6 +1453,7 @@
                 updateQuizCounterUI();
                 renderActivityLog();
                 renderHistoryLog();
+                startBonusCooldownTimer();
             }
         });
     }
@@ -1403,7 +1499,6 @@
             isAdmin = ADMIN_USER_IDS.includes(userId);
             if (isAdmin) document.getElementById('admin-mode-btn').classList.remove('hidden');
             
-            // Wait for Firebase to be ready
             if (!window.firestore) {
                 await new Promise(resolve => {
                     const checkInterval = setInterval(() => {
@@ -1464,6 +1559,7 @@
             updateQuizCounterUI();
             renderActivityLog();
             renderHistoryLog();
+            startBonusCooldownTimer();
             
             setTimeout(() => {
                 if (loadingOverlay) loadingOverlay.style.display = 'none';
