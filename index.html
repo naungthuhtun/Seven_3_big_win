@@ -113,7 +113,6 @@
         .nav-btn:active { transform: scale(0.95); }
         .activity-item { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid #fbbf24; }
         .activity-time { font-size: 9px; color: #6b7280; margin-top: 4px; }
-        .banner-ad-container { width: 100%; text-align: center; padding: 5px 0; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: 10px; min-height: 60px; }
     </style>
 </head>
 <body>
@@ -130,12 +129,9 @@
     <a href="https://t.me/MMGOLDEN_bot" target="_blank" class="btn-yellow inline-block mt-4 px-4 py-2 rounded-lg text-sm">Open @MMGOLDEN_bot</a>
 </div>
 
-<!-- Banner Ad Container (Top) -->
-<div id="bannerAdContainer" class="banner-ad-container"></div>
-
 <div class="real-time-badge hidden" id="realtimeBadge">🔴 Real-time Updates Active</div>
 
-<div class="fixed top-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm p-4 z-50 border-b border-amber-500/20" style="top: 60px;">
+<div class="fixed top-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm p-4 z-50 border-b border-amber-500/20">
     <div class="max-w-md mx-auto">
         <div class="flex justify-between items-center mb-2">
             <div class="flex items-center gap-2">
@@ -163,7 +159,7 @@
     </div>
 </div>
 
-<main class="max-w-md mx-auto pt-36 px-4" style="display: none;" id="mainContent">
+<main class="max-w-md mx-auto pt-28 px-4" style="display: none;" id="mainContent">
     <!-- Home Section -->
     <div id="sec-home" class="section active space-y-5">
         <div class="gold-card p-6 text-center">
@@ -356,7 +352,7 @@
                         </div>
                     </div>
                     <div id="quiz-list" class="quiz-list mb-5"></div>
-                    <div class="overflow-x-auto mb-5"><table class="admin-table w-full"><thead><tr><th>User</th><th>Balance</th><th>Actions</th></tr></thead><tbody id="admin-user-table"></tbody></table></div>
+                    <div class="overflow-x-auto mb-5"><table class="admin-table w-full"><thead><tr><th>User</th><th>Balance</th><th>Actions</th></tr></thead><tbody id="admin-user-table"></tbody></td></div>
                     <div class="grid grid-cols-3 gap-2 mb-5"><input type="text" id="search-user" placeholder="User ID/Name" class="text-sm p-3"><input type="number" id="adjust-points" placeholder="Points" class="text-sm p-3"><select id="adjust-action" class="text-sm p-3"><option value="add">Add</option><option value="remove">Remove</option></select><button onclick="adjustUserPoints()" class="btn-yellow py-2 text-sm col-span-3 rounded-xl">Adjust Points</button></div>
                     <div id="admin-withdraw-list" class="space-y-3 max-h-60 overflow-y-auto"></div>
                 </div>
@@ -367,8 +363,8 @@
 </main>
 
 <nav class="fixed bottom-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm border-t border-white/10 flex justify-around py-3 z-50">
-    <button onclick="showSecWithAd('sec-home')" class="nav-btn flex flex-col items-center text-amber-500 nav-active py-1"><i class="fas fa-home text-xl"></i><span class="text-[9px] mt-0.5">Home</span></button>
-    <button onclick="showSecWithAd('sec-quiz')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-brain text-xl"></i><span class="text-[9px] mt-0.5">Quiz</span></button>
+    <button onclick="showSec('sec-home')" class="nav-btn flex flex-col items-center text-amber-500 nav-active py-1"><i class="fas fa-home text-xl"></i><span class="text-[9px] mt-0.5">Home</span></button>
+    <button onclick="showSec('sec-quiz')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-brain text-xl"></i><span class="text-[9px] mt-0.5">Quiz</span></button>
     <button onclick="showSec('sec-invite')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-user-plus text-xl"></i><span class="text-[9px] mt-0.5">Invite</span></button>
     <button onclick="showSec('sec-tasks')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-tasks text-xl"></i><span class="text-[9px] mt-0.5">Tasks</span></button>
     <button onclick="showSec('sec-about')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-cog text-xl"></i><span class="text-[9px] mt-0.5">Setting</span></button>
@@ -385,19 +381,10 @@
     const ADMIN_PASSWORD = "871033";
     const ADMIN_USER_IDS = ["6099430589"];
     
-    // ========== AD UNIT IDs (6 Ads) ==========
-    const BANNER_AD_ID = "399122";        // Top banner - always visible
-    const REWARDED_BONUS_ID = "399125";   // Daily bonus ad
-    const REWARDED_TASK_ID = "399126";    // Task ad (30 sec, 50 PTS)
-    const REWARDED_QUIZ_ID = "399123";    // Quiz ad (every 2 answers)
-    const REWARDED_GAME_ID = "399124";    // Game ad (after each game)
-    const INTERSTITIAL_AD_ID = "399127";  // Navigation ad (when switching pages)
-    
-    // RichInfo Ad Controller
+    // RichInfo Ad Controller - Simplified
     let tgAdsController = null;
     let isAdReady = false;
     
-    // Initialize RichInfo Ads
     function initRichInfoAds() {
         try {
             if (typeof window.TelegramAdsController !== 'undefined') {
@@ -408,10 +395,8 @@
                 });
                 isAdReady = true;
                 console.log("✅ RichInfo Ads initialized");
-                // Show top banner ad
-                showTopBannerAd();
             } else {
-                console.log("⚠️ TelegramAdsController not loaded yet");
+                console.log("⚠️ Waiting for Ads...");
                 setTimeout(initRichInfoAds, 1000);
             }
         } catch(e) {
@@ -420,143 +405,31 @@
         }
     }
     
-    // Show Top Banner Ad (always visible)
-    function showTopBannerAd() {
-        if (tgAdsController && isAdReady) {
-            try {
-                tgAdsController.showBannerAd({
-                    adUnitId: BANNER_AD_ID,
-                    containerId: "bannerAdContainer",
-                    position: "top"
-                });
-                console.log("✅ Top banner ad displayed");
-            } catch(e) {
-                console.log("Banner ad error:", e);
-            }
-        }
-    }
-    
-    // Show Rewarded Ad (for Bonus)
-    function showBonusAd(callback) {
+    // Simple ad show function (works with any ad unit)
+    function showRewardedAd(callback) {
         if (tgAdsController && isAdReady) {
             try {
                 tgAdsController.showRewardedAd({
-                    adUnitId: REWARDED_BONUS_ID,
                     onReward: () => {
-                        console.log("🎉 Bonus ad watched!");
+                        console.log("🎉 Ad rewarded!");
                         if (callback) callback();
                     },
                     onError: (err) => {
                         console.log("Ad error:", err);
                         if (callback) callback();
-                    }
-                });
-            } catch(e) {
-                console.log("Ad show error:", e);
-                if (callback) callback();
-            }
-        } else {
-            if (callback) callback();
-        }
-    }
-    
-    // Show Task Ad (30 seconds, 50 PTS reward)
-    function showTaskAd(callback) {
-        if (tgAdsController && isAdReady) {
-            try {
-                tgAdsController.showRewardedAd({
-                    adUnitId: REWARDED_TASK_ID,
-                    onReward: () => {
-                        console.log("🎉 Task ad watched! +50 PTS");
-                        if (callback) callback();
                     },
-                    onError: (err) => {
-                        console.log("Ad error:", err);
-                        if (callback) callback();
-                    }
-                });
-            } catch(e) {
-                console.log("Ad show error:", e);
-                if (callback) callback();
-            }
-        } else {
-            if (callback) callback();
-        }
-    }
-    
-    // Show Quiz Ad
-    function showQuizAd(callback) {
-        if (tgAdsController && isAdReady) {
-            try {
-                tgAdsController.showRewardedAd({
-                    adUnitId: REWARDED_QUIZ_ID,
-                    onReward: () => {
-                        console.log("🎉 Quiz ad watched!");
-                        if (callback) callback();
-                    },
-                    onError: (err) => {
-                        console.log("Ad error:", err);
-                        if (callback) callback();
-                    }
-                });
-            } catch(e) {
-                console.log("Ad show error:", e);
-                if (callback) callback();
-            }
-        } else {
-            if (callback) callback();
-        }
-    }
-    
-    // Show Game Ad
-    function showGameAd(callback) {
-        if (tgAdsController && isAdReady) {
-            try {
-                tgAdsController.showRewardedAd({
-                    adUnitId: REWARDED_GAME_ID,
-                    onReward: () => {
-                        console.log("🎉 Game ad watched!");
-                        if (callback) callback();
-                    },
-                    onError: (err) => {
-                        console.log("Ad error:", err);
-                        if (callback) callback();
-                    }
-                });
-            } catch(e) {
-                console.log("Ad show error:", e);
-                if (callback) callback();
-            }
-        } else {
-            if (callback) callback();
-        }
-    }
-    
-    // Show Interstitial Ad (for navigation)
-    function showInterstitialAd(callback) {
-        if (tgAdsController && isAdReady) {
-            try {
-                tgAdsController.showInterstitialAd({
-                    adUnitId: INTERSTITIAL_AD_ID,
                     onClose: () => {
-                        console.log("Interstitial ad closed");
-                        if (callback) callback();
+                        console.log("Ad closed");
                     }
                 });
             } catch(e) {
-                console.log("Interstitial ad error:", e);
+                console.log("Ad error:", e);
                 if (callback) callback();
             }
         } else {
+            console.log("Ad not ready, auto-reward");
             if (callback) callback();
         }
-    }
-    
-    // Show ad before switching sections (with interstitial)
-    function showSecWithAd(id) {
-        showInterstitialAd(() => {
-            showSec(id);
-        });
     }
     
     let quizAttemptCount = 0;
@@ -627,7 +500,6 @@
         }
     }, 1000);
     
-    // Activity Log Functions
     async function addActivityLog(action, amount, type) {
         const timestamp = new Date().toLocaleString();
         const logEntry = { action, amount, type, timestamp, date: new Date().toISOString() };
@@ -745,11 +617,10 @@
         }
     }
     
-    // ========== REFERRAL SYSTEM ==========
     async function handleReferral(refId) {
         if (refId === userId) return;
         try {
-            console.log("🔗 Referral detected! Inviter:", refId, "New User:", userId);
+            console.log("🔗 Referral detected! Inviter:", refId);
             const inviterRef = window.fsDoc(window.firestore, 'users', refId);
             const inviterSnap = await window.fsGetDoc(inviterRef);
             if (!inviterSnap.exists()) return;
@@ -817,7 +688,6 @@
         if(id === 'sec-quiz') updateQuizCounterUI();
     }
     
-    // ========== QUIZ FUNCTIONS ==========
     function renderQuiz() {
         const availableQuizzes = quizzesCache.filter(q => !completedQuizzes.includes(q.id));
         if (availableQuizzes.length > 0) {
@@ -856,14 +726,14 @@
                 quizAttemptCount = 0;
                 pendingQuizPoints = currentQuiz.p;
                 pendingQuizId = currentQuiz.id;
-                showQuizAd(async () => {
-                    await addPointsOptimized(pendingQuizPoints, "Quiz");
+                showRewardedAd(async () => {
+                    await addPointsOptimized(pendingQuizPoints, "Quiz (Ad)");
                     completedQuizzes.push(pendingQuizId);
                     totalQuizzesAnswered++;
                     await saveToFirebase();
                     renderQuiz();
                     updateQuizCounterUI();
-                    showNotification(`✅ Correct! +${pendingQuizPoints} PTS (Total: ${totalQuizzesAnswered})`);
+                    showNotification(`✅ Correct! +${pendingQuizPoints} PTS!`);
                     selectedChoice = null;
                     pendingQuizPoints = 0;
                     pendingQuizId = null;
@@ -875,11 +745,11 @@
                 await saveToFirebase();
                 renderQuiz();
                 updateQuizCounterUI();
-                showNotification(`✅ Correct! +${currentQuiz.p} PTS (Total: ${totalQuizzesAnswered})`);
+                showNotification(`✅ Correct! +${currentQuiz.p} PTS!`);
                 selectedChoice = null;
             }
         } else {
-            showNotification("❌ Wrong answer! Better luck next time!");
+            showNotification("❌ Wrong answer!");
             renderQuiz();
             selectedChoice = null;
         }
@@ -1027,7 +897,6 @@
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
             
-            // Initialize Ads
             initRichInfoAds();
             
             setupQuizzesListener();
@@ -1078,7 +947,6 @@
         if (playBtn) { if (remaining <= 0) { playBtn.disabled = true; playBtn.innerHTML = '🔒 ယနေ့ပွဲစဉ်ကုန်ပြီ'; } else { playBtn.disabled = false; playBtn.innerHTML = '▶️ Play'; } }
     }
     
-    // ========== GAME ==========
     function initGameCanvas() {
         const canvas = document.getElementById('gameCanvas');
         if(!canvas) return;
@@ -1139,13 +1007,18 @@
         const earned = gameCoins * COIN_TO_POINTS;
         if(earned > 0) { 
             pendingGameReward = earned;
-            showGameAd(async () => {
-                await addPointsOptimized(pendingGameReward, "Coin Runner");
+            showRewardedAd(async () => {
+                await addPointsOptimized(pendingGameReward, "Coin Runner (Ad)");
                 gamesPlayedToday++; 
                 await saveToFirebase(); 
                 updateGameRemainingUI(); 
                 pendingGameReward = 0;
             });
+        } else {
+            // No coins earned, just increment game count
+            gamesPlayedToday++; 
+            await saveToFirebase(); 
+            updateGameRemainingUI();
         }
         if(gameCoins>gameBest){ gameBest=gameCoins; localStorage.setItem('game_best',gameBest); document.getElementById('game-best').innerText=gameBest; } 
         const overlayStars = '⭐'.repeat(Math.min(5, Math.floor(gameCoins/20)));
@@ -1154,7 +1027,6 @@
         document.body.appendChild(overlay); 
     }
     
-    // ========== TASKS ==========
     function renderTasks() { 
         const c=document.getElementById('task-list-display'); if(!c)return; 
         if(tasksCache.length===0){ c.innerHTML='<div class="gold-card p-6 text-center text-slate-500">No tasks yet</div>'; return; } 
@@ -1175,9 +1047,9 @@
     
     async function completeTask(id,reward){ 
         if(completedTasks.includes(id)){ showNotification("Already completed!"); return; } 
-        showTaskAd(async () => {
+        showRewardedAd(async () => {
             completedTasks.push(id); 
-            await addPointsOptimized(50, "Task Video Ad");  // Fixed 50 PTS for task ad
+            await addPointsOptimized(50, "Task Video Ad (50 PTS)");
             await saveToFirebase(); 
             renderTasks(); 
             showNotification("✅ +50 PTS from watching video ad!");
@@ -1236,8 +1108,8 @@
         const today = new Date().toDateString();
         const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
         if (lastBonus === today) { alert("နောက်တစ်နေ့မှ ထပ်မံရယူနိုင်ပါသည်။"); return; }
-        showBonusAd(async () => {
-            await addPointsOptimized(100, "Daily Bonus");
+        showRewardedAd(async () => {
+            await addPointsOptimized(100, "Daily Bonus (Ad)");
             localStorage.setItem(`daily_bonus_${userId}`, today);
             showNotification("✅ Daily bonus claimed! +100 PTS");
         });
@@ -1255,7 +1127,7 @@
             const usersSnapshot = await window.fsGetDocs(usersCollection);
             const users = [];
             usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
+            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></td>'; return; }
             tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
         } catch(e) { console.error(e); }
     }
