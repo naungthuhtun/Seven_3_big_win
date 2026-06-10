@@ -5,8 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MM GOLDEN - Telegram Mini App</title>
     
-    <!-- AdsGram Ad Network -->
-    <script src="https://cdn.adsgram.ai/js/adsgram.js"></script>
+    <!-- RichInfo Telegram Ad Network -->
+    <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
+    <script>
+        window.TelegramAdsController = new TelegramAdsController();
+        window.TelegramAdsController.initialize({
+            pubId: "1014061",
+            appId: "7735",
+        });
+    </script>
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -380,25 +387,20 @@
     const BOT_USERNAME = "MMGOLDEN_bot";
     const ADMIN_PASSWORD = "871033";
     const ADMIN_USER_IDS = ["6099430589"];
-    const ADSGRAM_BLOCK_ID = "6120803";
     
-    // AdsGram setup
-    let adsgramShowAd = null;
-    
-    async function initAdsgram() {
-        try {
-            const result = await window.Adsgram?.init({ blockId: ADSGRAM_BLOCK_ID });
-            if (result) adsgramShowAd = result;
-            console.log("✅ AdsGram initialized");
-        } catch(e) { console.log("AdsGram init error:", e); }
-    }
+    // RichInfo Telegram Ad Controller
+    let tgAdsController = null;
     
     function showRewardedAd(callback) {
-        if (adsgramShowAd) {
-            adsgramShowAd().then(() => {
-                if (callback) callback();
-            }).catch(() => {
-                if (callback) callback();
+        if (window.TelegramAdsController) {
+            tgAdsController = window.TelegramAdsController;
+            tgAdsController.showRewardedAd({
+                onReward: () => {
+                    if (callback) callback();
+                },
+                onError: () => {
+                    if (callback) callback();
+                }
             });
         } else {
             if (callback) callback();
@@ -430,7 +432,6 @@
     let isAdmin = false;
     let activityLog = [];
     let pendingGameReward = 0;
-    let pendingBonusCallback = null;
     
     let unsubscribeQuizzes = null;
     let unsubscribeTasks = null;
@@ -867,7 +868,6 @@
             }
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
-            await initAdsgram();
             setupQuizzesListener();
             setupTasksListener();
             setupLeaderboardListener();
@@ -1093,7 +1093,7 @@
             const usersSnapshot = await window.fsGetDocs(usersCollection);
             const users = [];
             usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
+            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></table>'; return; }
             tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
         } catch(e) { console.error(e); }
     }
