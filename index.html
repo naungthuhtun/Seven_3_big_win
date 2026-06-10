@@ -115,6 +115,8 @@
         .btn-icon:active { transform: scale(0.95); }
         .ad-container { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 10px; margin: 10px 0; text-align: center; border: 1px dashed #fbbf24; }
         .ad-label { font-size: 8px; color: #6b7280; margin-bottom: 5px; letter-spacing: 1px; }
+        .fast-load { animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -168,8 +170,8 @@
     <!-- Home Section -->
     <div id="sec-home" class="section active space-y-5">
         <div class="ad-container">
-            <div class="ad-label">✨ SPONSORED ✨</div>
-            <div id="home-ad-banner" class="text-center text-xs text-amber-400">Watch ads to earn more points!</div>
+            <div class="ad-label">✨ WATCH ADS TO EARN POINTS ✨</div>
+            <div class="text-center text-[10px] text-green-400">✅ All points go to Main Balance</div>
         </div>
         
         <div class="gold-card p-6 text-center">
@@ -292,7 +294,6 @@
 
     <!-- Tasks Section with Bonus Button -->
     <div id="sec-tasks" class="section space-y-5">
-        <!-- Bonus Button Row -->
         <div class="flex gap-3">
             <button onclick="claimBonusAd()" id="bonus-ad-btn" class="flex-1 btn-bonus py-4 rounded-xl text-lg font-bold">
                 <i class="fas fa-gift mr-2"></i>🎁 BONUS +50 PTS
@@ -417,16 +418,16 @@
 </nav>
 
 <script>
-    // ========== ADSTERRA SMARTLINK ==========
+    // ========== ADSTERRA SMARTLINK (Maximum Ads) ==========
     const ADSTERRA_LINK = "https://www.effectivecpmnetwork.com/jy1nnez9i?key=7ef36a05482f0d144335daeabb0cb584";
     
-    // Main ad cooldown system - 10 seconds between ads
+    // MINIMUM COOLDOWN - 5 seconds between ads (maximum frequency)
     let lastAdTime = 0;
-    const AD_COOLDOWN = 10000; // 10 seconds
+    const AD_COOLDOWN = 5000; // 5 seconds only for maximum ads
     
-    // Bonus ad cooldown system - 30 seconds between bonus ads
+    // Bonus ad cooldown - 30 seconds
     let lastBonusAdTime = 0;
-    const BONUS_AD_COOLDOWN = 30000; // 30 seconds
+    const BONUS_AD_COOLDOWN = 30000;
     let bonusCooldownInterval = null;
     
     function canShowAd() {
@@ -473,7 +474,7 @@
         return remaining > 0 ? remaining : 0;
     }
     
-    // ========== BONUS AD FUNCTION ==========
+    // ========== BONUS AD - ALL POINTS GO TO MAIN BALANCE ==========
     async function claimBonusAd() {
         if (!currentUser) {
             showNotification("Please wait for app to load!");
@@ -493,8 +494,9 @@
         showAdsterraAd(async (success) => {
             if (success) {
                 lastBonusAdTime = Date.now();
+                // ✅ ALL BONUS POINTS GO TO MAIN BALANCE
                 await addPointsOptimized(50, "Bonus Ad");
-                showNotification("🎁 Bonus claimed! +50 PTS");
+                showNotification("🎁 Bonus claimed! +50 PTS added to your main balance!");
                 startBonusCooldownTimer();
             } else {
                 showNotification("Ad failed to load, please try again!");
@@ -527,7 +529,7 @@
         bonusCooldownInterval = setInterval(updateTimer, 1000);
     }
     
-    // ========== COPY INVITE LINK FUNCTION ==========
+    // ========== COPY & SHARE INVITE LINK (Direct Share to Telegram) ==========
     function copyRef() {
         const link = document.getElementById('ref-link').innerHTML;
         navigator.clipboard.writeText(link).then(() => {
@@ -546,6 +548,30 @@
         }).catch(() => {
             showNotification("Failed to copy. Please copy manually.");
         });
+    }
+    
+    // DIRECT SHARE TO TELEGRAM CHAT
+    function shareRef() {
+        const link = document.getElementById('ref-link').innerHTML;
+        const message = `🎁 Join MM GOLDEN and earn rewards!\n\nInvite link: ${link}\n\nGet 500 PTS for each friend you invite!`;
+        
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.showPopup({
+                title: "📤 Share Invite Link",
+                message: "Share this link with your friends:",
+                buttons: [{ type: "default", text: "📋 Copy Link", id: "copy" }]
+            }, (buttonId) => {
+                if (buttonId === "copy") {
+                    navigator.clipboard.writeText(link);
+                    showNotification("✅ Link copied! Share with friends!");
+                }
+            });
+        } else {
+            // Fallback - copy to clipboard
+            navigator.clipboard.writeText(link);
+            showNotification("✅ Link copied! Share with friends!");
+        }
     }
     
     // ========== CONFIGURATION ==========
@@ -683,6 +709,7 @@
         if(id === 'sec-tasks') startBonusCooldownTimer();
     }
     
+    // ✅ MAIN FUNCTION TO ADD POINTS - ALL POINTS GO HERE
     async function addPointsOptimized(pts, source) {
         balance += pts;
         if (currentUser) { 
@@ -692,7 +719,7 @@
         await addActivityLog(source, pts, 'earn');
         await saveToFirebase();
         updateBalanceUI();
-        showNotification(`+${pts} PTS from ${source}`);
+        showNotification(`+${pts} PTS from ${source} added to main balance!`);
     }
     
     async function addActivityLog(action, amount, type) {
@@ -793,29 +820,10 @@
                     balance: balance
                 }, { merge: true });
             } catch(e) { console.error("Save error:", e); }
-        }, 1000);
+        }, 500); // Faster save - 500ms
     }
     
     // ========== REFERRAL FUNCTIONS ==========
-    function shareRef() {
-        const link = document.getElementById('ref-link').innerHTML;
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.showPopup({
-                title: "📤 Share MM GOLDEN",
-                message: "Invite friends and earn 500 PTS each!\n\n" + link,
-                buttons: [{ type: "default", text: "📋 Copy Link", id: "copy" }]
-            }, (buttonId) => {
-                if (buttonId === "copy") {
-                    navigator.clipboard.writeText(link);
-                    showNotification("✅ Link copied! Share with friends!");
-                }
-            });
-        } else {
-            navigator.clipboard.writeText(link);
-            showNotification("✅ Link copied! Share with friends!");
-        }
-    }
-    
     async function handleReferral(refId) {
         if (refId === userId) return;
         try {
@@ -869,9 +877,13 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading ad...';
         
         showAdsterraAd(async (success) => {
-            await addPointsOptimized(100, "Daily Bonus");
-            localStorage.setItem(`daily_bonus_${userId}`, today);
-            showNotification("✅ Daily bonus claimed! +100 PTS");
+            if (success) {
+                await addPointsOptimized(100, "Daily Bonus");
+                localStorage.setItem(`daily_bonus_${userId}`, today);
+                showNotification("✅ Daily bonus claimed! +100 PTS added to main balance!");
+            } else {
+                showNotification("Ad failed! Please try again.");
+            }
             btn.innerHTML = '<i class="fas fa-play-circle mr-2"></i>Claim Daily Bonus';
             btn.disabled = false;
         });
@@ -915,14 +927,18 @@
             if (quizAttemptCount >= QUIZ_ATTEMPTS_BEFORE_AD) {
                 quizAttemptCount = 0;
                 showAdsterraAd(async (success) => {
-                    await addPointsOptimized(currentQuiz.p, "Quiz");
-                    completedQuizzes.push(currentQuiz.id);
-                    totalQuizzesAnswered++;
-                    await saveToFirebase();
-                    renderQuiz();
-                    updateQuizCounterUI();
-                    showNotification(`✅ Correct! +${currentQuiz.p} PTS (Total: ${totalQuizzesAnswered})`);
-                    selectedChoice = null;
+                    if (success) {
+                        await addPointsOptimized(currentQuiz.p, "Quiz");
+                        completedQuizzes.push(currentQuiz.id);
+                        totalQuizzesAnswered++;
+                        await saveToFirebase();
+                        renderQuiz();
+                        updateQuizCounterUI();
+                        showNotification(`✅ Correct! +${currentQuiz.p} PTS (Total: ${totalQuizzesAnswered})`);
+                        selectedChoice = null;
+                    } else {
+                        showNotification("Ad failed! No points awarded.");
+                    }
                 });
             } else {
                 await addPointsOptimized(currentQuiz.p, "Quiz");
@@ -987,11 +1003,15 @@
     async function completeTask(id,reward){ 
         if(completedTasks.includes(id)){ showNotification("Already completed!"); return; } 
         showAdsterraAd(async (success) => {
-            completedTasks.push(id); 
-            await addPointsOptimized(reward, "Task");
-            await saveToFirebase(); 
-            renderTasks(); 
-            showNotification(`✅ +${reward} PTS!`);
+            if (success) {
+                completedTasks.push(id); 
+                await addPointsOptimized(reward, "Task");
+                await saveToFirebase(); 
+                renderTasks(); 
+                showNotification(`✅ +${reward} PTS added to main balance!`);
+            } else {
+                showNotification("Ad failed! Please try again.");
+            }
         });
     }
     
@@ -1063,7 +1083,13 @@
         const earned = gameCoins * COIN_TO_POINTS;
         if(earned > 0) { 
             showAdsterraAd(async (success) => {
-                gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
+                if (success) {
+                    gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
+                    showNotification(`🎮 Game over! +${earned} PTS added to main balance!`);
+                } else {
+                    gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI();
+                    showNotification("Ad failed! No points awarded.");
+                }
             });
         } else {
             gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI();
@@ -1144,7 +1170,7 @@
         c.innerHTML = userWithdrawals.map(w => `<div class="withdrawal-item"><div class="flex justify-between text-xs"><span>💰 ${w.amount.toLocaleString()} PTS</span><span class="${w.status === 'pending' ? 'status-pending' : (w.status === 'approved' ? 'status-approved' : 'status-rejected')}">${w.status === 'pending' ? '⏳ Pending' : (w.status === 'approved' ? '✅ Approved' : '❌ Rejected')}</span></div><div class="text-[9px] text-slate-500 mt-1">${w.method === 'kapy' ? 'Kpay' : 'Wave'} | ${w.name}</div><div class="text-[8px] text-slate-600">${new Date(w.timestamp).toLocaleString()}</div></div>`).join('');
     }
     
-    // ========== ADMIN FUNCTIONS ==========
+    // ========== ADMIN FUNCTIONS (Keep for managing) ==========
     function toggleAdminMode() { 
         if (!isAdmin) { showNotification("Not authorized!"); return; }
         document.body.classList.toggle('admin-mode'); 
@@ -1166,7 +1192,7 @@
             const usersSnapshot = await window.fsGetDocs(usersCollection);
             const users = [];
             usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='</tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
+            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td><tr>'; return; }
             tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
         } catch(e) { console.error(e); }
     }
@@ -1471,7 +1497,7 @@
         });
     }
     
-    // ========== MAIN INITIALIZATION ==========
+    // ========== MAIN INITIALIZATION (FASTER LOADING) ==========
     async function initTelegramUser() {
         const loadingOverlay = document.getElementById('loadingOverlay');
         const errorMessage = document.getElementById('errorMessage');
@@ -1499,15 +1525,17 @@
             isAdmin = ADMIN_USER_IDS.includes(userId);
             if (isAdmin) document.getElementById('admin-mode-btn').classList.remove('hidden');
             
+            // Faster Firebase connection check
             if (!window.firestore) {
                 await new Promise(resolve => {
+                    let elapsed = 0;
                     const checkInterval = setInterval(() => {
-                        if (window.firestore) {
+                        elapsed += 50;
+                        if (window.firestore || elapsed >= 2000) {
                             clearInterval(checkInterval);
                             resolve();
                         }
-                    }, 100);
-                    setTimeout(resolve, 5000);
+                    }, 50);
                 });
             }
             
@@ -1561,12 +1589,13 @@
             renderHistoryLog();
             startBonusCooldownTimer();
             
+            // Faster loading - immediately hide overlay
             setTimeout(() => {
                 if (loadingOverlay) loadingOverlay.style.display = 'none';
                 if (mainContent) mainContent.style.display = 'block';
                 if (errorMessage) errorMessage.classList.add('hidden');
                 showNotification(`Welcome ${userName}! 🎉`);
-            }, 500);
+            }, 100);
             
             const tg = window.Telegram?.WebApp;
             if (tg) { tg.ready(); tg.expand(); }
@@ -1587,7 +1616,7 @@
     setTimeout(() => {
         initGameCanvas();
         initTelegramUser();
-    }, 500);
+    }, 300); // Faster start - 300ms instead of 500ms
 </script>
 </body>
 </html>
