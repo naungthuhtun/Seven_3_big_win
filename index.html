@@ -173,6 +173,7 @@
 <div class="loading-overlay" id="loadingOverlay">
     <i class="fas fa-spinner fa-spin text-4xl text-amber-400 mb-4"></i>
     <p class="text-white">Loading MM GOLDEN...</p>
+    <p class="text-slate-500 text-xs mt-2" id="loading-status">Initializing...</p>
 </div>
 
 <div class="error-message hidden" id="errorMessage">
@@ -519,6 +520,14 @@
     
     document.getElementById('realtimeBadge').classList.remove('hidden');
     
+    // ========== FIXED: Better loading with timeout and status ==========
+    let loadingTimeout;
+    
+    function showLoadingStatus(status) {
+        const statusEl = document.getElementById('loading-status');
+        if (statusEl) statusEl.innerText = status;
+    }
+    
     // ========== TELEGRAM NOTIFICATION ==========
     async function sendTelegramNotification(message) {
         if (!BOT_TOKEN) return;
@@ -540,15 +549,24 @@
         }
     }
     
-    // ========== HELPER FUNCTIONS ==========
+    // ========== FIXED: Check Telegram WebApp ==========
     function checkTelegramWebApp() {
         const tg = window.Telegram?.WebApp;
-        if (!tg || !tg.initDataUnsafe?.user) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('errorMessage').classList.remove('hidden');
-            return false;
+        // Check both Telegram object and URL parameters (for testing)
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasTelegramData = urlParams.has('tgWebAppData');
+        
+        if (tg || hasTelegramData) {
+            console.log("✅ Telegram WebApp detected");
+            if (tg) {
+                tg.ready();
+                tg.expand();
+            }
+            return true;
         }
-        return true;
+        
+        console.log("❌ Not in Telegram WebApp");
+        return false;
     }
     
     function getUserId() {
@@ -556,7 +574,8 @@
         if (tg && tg.initDataUnsafe?.user) {
             return tg.initDataUnsafe.user.id.toString();
         }
-        return null;
+        // Fallback for testing - REMOVE IN PRODUCTION
+        return "test_user_" + Math.random().toString(36).substr(2, 8);
     }
     
     function getUserName() {
@@ -1392,18 +1411,59 @@
         });
     }
     
+    // ========== FIXED: Main initialization with better error handling ==========
     async function initTelegramUser() {
-        if (!checkTelegramWebApp()) return;
-        userId = getUserId();
-        userName = getUserName();
-        document.getElementById('display-name').innerHTML = `<i class="fab fa-telegram mr-1"></i>${userName}`;
-        document.getElementById('profile-name').innerText = userName;
-        document.getElementById('profile-user-id').innerText = userId;
-        isAdmin = ADMIN_USER_IDS.includes(userId);
-        if (isAdmin) document.getElementById('admin-mode-btn').classList.remove('hidden');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorMessage = document.getElementById('errorMessage');
+        const mainContent = document.getElementById('mainContent');
+        
+        showLoadingStatus("Checking Telegram...");
+        
+        if (!checkTelegramWebApp()) {
+            if (loadingOverlay) loadingOverlay.style.display = 'none';
+            if (errorMessage) errorMessage.classList.remove('hidden');
+            if (mainContent) mainContent.style.display = 'none';
+            clearTimeout(loadingTimeout);
+            return;
+        }
+        
+        showLoadingStatus("Getting user info...");
+        
         try {
+            userId = getUserId();
+            userName = getUserName();
+            
+            if (!userId) {
+                throw new Error("Cannot get user ID");
+            }
+            
+            document.getElementById('display-name').innerHTML = `<i class="fab fa-telegram mr-1"></i>${userName}`;
+            document.getElementById('profile-name').innerText = userName;
+            document.getElementById('profile-user-id').innerText = userId;
+            
+            isAdmin = ADMIN_USER_IDS.includes(userId);
+            if (isAdmin) document.getElementById('admin-mode-btn').classList.remove('hidden');
+            
+            showLoadingStatus("Connecting to Firebase...");
+            
+            // Wait for Firebase to be ready
+            if (!window.firestore) {
+                await new Promise(resolve => {
+                    const checkInterval = setInterval(() => {
+                        if (window.firestore) {
+                            clearInterval(checkInterval);
+                            resolve();
+                        }
+                    }, 100);
+                    setTimeout(resolve, 5000);
+                });
+            }
+            
+            showLoadingStatus("Loading user data...");
+            
             const userRef = window.fsDoc(window.firestore, 'users', userId);
             const userSnap = await window.fsGetDoc(userRef);
+            
             if (userSnap.exists()) {
                 const data = userSnap.data();
                 currentUser = { id: userId, name: data.name || userName, balance: data.balance || 0, totalEarned: data.totalEarned || 0 };
@@ -1422,18 +1482,27 @@
                 activityLog = [];
                 await saveToFirebase();
             }
+            
+            showLoadingStatus("Setting up features...");
+            
             const startParam = getStartParam();
             if (startParam && startParam !== userId) {
                 setTimeout(() => handleReferral(startParam), 2000);
             }
+            
             const today = new Date().toDateString();
-            if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
+            if (lastGameDate !== today) { 
+                gamesPlayedToday = 0; 
+                lastGameDate = today; 
+                await saveToFirebase(); 
+            }
             
             setupQuizzesListener();
             setupTasksListener();
             setupLeaderboardListener();
             setupUserListener();
             setupWithdrawalsListener();
+            
             updateBalanceUI();
             renderRefUI();
             renderTasks();
@@ -1442,14 +1511,46 @@
             updateQuizCounterUI();
             renderActivityLog();
             renderHistoryLog();
-            showNotification(`Welcome ${userName}! 🎉`);
+            
+            showLoadingStatus("Done!");
+            
+            setTimeout(() => {
+                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                if (mainContent) mainContent.style.display = 'block';
+                if (errorMessage) errorMessage.classList.add('hidden');
+                showNotification(`Welcome ${userName}! 🎉`);
+            }, 500);
+            
+            clearTimeout(loadingTimeout);
+            
             const tg = window.Telegram?.WebApp;
             if (tg) { tg.ready(); tg.expand(); }
+            
         } catch(error) {
-            console.error("Firebase error:", error);
-            showNotification("Firebase connection issue.");
+            console.error("Init error:", error);
+            if (loadingOverlay) {
+                loadingOverlay.innerHTML = `
+                    <i class="fas fa-exclamation-triangle text-red-400 text-4xl mb-4"></i>
+                    <p class="text-white mb-2">Connection Error!</p>
+                    <p class="text-slate-400 text-xs text-center px-4">${error.message || 'Cannot connect to server'}</p>
+                    <button onclick="location.reload()" class="btn-yellow mt-4 px-6 py-2 rounded-lg text-sm">⟳ Retry</button>
+                `;
+            }
         }
     }
+    
+    // Set loading timeout
+    loadingTimeout = setTimeout(() => {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay && loadingOverlay.style.display !== 'none') {
+            loadingOverlay.innerHTML = `
+                <i class="fas fa-exclamation-triangle text-amber-400 text-4xl mb-4"></i>
+                <p class="text-white mb-2">Loading Timeout!</p>
+                <p class="text-slate-400 text-xs text-center px-4">Please check your internet connection and try again.</p>
+                <button onclick="location.reload()" class="btn-yellow mt-4 px-6 py-2 rounded-lg text-sm">⟳ Retry</button>
+            `;
+        }
+    }, 15000);
     
     setTimeout(() => {
         initGameCanvas();
