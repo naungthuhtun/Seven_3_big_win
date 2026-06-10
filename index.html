@@ -7,13 +7,6 @@
     
     <!-- RichInfo Telegram Ad Network -->
     <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-    <script>
-        window.TelegramAdsController = new TelegramAdsController();
-        window.TelegramAdsController.initialize({
-            pubId: "1014061",
-            appId: "7735",
-        });
-    </script>
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -388,21 +381,54 @@
     const ADMIN_PASSWORD = "871033";
     const ADMIN_USER_IDS = ["6099430589"];
     
-    // RichInfo Telegram Ad Controller
+    // RichInfo Ad Controller (Fixed)
     let tgAdsController = null;
+    let isAdReady = false;
     
+    // Initialize RichInfo Ads
+    function initRichInfoAds() {
+        try {
+            if (typeof window.TelegramAdsController !== 'undefined') {
+                tgAdsController = new window.TelegramAdsController();
+                tgAdsController.initialize({
+                    pubId: "1014061",
+                    appId: "7735",
+                });
+                isAdReady = true;
+                console.log("✅ RichInfo Ads initialized");
+            } else {
+                console.log("⚠️ TelegramAdsController not loaded yet");
+                setTimeout(initRichInfoAds, 1000);
+            }
+        } catch(e) {
+            console.log("Ad init error:", e);
+            isAdReady = false;
+        }
+    }
+    
+    // Show Rewarded Ad - Fixed version
     function showRewardedAd(callback) {
-        if (window.TelegramAdsController) {
-            tgAdsController = window.TelegramAdsController;
-            tgAdsController.showRewardedAd({
-                onReward: () => {
-                    if (callback) callback();
-                },
-                onError: () => {
-                    if (callback) callback();
-                }
-            });
+        if (tgAdsController && isAdReady) {
+            try {
+                tgAdsController.showRewardedAd({
+                    onReward: () => {
+                        console.log("🎉 Ad watched, giving reward!");
+                        if (callback) callback();
+                    },
+                    onError: (err) => {
+                        console.log("Ad error, still giving reward:", err);
+                        if (callback) callback();
+                    },
+                    onClose: () => {
+                        console.log("Ad closed without reward");
+                    }
+                });
+            } catch(e) {
+                console.log("Ad show error:", e);
+                if (callback) callback();
+            }
         } else {
+            console.log("Ad not ready, skipping");
             if (callback) callback();
         }
     }
@@ -432,6 +458,8 @@
     let isAdmin = false;
     let activityLog = [];
     let pendingGameReward = 0;
+    let pendingTaskCallback = null;
+    let pendingBonusCallback = null;
     
     let unsubscribeQuizzes = null;
     let unsubscribeTasks = null;
@@ -868,6 +896,10 @@
             }
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
+            
+            // Initialize Ads
+            initRichInfoAds();
+            
             setupQuizzesListener();
             setupTasksListener();
             setupLeaderboardListener();
