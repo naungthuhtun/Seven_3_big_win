@@ -7,13 +7,6 @@
     
     <!-- RichInfo Telegram Ad Network -->
     <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-    <script>
-        window.TelegramAdsController = new TelegramAdsController();
-        window.TelegramAdsController.initialize({
-            pubId: "1014061",
-            appId: "7735",
-        });
-    </script>
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -118,8 +111,6 @@
         .nav-btn:active { transform: scale(0.95); }
         .activity-item { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid #fbbf24; }
         .activity-time { font-size: 9px; color: #6b7280; margin-top: 4px; }
-        .activity-earn { color: #10b981; }
-        .activity-spend { color: #ef4444; }
         .btn-icon { width: 40px; height: 40px; background: rgba(0,0,0,0.3); border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-icon:active { transform: scale(0.95); }
     </style>
@@ -208,31 +199,6 @@
         <button id="withdraw-home-btn" onclick="checkWithdrawEligibility()" class="w-full withdraw-btn py-5 text-lg font-bold rounded-xl">
             <i class="fas fa-wallet mr-2"></i> ငွေထုတ်ယူရန်
         </button>
-    </div>
-
-    <!-- Bonus Section -->
-    <div id="sec-bonus" class="section space-y-5">
-        <div class="gold-card p-6 text-center">
-            <div class="flex justify-center mb-4">
-                <div class="w-24 h-24 bg-gradient-to-br from-green-500/30 to-emerald-600/30 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-gem text-4xl text-green-400"></i>
-                </div>
-            </div>
-            <h3 class="text-white font-bold text-xl mb-2">🎁 Daily Bonus Video</h3>
-            <p class="text-sm text-slate-400 mb-4">Watch video ad to earn 50 PTS!</p>
-            <div class="mb-6 bg-gradient-to-r from-green-900/20 to-emerald-900/20 p-5 rounded-2xl">
-                <div class="inline-flex items-center gap-4 p-4 bg-black/40 rounded-xl">
-                    <div><i class="fas fa-video text-green-400 text-2xl"></i><p class="text-xs mt-1">Watch Ad</p></div>
-                    <div class="text-3xl text-amber-400">→</div>
-                    <div><i class="fas fa-coins text-amber-400 text-2xl"></i><p class="text-xs mt-1">+50 PTS</p></div>
-                </div>
-            </div>
-            <button id="bonus-video-btn" onclick="claimBonusVideo()" class="w-full btn-yellow py-5 text-lg font-bold rounded-xl">
-                <i class="fas fa-play-circle mr-2"></i>Watch Video for 50 PTS
-            </button>
-            <p id="bonus-video-status" class="text-[10px] text-slate-500 mt-3">တစ်နေ့တစ်ကြိမ်သာ ရယူနိုင်ပါသည်။</p>
-            <button onclick="showSec('sec-home')" class="w-full text-slate-500 mt-4 py-3">← Back to Home</button>
-        </div>
     </div>
 
     <!-- History Section -->
@@ -368,7 +334,6 @@
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>Coin Runner ဂိမ်း (1 coin = 10 PTS, တစ်နေ့ 5 ပွဲသာ)</li>
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>သူငယ်ချင်းဖိတ်ခေါ်ခြင်း (+500 PTS)</li>
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>နေ့စဉ် Bonus (+100 PTS)</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>Bonus Video (+50 PTS)</li>
                 </ul>
             </div>
             <div class="p-5 bg-amber-900/20 rounded-2xl mt-4">
@@ -419,7 +384,6 @@
 
 <nav class="fixed bottom-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm border-t border-white/10 flex justify-around py-3 z-50">
     <button onclick="showSec('sec-home')" class="nav-btn flex flex-col items-center text-amber-500 nav-active py-1"><i class="fas fa-home text-xl"></i><span class="text-[9px] mt-0.5">Home</span></button>
-    <button onclick="showSec('sec-bonus')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-gift text-xl"></i><span class="text-[9px] mt-0.5">Bonus</span></button>
     <button onclick="showSec('sec-quiz')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-brain text-xl"></i><span class="text-[9px] mt-0.5">Quiz</span></button>
     <button onclick="showSec('sec-invite')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-user-plus text-xl"></i><span class="text-[9px] mt-0.5">Invite</span></button>
     <button onclick="showSec('sec-tasks')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-tasks text-xl"></i><span class="text-[9px] mt-0.5">Tasks</span></button>
@@ -437,13 +401,43 @@
     const ADMIN_PASSWORD = "871033";
     const ADMIN_USER_IDS = ["6099430589"];
     
+    // Ad Unit IDs
+    const DAILY_BONUS_AD_ID = "399125";
+    const QUIZ_AD_ID = "399123";
+    const GAME_AD_ID = "399124";
+    const TASK_AD_ID = "399126";
+    
     // RichInfo Ad Controller
     let tgAdsController = null;
+    let isAdReady = false;
     
-    function showRewardedAd(callback) {
-        if (window.TelegramAdsController) {
+    // Initialize RichInfo Ads
+    function initRichInfoAds() {
+        try {
+            if (typeof window.TelegramAdsController !== 'undefined') {
+                tgAdsController = new window.TelegramAdsController();
+                tgAdsController.initialize({
+                    pubId: "1014061",
+                    appId: "7735",
+                });
+                isAdReady = true;
+                console.log("✅ RichInfo Ads initialized");
+            } else {
+                console.log("⚠️ Waiting for Ads...");
+                setTimeout(initRichInfoAds, 1000);
+            }
+        } catch(e) {
+            console.log("Ad init error:", e);
+            isAdReady = false;
+        }
+    }
+    
+    // Show Rewarded Ad with specific ad unit
+    function showRewardedAd(adUnitId, callback) {
+        if (tgAdsController && isAdReady) {
             try {
-                window.TelegramAdsController.showRewardedAd({
+                tgAdsController.showRewardedAd({
+                    adUnitId: adUnitId,
                     onReward: () => {
                         console.log("🎉 Ad rewarded!");
                         if (callback) callback();
@@ -454,11 +448,11 @@
                     }
                 });
             } catch(e) {
-                console.log("Ad error:", e);
+                console.log("Ad show error:", e);
                 if (callback) callback();
             }
         } else {
-            console.log("Ad not ready");
+            console.log("Ad not ready, auto-reward");
             if (callback) callback();
         }
     }
@@ -730,31 +724,12 @@
     function showSec(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        const map = { 'sec-home':0, 'sec-bonus':1, 'sec-quiz':2, 'sec-invite':3, 'sec-tasks':4, 'sec-about':5 };
+        const map = { 'sec-home':0, 'sec-quiz':1, 'sec-invite':2, 'sec-tasks':3, 'sec-about':4 };
         document.querySelectorAll('.nav-btn').forEach((b,i) => { if(map[id]===i) b.classList.add('nav-active','text-amber-500'); else b.classList.remove('nav-active','text-amber-500'); });
         if(id === 'sec-profile') { renderUserProfile(); renderUserWithdrawalHistory(); }
         if(id === 'sec-about') { renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); }
         if(id === 'sec-quiz') updateQuizCounterUI();
         if(id === 'sec-history') renderHistoryLog();
-    }
-    
-    // ========== BONUS VIDEO ==========
-    async function claimBonusVideo() {
-        if (!currentUser) return;
-        const today = new Date().toDateString();
-        const lastBonusVideo = localStorage.getItem(`bonus_video_${userId}`);
-        if (lastBonusVideo === today) { 
-            showNotification("နောက်တစ်နေ့မှ ထပ်မံရယူနိုင်ပါသည်။"); 
-            return; 
-        }
-        showRewardedAd(async () => {
-            await addPointsOptimized(50, "Bonus Video Ad");
-            localStorage.setItem(`bonus_video_${userId}`, today);
-            showNotification("✅ +50 PTS from bonus video!");
-        });
-        const btn = document.getElementById('bonus-video-btn');
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        setTimeout(() => { btn.innerHTML = '<i class="fas fa-play-circle mr-2"></i>Watch Video for 50 PTS'; btn.disabled = false; }, 5000);
     }
     
     // ========== QUIZ FUNCTIONS ==========
@@ -794,7 +769,7 @@
             quizAttemptCount++;
             if (quizAttemptCount >= QUIZ_ATTEMPTS_BEFORE_AD) {
                 quizAttemptCount = 0;
-                showRewardedAd(async () => {
+                showRewardedAd(QUIZ_AD_ID, async () => {
                     await addPointsOptimized(currentQuiz.p, "Quiz");
                     completedQuizzes.push(currentQuiz.id);
                     totalQuizzesAnswered++;
@@ -964,6 +939,8 @@
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
             
+            initRichInfoAds();
+            
             setupQuizzesListener();
             setupTasksListener();
             setupLeaderboardListener();
@@ -1072,7 +1049,7 @@
         if(gameAnimationId) cancelAnimationFrame(gameAnimationId); 
         const earned = gameCoins * COIN_TO_POINTS;
         if(earned > 0) { 
-            showRewardedAd(async () => {
+            showRewardedAd(GAME_AD_ID, async () => {
                 gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
             });
         } else {
@@ -1105,7 +1082,7 @@
     
     async function completeTask(id,reward){ 
         if(completedTasks.includes(id)){ showNotification("Already completed!"); return; } 
-        showRewardedAd(async () => {
+        showRewardedAd(TASK_AD_ID, async () => {
             completedTasks.push(id); 
             await addPointsOptimized(reward, "Task");
             await saveToFirebase(); 
@@ -1166,7 +1143,7 @@
         const today = new Date().toDateString();
         const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
         if (lastBonus === today) { alert("နောက်တစ်နေ့မှ ထပ်မံရယူနိုင်ပါသည်။"); return; }
-        showRewardedAd(async () => {
+        showRewardedAd(DAILY_BONUS_AD_ID, async () => {
             await addPointsOptimized(100, "Daily Bonus");
             localStorage.setItem(`daily_bonus_${userId}`, today);
             showNotification("✅ Daily bonus claimed! +100 PTS");
