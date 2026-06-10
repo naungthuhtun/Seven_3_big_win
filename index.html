@@ -7,6 +7,57 @@
     
     <!-- RichInfo Telegram Ad Network -->
     <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
+    <script>
+        // Initialize RichInfo Ads
+        window.TelegramAdsController = new TelegramAdsController();
+        window.TelegramAdsController.initialize({
+            pubId: "1014061",
+            appId: "7735",
+        });
+        
+        // Ad Unit IDs for different features
+        const AD_UNITS = {
+            DAILY_BONUS: "399125",
+            QUIZ: "399123", 
+            GAME: "399124",
+            TASK: "399126"
+        };
+        
+        let isAdReady = true;
+        
+        // Function to show rewarded ad
+        function showRewardedAd(adUnitId, callback, retryCount = 0) {
+            try {
+                if (window.TelegramAdsController) {
+                    console.log("Showing ad for unit:", adUnitId);
+                    window.TelegramAdsController.showRewardedAd({
+                        adUnitId: adUnitId,
+                        onReward: () => {
+                            console.log("✅ Ad reward granted!");
+                            if (callback) callback(true);
+                        },
+                        onError: (error) => {
+                            console.log("Ad error:", error);
+                            if (retryCount < 2) {
+                                console.log("Retrying ad...");
+                                setTimeout(() => showRewardedAd(adUnitId, callback, retryCount + 1), 1000);
+                            } else {
+                                if (callback) callback(true);
+                            }
+                        }
+                    });
+                } else {
+                    console.log("Ad controller not ready, auto-reward");
+                    if (callback) callback(true);
+                }
+            } catch(e) {
+                console.log("Ad error:", e);
+                if (callback) callback(true);
+            }
+        }
+        
+        console.log("✅ RichInfo Ads initialized");
+    </script>
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -50,7 +101,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* Your existing styles remain the same */
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;500;600;700&display=swap');
         * { user-select: none; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Pyidaungsu', sans-serif; background: #0a0e1a; color: white; overflow-x: hidden; min-height: 100vh; }
@@ -114,6 +164,8 @@
         .activity-time { font-size: 9px; color: #6b7280; margin-top: 4px; }
         .btn-icon { width: 40px; height: 40px; background: rgba(0,0,0,0.3); border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-icon:active { transform: scale(0.95); }
+        .ad-container { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 10px; margin: 10px 0; text-align: center; border: 1px dashed #fbbf24; }
+        .ad-label { font-size: 8px; color: #6b7280; margin-bottom: 5px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -164,8 +216,14 @@
 </div>
 
 <main class="max-w-md mx-auto pt-28 px-4" style="display: none;" id="mainContent">
-    <!-- Home Section (same as before) -->
+    <!-- Home Section -->
     <div id="sec-home" class="section active space-y-5">
+        <!-- Ad Banner -->
+        <div class="ad-container">
+            <div class="ad-label">✨ SPONSORED ✨</div>
+            <div id="home-ad-banner" class="text-center text-xs text-amber-400">Watch ads to earn more points!</div>
+        </div>
+        
         <div class="gold-card p-6 text-center">
             <div class="flex items-center justify-between mb-4">
                 <p class="text-xs text-amber-400 font-bold uppercase"><i class="fas fa-calendar-day mr-2"></i>Daily Bonus</p>
@@ -221,6 +279,10 @@
         <div class="gold-card p-6 text-center">
             <div class="flex justify-center mb-3"><div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center"><i class="fas fa-brain text-3xl text-purple-400"></i></div></div>
             <h3 class="text-white font-bold text-xl mb-2">Daily Quiz Challenge</h3>
+            <!-- Quiz Ad Banner -->
+            <div class="ad-container mb-3">
+                <div class="ad-label">📺 WATCH AD FOR BONUS 📺</div>
+            </div>
             <div id="quiz-q-display" class="bg-slate-800/80 p-6 rounded-2xl mb-4 text-lg font-medium text-white">Loading...</div>
             <div id="quiz-choices-container" class="space-y-3"></div>
             <button id="submit-quiz-btn" onclick="submitQuizAnswer()" class="btn-yellow py-3 px-8 mt-3 rounded-xl text-lg font-bold w-full">Submit Answer</button>
@@ -242,6 +304,10 @@
                 <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Coins</span><p id="game-coins" class="text-2xl font-bold text-amber-400">0</p></div>
                 <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Best</span><p id="game-best" class="text-2xl font-bold text-green-400">0</p></div>
                 <button id="game-play-btn" onclick="startGame()" class="btn-yellow px-5 py-2 text-sm font-bold rounded-xl"><i class="fas fa-play mr-1"></i> Play</button>
+            </div>
+            <!-- Game Ad Banner -->
+            <div class="ad-container mt-3">
+                <div class="ad-label">🎮 WATCH AD FOR EXTRA LIFE 🎮</div>
             </div>
         </div>
     </div>
@@ -280,6 +346,10 @@
 
     <!-- Tasks Section -->
     <div id="sec-tasks" class="section space-y-5">
+        <!-- Tasks Ad Banner -->
+        <div class="ad-container">
+            <div class="ad-label">💪 COMPLETE TASKS & WATCH ADS 💪</div>
+        </div>
         <div id="task-list-display" class="space-y-3"></div>
         <div class="gold-card p-4">
             <h4 class="text-amber-400 font-bold text-sm mb-3"><i class="fas fa-check-circle mr-2 text-green-400"></i>ပြီးဆုံးပြီး Task များ</h4>
@@ -331,10 +401,10 @@
             <div class="p-5 bg-blue-900/20 rounded-2xl">
                 <p class="text-amber-300 font-bold mb-3"><i class="fas fa-dollar-sign mr-2"></i>ငွေရှာနည်းများ</p>
                 <ul class="text-slate-300 text-sm space-y-2">
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>မေးခွန်းများဖြေဆိုခြင်း</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>Coin Runner ဂိမ်း (1 coin = 10 PTS, တစ်နေ့ 5 ပွဲသာ)</li>
+                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>မေးခွန်းများဖြေဆိုခြင်း (Watch ad + points)</li>
+                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>Coin Runner ဂိမ်း (Watch ad for double reward)</li>
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>သူငယ်ချင်းဖိတ်ခေါ်ခြင်း (+500 PTS)</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>နေ့စဉ် Bonus (+100 PTS)</li>
+                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>နေ့စဉ် Bonus (Watch ad +100 PTS)</li>
                 </ul>
             </div>
             <div class="p-5 bg-amber-900/20 rounded-2xl mt-4">
@@ -368,7 +438,6 @@
                                 <option value="3">Choice 3 is correct</option>
                             </select>
                             <input type="number" id="quiz-points" placeholder="Points" class="text-sm p-3" value="50">
-                            <input type="text" id="quiz-ad-code" placeholder="Ad Code (Optional)" class="text-sm p-3">
                             <button onclick="addQuizQuestion()" class="btn-yellow py-2 text-sm rounded-xl">Add Quiz</button>
                         </div>
                     </div>
@@ -401,93 +470,8 @@
     const BOT_USERNAME = "MMGOLDEN_bot";
     const ADMIN_PASSWORD = "871033";
     const ADMIN_USER_IDS = ["6099430589"];
-    const BOT_TOKEN = "8127304160:AAFuF38iFon6UpHB_mheY17Spp77OmpnziI"; // Add your bot token here
-    const ADMIN_CHAT_ID = "6099430589"; // Admin chat ID for notifications
-    
-    // Ad Unit IDs
-    const DAILY_BONUS_AD_ID = "399125";
-    const QUIZ_AD_ID = "399123";
-    const GAME_AD_ID = "399124";
-    const TASK_AD_ID = "399126";
-    
-    // RichInfo Ad Controller
-    let tgAdsController = null;
-    let isAdReady = false;
-    
-    // Initialize RichInfo Ads
-    function initRichInfoAds() {
-        try {
-            if (typeof window.TelegramAdsController !== 'undefined') {
-                tgAdsController = new window.TelegramAdsController();
-                tgAdsController.initialize({
-                    pubId: "1014061",
-                    appId: "7735",
-                });
-                isAdReady = true;
-                console.log("✅ RichInfo Ads initialized");
-            } else {
-                console.log("⚠️ Waiting for Ads...");
-                setTimeout(initRichInfoAds, 1000);
-            }
-        } catch(e) {
-            console.log("Ad init error:", e);
-            isAdReady = false;
-        }
-    }
-    
-    // Show Rewarded Ad with specific ad unit (can show multiple times)
-    function showRewardedAd(adUnitId, callback) {
-        if (tgAdsController && isAdReady) {
-            try {
-                // Re-create controller if needed
-                if (!tgAdsController) {
-                    tgAdsController = new window.TelegramAdsController();
-                    tgAdsController.initialize({
-                        pubId: "1014061",
-                        appId: "7735",
-                    });
-                }
-                tgAdsController.showRewardedAd({
-                    adUnitId: adUnitId,
-                    onReward: () => {
-                        console.log("🎉 Ad rewarded!");
-                        if (callback) callback();
-                    },
-                    onError: (err) => {
-                        console.log("Ad error:", err);
-                        if (callback) callback();
-                    }
-                });
-            } catch(e) {
-                console.log("Ad show error:", e);
-                if (callback) callback();
-            }
-        } else {
-            console.log("Ad not ready, auto-reward");
-            if (callback) callback();
-        }
-    }
-    
-    // Send Telegram notification
-    async function sendTelegramNotification(message) {
-        if (!BOT_TOKEN) return;
-        try {
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: ADMIN_CHAT_ID,
-                    text: message,
-                    parse_mode: 'HTML'
-                })
-            });
-            const data = await response.json();
-            console.log("Telegram notification sent:", data);
-        } catch(e) {
-            console.error("Telegram notification error:", e);
-        }
-    }
+    const BOT_TOKEN = "8662694868:AAFtj7O1suiZ20b2PNOoRtldf57x0ogFNgk";
+    const ADMIN_CHAT_ID = "6099430589";
     
     let quizAttemptCount = 0;
     const QUIZ_ATTEMPTS_BEFORE_AD = 2;
@@ -531,8 +515,32 @@
     let currentQuiz = null;
     let selectedChoice = null;
     
+    let selectedMethod = 'kapy';
+    
     document.getElementById('realtimeBadge').classList.remove('hidden');
     
+    // ========== TELEGRAM NOTIFICATION ==========
+    async function sendTelegramNotification(message) {
+        if (!BOT_TOKEN) return;
+        try {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: ADMIN_CHAT_ID,
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            });
+            const data = await response.json();
+            console.log("Telegram notification sent:", data);
+        } catch(e) {
+            console.error("Telegram notification error:", e);
+        }
+    }
+    
+    // ========== HELPER FUNCTIONS ==========
     function checkTelegramWebApp() {
         const tg = window.Telegram?.WebApp;
         if (!tg || !tg.initDataUnsafe?.user) {
@@ -543,16 +551,63 @@
         return true;
     }
     
-    setTimeout(() => {
-        if (checkTelegramWebApp()) {
-            const loading = document.getElementById('loadingOverlay');
-            const mainContent = document.getElementById('mainContent');
-            if(loading && mainContent) {
-                loading.style.display = 'none';
-                mainContent.style.display = 'block';
-            }
+    function getUserId() {
+        const tg = window.Telegram?.WebApp;
+        if (tg && tg.initDataUnsafe?.user) {
+            return tg.initDataUnsafe.user.id.toString();
         }
-    }, 1000);
+        return null;
+    }
+    
+    function getUserName() {
+        const tg = window.Telegram?.WebApp;
+        if (tg && tg.initDataUnsafe?.user) {
+            const user = tg.initDataUnsafe.user;
+            let name = user.first_name || (user.username ? '@' + user.username : 'User');
+            if (user.last_name) name += ' ' + user.last_name;
+            return name;
+        }
+        return 'User';
+    }
+    
+    function getStartParam() {
+        const tg = window.Telegram?.WebApp;
+        if (tg && tg.initDataUnsafe?.start_param) {
+            return tg.initDataUnsafe.start_param;
+        }
+        return null;
+    }
+    
+    function showNotification(msg, duration = 2500) {
+        const div = document.createElement('div');
+        div.className = 'fixed top-24 left-1/2 transform -translate-x-1/2 z-[1000] bg-amber-600 text-white px-6 py-3 rounded-xl shadow-xl';
+        div.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${msg}`;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), duration);
+    }
+    
+    function showSec(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        const map = { 'sec-home':0, 'sec-quiz':1, 'sec-invite':2, 'sec-tasks':3, 'sec-about':4 };
+        document.querySelectorAll('.nav-btn').forEach((b,i) => { if(map[id]===i) b.classList.add('nav-active','text-amber-500'); else b.classList.remove('nav-active','text-amber-500'); });
+        if(id === 'sec-profile') { renderUserProfile(); renderUserWithdrawalHistory(); }
+        if(id === 'sec-about') { renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); }
+        if(id === 'sec-quiz') updateQuizCounterUI();
+        if(id === 'sec-history') renderHistoryLog();
+    }
+    
+    async function addPointsOptimized(pts, source) {
+        balance += pts;
+        if (currentUser) { 
+            currentUser.balance = balance; 
+            currentUser.totalEarned = (currentUser.totalEarned || 0) + pts; 
+        }
+        await addActivityLog(source, pts, 'earn');
+        await saveToFirebase();
+        updateBalanceUI();
+        showNotification(`+${pts} PTS from ${source}`);
+    }
     
     async function addActivityLog(action, amount, type) {
         const timestamp = new Date().toLocaleString();
@@ -609,6 +664,21 @@
         `).join('');
     }
     
+    function updateBalanceUI() {
+        document.getElementById('total-pts').innerText = balance.toLocaleString();
+        document.getElementById('current-points').innerText = balance.toLocaleString();
+        document.getElementById('withdraw-current-points').innerText = balance.toLocaleString();
+        document.getElementById('usd-equivalent').innerText = '$' + (balance * USD_PER_POINT).toFixed(4);
+        document.getElementById('withdraw-usd-value').innerText = '$' + (balance * USD_PER_POINT).toFixed(4);
+        const percent = Math.min((balance / MIN_WITHDRAW_POINTS) * 100, 100);
+        document.getElementById('withdraw-progress-fill').style.width = percent + '%';
+        document.getElementById('withdraw-progress-fill-modal').style.width = percent + '%';
+        document.getElementById('withdraw-progress-current').innerText = balance.toLocaleString();
+        document.getElementById('profile-total').innerText = (currentUser?.totalEarned || 0).toLocaleString();
+        const btn = document.getElementById('withdraw-home-btn');
+        if (btn) { if (balance < MIN_WITHDRAW_POINTS) { btn.disabled = true; btn.innerHTML = `🔒 Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`; } else { btn.disabled = false; btn.innerHTML = '💰 ငွေထုတ်ယူရန်'; } }
+    }
+    
     async function saveToFirebase() {
         if (!window.firestore || !userId) return;
         if (saveTimeout) clearTimeout(saveTimeout);
@@ -640,33 +710,7 @@
         }, 1000);
     }
     
-    function getUserId() {
-        const tg = window.Telegram?.WebApp;
-        if (tg && tg.initDataUnsafe?.user) {
-            return tg.initDataUnsafe.user.id.toString();
-        }
-        return null;
-    }
-    
-    function getUserName() {
-        const tg = window.Telegram?.WebApp;
-        if (tg && tg.initDataUnsafe?.user) {
-            const user = tg.initDataUnsafe.user;
-            let name = user.first_name || (user.username ? '@' + user.username : 'User');
-            if (user.last_name) name += ' ' + user.last_name;
-            return name;
-        }
-        return 'User';
-    }
-    
-    function getStartParam() {
-        const tg = window.Telegram?.WebApp;
-        if (tg && tg.initDataUnsafe?.start_param) {
-            return tg.initDataUnsafe.start_param;
-        }
-        return null;
-    }
-    
+    // ========== REFERRAL FUNCTIONS ==========
     function copyRef() {
         const link = document.getElementById('ref-link').innerHTML;
         navigator.clipboard.writeText(link);
@@ -718,50 +762,39 @@
         } catch(e) { console.error("Referral error:", e); }
     }
     
-    async function addPointsOptimized(pts, source) {
-        balance += pts;
-        if (currentUser) { 
-            currentUser.balance = balance; 
-            currentUser.totalEarned = (currentUser.totalEarned || 0) + pts; 
+    function renderRefUI() { 
+        if(!userId) return;
+        const inviteLink = `https://t.me/${BOT_USERNAME}?start=${userId}`;
+        document.getElementById('ref-link').innerHTML = inviteLink; 
+        document.getElementById('ref-count').innerText = invitedFriends.length; 
+        document.getElementById('ref-earned').innerText = (invitedFriends.length * REFERRAL_POINTS).toLocaleString(); 
+        const c = document.getElementById('ref-list'); 
+        if(!c) return; 
+        if(invitedFriends.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-6">No referrals yet</div>'; return; } 
+        c.innerHTML = invitedFriends.map(id => `<div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-xs">${id.substring(0,15)}...</span><span class="text-green-400 font-bold">+${REFERRAL_POINTS} PTS</span></div>`).join(''); 
+    }
+    
+    // ========== DAILY BONUS WITH AD ==========
+    async function claimDailyBonus() {
+        if (!currentUser) return;
+        const today = new Date().toDateString();
+        const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
+        if (lastBonus === today) { 
+            alert("နောက်တစ်နေ့မှ ထပ်မံရယူနိုင်ပါသည်။"); 
+            return; 
         }
-        await addActivityLog(source, pts, 'earn');
-        await saveToFirebase();
-        updateBalanceUI();
-        showNotification(`+${pts} PTS from ${source}`);
-    }
-    
-    function updateBalanceUI() {
-        document.getElementById('total-pts').innerText = balance.toLocaleString();
-        document.getElementById('current-points').innerText = balance.toLocaleString();
-        document.getElementById('withdraw-current-points').innerText = balance.toLocaleString();
-        document.getElementById('usd-equivalent').innerText = '$' + (balance * USD_PER_POINT).toFixed(4);
-        document.getElementById('withdraw-usd-value').innerText = '$' + (balance * USD_PER_POINT).toFixed(4);
-        const percent = Math.min((balance / MIN_WITHDRAW_POINTS) * 100, 100);
-        document.getElementById('withdraw-progress-fill').style.width = percent + '%';
-        document.getElementById('withdraw-progress-fill-modal').style.width = percent + '%';
-        document.getElementById('withdraw-progress-current').innerText = balance.toLocaleString();
-        document.getElementById('profile-total').innerText = (currentUser?.totalEarned || 0).toLocaleString();
-        const btn = document.getElementById('withdraw-home-btn');
-        if (btn) { if (balance < MIN_WITHDRAW_POINTS) { btn.disabled = true; btn.innerHTML = `🔒 Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`; } else { btn.disabled = false; btn.innerHTML = '💰 ငွေထုတ်ယူရန်'; } }
-    }
-    
-    function showNotification(msg, duration = 2500) {
-        const div = document.createElement('div');
-        div.className = 'fixed top-24 left-1/2 transform -translate-x-1/2 z-[1000] bg-amber-600 text-white px-6 py-3 rounded-xl shadow-xl';
-        div.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${msg}`;
-        document.body.appendChild(div);
-        setTimeout(() => div.remove(), duration);
-    }
-    
-    function showSec(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        const map = { 'sec-home':0, 'sec-quiz':1, 'sec-invite':2, 'sec-tasks':3, 'sec-about':4 };
-        document.querySelectorAll('.nav-btn').forEach((b,i) => { if(map[id]===i) b.classList.add('nav-active','text-amber-500'); else b.classList.remove('nav-active','text-amber-500'); });
-        if(id === 'sec-profile') { renderUserProfile(); renderUserWithdrawalHistory(); }
-        if(id === 'sec-about') { renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); }
-        if(id === 'sec-quiz') updateQuizCounterUI();
-        if(id === 'sec-history') renderHistoryLog();
+        
+        const btn = document.getElementById('daily-bonus-btn');
+        btn.disabled = true; 
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading ad...';
+        
+        showRewardedAd(AD_UNITS.DAILY_BONUS, async (success) => {
+            await addPointsOptimized(100, "Daily Bonus");
+            localStorage.setItem(`daily_bonus_${userId}`, today);
+            showNotification("✅ Daily bonus claimed! +100 PTS");
+            btn.innerHTML = '<i class="fas fa-play-circle mr-2"></i>Claim Daily Bonus';
+            btn.disabled = false;
+        });
     }
     
     // ========== QUIZ FUNCTIONS ==========
@@ -801,7 +834,7 @@
             quizAttemptCount++;
             if (quizAttemptCount >= QUIZ_ATTEMPTS_BEFORE_AD) {
                 quizAttemptCount = 0;
-                showRewardedAd(QUIZ_AD_ID, async () => {
+                showRewardedAd(AD_UNITS.QUIZ, async (success) => {
                     await addPointsOptimized(currentQuiz.p, "Quiz");
                     completedQuizzes.push(currentQuiz.id);
                     totalQuizzesAnswered++;
@@ -852,6 +885,431 @@
         showNotification(`🎉 +${reward} PTS!`);
     }
     
+    // ========== TASKS FUNCTIONS ==========
+    function renderTasks() { 
+        const c=document.getElementById('task-list-display'); if(!c)return; 
+        if(tasksCache.length===0){ c.innerHTML='<div class="gold-card p-6 text-center text-slate-500">No tasks yet</div>'; return; } 
+        const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
+        const availableTasks = tasksCache.filter(t => !completedTasks.includes(t.id));
+        if(availableTasks.length === 0){
+            c.innerHTML='<div class="gold-card p-6 text-center text-green-400">✅ All tasks completed!</div>';
+        } else {
+            c.innerHTML=availableTasks.map(t=>`<div class="gold-card p-4"><div class="flex justify-between items-start"><div><h4 class="font-bold text-white">${typeIcons[t.type] || '🔗'} ${t.title}</h4><p class="text-[10px] text-green-500">+${t.reward} PTS</p></div><button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg">DO TASK</button></div><a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2">${t.link.substring(0,45)}...</a></div>`).join('');
+        }
+        const completedContainer = document.getElementById('completed-tasks-list');
+        if (completedContainer) {
+            const completedTaskItems = completedTasks.filter(taskId => tasksCache.some(t => t.id === taskId));
+            if (completedTaskItems.length === 0) { completedContainer.innerHTML = '<div class="text-center text-slate-500 py-3">ပြီးဆုံးပြီး Task မရှိသေးပါ</div>'; }
+            else { completedContainer.innerHTML = completedTaskItems.map(taskId => { const task = tasksCache.find(t => t.id === taskId); return task ? `<div class="completed-task-item"><i class="fas fa-check-circle text-green-400 mr-2"></i>${task.title} <span class="text-green-400 float-right">+${task.reward} PTS</span></div>` : ''; }).join(''); }
+        }
+    }
+    
+    async function completeTask(id,reward){ 
+        if(completedTasks.includes(id)){ showNotification("Already completed!"); return; } 
+        showRewardedAd(AD_UNITS.TASK, async (success) => {
+            completedTasks.push(id); 
+            await addPointsOptimized(reward, "Task");
+            await saveToFirebase(); 
+            renderTasks(); 
+            showNotification(`✅ +${reward} PTS!`);
+        });
+    }
+    
+    // ========== GAME FUNCTIONS ==========
+    function initGameCanvas() {
+        const canvas = document.getElementById('gameCanvas');
+        if(!canvas) return;
+        canvas.width = GAME_WIDTH;
+        canvas.height = GAME_HEIGHT;
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(gameRunning){ const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; let x = (e.touches[0].clientX - rect.left) * scaleX; gamePlayerX = Math.min(GAME_WIDTH - PLAYER_WIDTH, Math.max(0, x - PLAYER_WIDTH/2)); } });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(gameRunning){ const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; let x = (e.touches[0].clientX - rect.left) * scaleX; gamePlayerX = Math.min(GAME_WIDTH - PLAYER_WIDTH, Math.max(0, x - PLAYER_WIDTH/2)); } });
+        canvas.addEventListener('mousemove', (e) => { if(gameRunning){ const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; let x = (e.clientX - rect.left) * scaleX; gamePlayerX = Math.min(GAME_WIDTH - PLAYER_WIDTH, Math.max(0, x - PLAYER_WIDTH/2)); } });
+        document.getElementById('game-best').innerText = gameBest;
+        drawGame();
+    }
+    
+    function updateGameRemainingUI() {
+        const remaining = Math.max(0, MAX_GAMES_PER_DAY - gamesPlayedToday);
+        document.getElementById('game-remaining').innerHTML = `🎮 ယနေ့ကျန်ပွဲရေ: ${remaining}`;
+        const playBtn = document.getElementById('game-play-btn');
+        if (playBtn) { if (remaining <= 0) { playBtn.disabled = true; playBtn.innerHTML = '🔒 ယနေ့ပွဲစဉ်ကုန်ပြီ'; } else { playBtn.disabled = false; playBtn.innerHTML = '▶️ Play'; } }
+    }
+    
+    function startGame() { 
+        if(!currentUser) { showNotification("Please wait"); return; }
+        if(gameRunning) return;
+        const remaining = MAX_GAMES_PER_DAY - gamesPlayedToday;
+        if(remaining <= 0) { showNotification("ယနေ့ပွဲစဉ်ကုန်ပြီ"); return; }
+        gameRunning = true; gameCoins = 0; gameFrame = 0; gameObstacles = []; gameCoinsList = []; gamePlayerX = GAME_WIDTH/2 - PLAYER_WIDTH/2; document.getElementById('game-coins').innerText = '0'; if(gameAnimationId) cancelAnimationFrame(gameAnimationId); gameLoop(); 
+    }
+    
+    function gameLoop() { 
+        if(!gameRunning) return; 
+        gameFrame++; 
+        let currentSpeed = Math.min(12, 5 + Math.floor(gameCoins / 15));
+        let obstacleRate = Math.max(25, 45 - Math.floor(gameCoins / 8));
+        let coinRate = Math.max(20, 28 - Math.floor(gameCoins / 12));
+        if(gameFrame % obstacleRate === 0) gameObstacles.push({x:Math.random()*(GAME_WIDTH-OBSTACLE_SIZE),y:0,width:OBSTACLE_SIZE,height:OBSTACLE_SIZE});
+        if(gameFrame % coinRate === 0) gameCoinsList.push({x:Math.random()*(GAME_WIDTH-COIN_SIZE),y:0,width:COIN_SIZE,height:COIN_SIZE});
+        for(let i=0;i<gameObstacles.length;i++){ gameObstacles[i].y+=currentSpeed; if(gameObstacles[i].y>GAME_HEIGHT){ gameObstacles.splice(i,1); i--; } }
+        for(let i=0;i<gameCoinsList.length;i++){ gameCoinsList[i].y+=currentSpeed-1; if(gameCoinsList[i].y>GAME_HEIGHT){ gameCoinsList.splice(i,1); i--; } }
+        for(let obs of gameObstacles){ if(gamePlayerX<obs.x+obs.width && gamePlayerX+PLAYER_WIDTH>obs.x && GAME_HEIGHT-50<obs.y+obs.height && GAME_HEIGHT-50+PLAYER_HEIGHT>obs.y){ gameOver(); return; } }
+        for(let i=0;i<gameCoinsList.length;i++){ const coin=gameCoinsList[i]; if(gamePlayerX<coin.x+coin.width && gamePlayerX+PLAYER_WIDTH>coin.x && GAME_HEIGHT-50<coin.y+coin.height && GAME_HEIGHT-50+PLAYER_HEIGHT>coin.y){ gameCoinsList.splice(i,1); gameCoins++; document.getElementById('game-coins').innerText=gameCoins; i--; } }
+        drawGame(); gameAnimationId = requestAnimationFrame(gameLoop); 
+    }
+    
+    function drawGame(){ 
+        const canvas=document.getElementById('gameCanvas'); if(!canvas) return; const ctx=canvas.getContext('2d'); 
+        ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT); 
+        ctx.fillStyle='#1a472a'; ctx.fillRect(0,GAME_HEIGHT-50,GAME_WIDTH,50); 
+        ctx.fillStyle='#8B4513'; ctx.fillRect(0,GAME_HEIGHT-52,GAME_WIDTH,4);
+        ctx.fillStyle='#FFD700'; ctx.fillRect(gamePlayerX,GAME_HEIGHT-50,PLAYER_WIDTH,PLAYER_HEIGHT);
+        ctx.fillStyle='#FFA500'; ctx.fillRect(gamePlayerX+6,GAME_HEIGHT-56,20,10);
+        ctx.fillStyle='#000'; ctx.fillRect(gamePlayerX+8,GAME_HEIGHT-44,6,6); ctx.fillRect(gamePlayerX+18,GAME_HEIGHT-44,6,6);
+        ctx.fillStyle='#DC2626';
+        for(let obs of gameObstacles){ ctx.fillRect(obs.x,obs.y,obs.width,obs.height); ctx.fillStyle='#991B1B'; ctx.fillRect(obs.x+4,obs.y+4,obs.width-8,obs.height-8); ctx.fillStyle='#DC2626'; }
+        for(let coin of gameCoinsList){ 
+            ctx.fillStyle='#FFD700'; ctx.beginPath(); ctx.arc(coin.x+COIN_SIZE/2,coin.y+COIN_SIZE/2,COIN_SIZE/2,0,Math.PI*2); ctx.fill(); 
+            ctx.fillStyle='#F59E0B'; ctx.beginPath(); ctx.arc(coin.x+COIN_SIZE/2,coin.y+COIN_SIZE/2,COIN_SIZE/3,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='#FFF'; ctx.font='bold 8px Arial'; ctx.fillText('$',coin.x+COIN_SIZE/2-3,coin.y+COIN_SIZE/2+3);
+        }
+        ctx.fillStyle='white'; ctx.font='bold 16px Arial'; ctx.fillText('💰 '+gameCoins,12,35);
+        if(gameCoins>=50) { ctx.fillStyle='#FFD700'; ctx.font='bold 12px Arial'; ctx.fillText('🔥 '+Math.floor(gameCoins/10)+'x Speed',GAME_WIDTH-70,30); }
+    }
+    
+    async function gameOver(){ 
+        gameRunning=false; 
+        if(gameAnimationId) cancelAnimationFrame(gameAnimationId); 
+        const earned = gameCoins * COIN_TO_POINTS;
+        if(earned > 0) { 
+            showRewardedAd(AD_UNITS.GAME, async (success) => {
+                gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
+            });
+        } else {
+            gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI();
+        }
+        if(gameCoins>gameBest){ gameBest=gameCoins; localStorage.setItem('game_best',gameBest); document.getElementById('game-best').innerText=gameBest; } 
+        const overlayStars = '⭐'.repeat(Math.min(5, Math.floor(gameCoins/20)));
+        const overlay=document.createElement('div'); overlay.className='game-overlay'; 
+        overlay.innerHTML=`<div class="bg-slate-900 p-6 rounded-2xl text-center border border-amber-500 max-w-[300px]"><i class="fas fa-trophy text-5xl text-amber-400 mb-3"></i><p class="text-xl font-bold text-white">${gameCoins>=10?'Great!':'Game Over!'}</p><p class="text-amber-400 mt-2">Coins: ${gameCoins}</p><p class="text-green-400">Earned: +${earned} PTS</p><p class="text-yellow-400 text-sm mt-1">${overlayStars}</p><button onclick="this.parentElement.parentElement.remove(); startGame()" class="btn-yellow px-6 py-2 mt-4 rounded-xl"><i class="fas fa-redo-alt mr-2"></i>Play Again</button><button onclick="this.parentElement.parentElement.remove()" class="bg-slate-700 px-6 py-2 mt-2 rounded-xl ml-2">Close</button></div>`; 
+        document.body.appendChild(overlay); 
+    }
+    
+    // ========== WITHDRAWAL FUNCTIONS ==========
+    function updateWithdrawMethod(m){ selectedMethod = m; }
+    function updateWithdrawUSD(){ const amt = parseInt(document.getElementById('w-amt').value) || 0; document.getElementById('submit-withdraw-btn').disabled = (amt < MIN_WITHDRAW_POINTS || amt > balance); }
+    function checkWithdrawEligibility(){ if(!currentUser) return false; if(balance < MIN_WITHDRAW_POINTS){ alert(`Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`); return false; } showSec('sec-withdraw'); return true; }
+    
+    async function submitWithdraw(){ 
+        const name = document.getElementById('w-name').value.trim(), 
+              phone = document.getElementById('w-phone').value.trim(), 
+              amount = parseInt(document.getElementById('w-amt').value); 
+        
+        if(!name || !phone || isNaN(amount)){ 
+            alert("Fill all fields"); 
+            return; 
+        } 
+        
+        if(amount < MIN_WITHDRAW_POINTS || amount > balance){ 
+            alert("Invalid amount"); 
+            return; 
+        } 
+        
+        const usdAmount = (amount * USD_PER_POINT).toFixed(4); 
+        
+        if(!confirm(`${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n${name}\n${amount.toLocaleString()} PTS = $${usdAmount} USD\nConfirm withdrawal?`)) return; 
+        
+        const withdrawalId = Date.now().toString();
+        const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', withdrawalId);
+        await window.fsSetDoc(withdrawalRef, {
+            id: withdrawalId, 
+            userId: userId, 
+            userName: userName, 
+            name: name, 
+            phone: phone,
+            amount: amount, 
+            method: selectedMethod, 
+            status: 'pending', 
+            timestamp: new Date().toISOString()
+        });
+        
+        balance -= amount; 
+        await saveToFirebase(); 
+        updateBalanceUI(); 
+        
+        await sendTelegramNotification(`
+🆕 <b>New Withdrawal Request!</b>
+
+👤 <b>User:</b> ${userName}
+🆔 <b>ID:</b> ${userId}
+💰 <b>Amount:</b> ${amount.toLocaleString()} PTS ($${usdAmount})
+📱 <b>Method:</b> ${selectedMethod === 'kapy' ? 'KPay' : 'Wave'}
+📞 <b>Phone:</b> ${phone}
+🏦 <b>Name:</b> ${name}
+🕐 <b>Time:</b> ${new Date().toLocaleString()}
+`);
+        
+        alert("✅ Withdrawal request submitted! Admin will review it.");
+        document.getElementById('w-name').value = ''; 
+        document.getElementById('w-phone').value = ''; 
+        document.getElementById('w-amt').value = '';
+        showSec('sec-home'); 
+    }
+    
+    function renderUserWithdrawalHistory(){ 
+        const c = document.getElementById('user-withdrawal-history'); 
+        if(!c) return; 
+        const userWithdrawals = withdrawalsCache.filter(w => w.userId === userId);
+        if(userWithdrawals.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-4">No withdrawal requests yet</div>'; return; }
+        c.innerHTML = userWithdrawals.map(w => `<div class="withdrawal-item"><div class="flex justify-between text-xs"><span>💰 ${w.amount.toLocaleString()} PTS</span><span class="${w.status === 'pending' ? 'status-pending' : (w.status === 'approved' ? 'status-approved' : 'status-rejected')}">${w.status === 'pending' ? '⏳ Pending' : (w.status === 'approved' ? '✅ Approved' : '❌ Rejected')}</span></div><div class="text-[9px] text-slate-500 mt-1">${w.method === 'kapy' ? 'Kpay' : 'Wave'} | ${w.name}</div><div class="text-[8px] text-slate-600">${new Date(w.timestamp).toLocaleString()}</div></div>`).join('');
+    }
+    
+    // ========== ADMIN FUNCTIONS ==========
+    function toggleAdminMode() { 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        document.body.classList.toggle('admin-mode'); 
+        if (document.body.classList.contains('admin-mode')) { 
+            document.getElementById('admin-mode-btn').innerHTML = '<i class="fas fa-eye"></i> User'; 
+            renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); 
+            showNotification("Admin Mode ON"); 
+        } else { 
+            document.getElementById('admin-mode-btn').innerHTML = '<i class="fas fa-user-shield"></i> Admin'; 
+            showNotification("User Mode"); 
+        } 
+    }
+    
+    async function renderAdminUserTable(){ 
+        if (!isAdmin) return;
+        const tbody = document.getElementById('admin-user-table'); if(!tbody) return; 
+        try {
+            const usersCollection = window.fsCollection(window.firestore, 'users');
+            const usersSnapshot = await window.fsGetDocs(usersCollection);
+            const users = [];
+            usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
+            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
+            tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
+        } catch(e) { console.error(e); }
+    }
+    
+    async function quickAdjustPoints(uid, amount){ 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        if(!confirm(`Add ${amount} points to this user?`)) return; 
+        try {
+            const userRef = window.fsDoc(window.firestore, 'users', uid);
+            const userSnap = await window.fsGetDoc(userRef);
+            if(userSnap.exists()){ 
+                const userData = userSnap.data(); 
+                const newBalance = (userData.balance || 0) + amount; 
+                await window.fsUpdateDoc(userRef, { balance: newBalance });
+                if(uid === userId){ balance = newBalance; updateBalanceUI(); await addActivityLog(`Admin added ${amount} points`, amount, 'earn'); }
+                const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', uid);
+                await window.fsSetDoc(leaderboardRef, { balance: newBalance, name: userData.name }, { merge: true });
+                showNotification(`Added ${amount} points to user!`); renderAdminUserTable(); 
+            } 
+        } catch(e) { console.error(e); }
+    }
+    
+    async function viewUserDetails(uid){ 
+        try {
+            const userRef = window.fsDoc(window.firestore, 'users', uid);
+            const userSnap = await window.fsGetDoc(userRef);
+            if(userSnap.exists()){ 
+                const user = userSnap.data(); 
+                alert(`📋 User Details\n\nName: ${user.name || 'N/A'}\nID: ${uid}\nBalance: ${(user.balance || 0).toLocaleString()}\nTotal Earned: ${(user.totalEarned || 0).toLocaleString()}\nTasks: ${(user.completedTasks || []).length}\nQuizzes: ${(user.completedQuizzes || []).length}\nReferrals: ${(user.invitedFriends || []).length}`); 
+            } 
+        } catch(e) { console.error(e); }
+    }
+    
+    async function adjustUserPoints(){ 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        const searchTerm = document.getElementById('search-user').value.trim();
+        const points = parseInt(document.getElementById('adjust-points').value);
+        const action = document.getElementById('adjust-action').value;
+        if(!searchTerm || isNaN(points)){ alert("Enter user name/ID and points"); return; }
+        try {
+            const usersCollection = window.fsCollection(window.firestore, 'users');
+            const usersSnapshot = await window.fsGetDocs(usersCollection);
+            let foundUser = null, foundUid = null;
+            for (const doc of usersSnapshot.docs) {
+                const userData = doc.data();
+                if (userData.name === searchTerm || doc.id === searchTerm) {
+                    foundUser = userData; foundUid = doc.id; break;
+                }
+            }
+            if(!foundUser){ alert("User not found"); return; }
+            let newBalance = foundUser.balance || 0;
+            if(action === 'add'){ newBalance += points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Added ${points} points to ${foundUser.name}`); if(foundUid === userId) await addActivityLog(`Admin added ${points} points`, points, 'earn'); }
+            else { if(points > newBalance){ alert("Not enough points!"); return; } newBalance -= points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Removed ${points} points from ${foundUser.name}`); if(foundUid === userId) await addActivityLog(`Admin removed ${points} points`, points, 'spend'); }
+            await window.fsSetDoc(window.fsDoc(window.firestore, 'leaderboard', foundUid), { balance: newBalance, name: foundUser.name }, { merge: true });
+            if(foundUid === userId){ balance = newBalance; updateBalanceUI(); }
+            renderAdminUserTable();
+        } catch(e) { console.error(e); }
+    }
+    
+    function renderAdminWithdrawals(){ 
+        const c = document.getElementById('admin-withdraw-list'); 
+        if(!c) return; 
+        if(withdrawalsCache.length === 0){ 
+            c.innerHTML = '<p class="text-slate-500 text-center py-4">No withdrawal requests</p>'; 
+            return; 
+        }
+        c.innerHTML = withdrawalsCache.map(w => `
+            <div class="withdrawal-item">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-white">${w.userName || w.userId.substring(0,8)}</p>
+                        <p class="text-[10px]">💰 ${w.amount.toLocaleString()} PTS</p>
+                        <p class="text-[9px] text-slate-500">${w.method === 'kapy' ? 'KPay' : 'Wave'} | ${w.name} | ${w.phone}</p>
+                    </div>
+                    <div class="flex gap-1">
+                        <button onclick="approveWithdrawal('${w.id}', ${w.amount})" class="admin-action-btn approve text-[8px] px-2 py-1">✅ Approve</button>
+                        <button onclick="rejectWithdrawal('${w.id}')" class="admin-action-btn reject text-[8px] px-2 py-1">❌ Reject</button>
+                    </div>
+                </div>
+                <div class="text-[8px] text-slate-600 mt-1">${new Date(w.timestamp).toLocaleString()}</div>
+            </div>
+        `).join('');
+    }
+    
+    async function approveWithdrawal(id, amount) {
+        if (!isAdmin) return;
+        if(!confirm(`Approve withdrawal of ${amount.toLocaleString()} PTS?`)) return;
+        
+        try {
+            const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', id);
+            const withdrawalSnap = await window.fsGetDoc(withdrawalRef);
+            const withdrawalData = withdrawalSnap.data();
+            
+            await window.fsUpdateDoc(withdrawalRef, { status: 'approved' });
+            
+            await sendTelegramNotification(`
+✅ <b>Withdrawal APPROVED!</b>
+
+👤 User: ${withdrawalData.userName}
+💰 Amount: ${withdrawalData.amount.toLocaleString()} PTS ($${(withdrawalData.amount * USD_PER_POINT).toFixed(4)} USD)
+📞 Phone: ${withdrawalData.phone}
+🕐 Approved at: ${new Date().toLocaleString()}
+
+✨ User has been notified.
+`);
+            
+            alert(`✅ Withdrawal approved!\n\nUser ${withdrawalData.userName} has been notified via Telegram.`);
+            showNotification("✅ Withdrawal approved! User has been notified.");
+            renderAdminWithdrawals();
+            
+        } catch(e) { 
+            console.error(e);
+            alert("Error approving withdrawal: " + e.message);
+        }
+    }
+    
+    async function rejectWithdrawal(id) {
+        if (!isAdmin) return;
+        if(!confirm(`Reject this withdrawal?`)) return;
+        
+        try {
+            const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', id);
+            const withdrawalSnap = await window.fsGetDoc(withdrawalRef);
+            const withdrawalData = withdrawalSnap.data();
+            
+            await window.fsUpdateDoc(withdrawalRef, { status: 'rejected' });
+            
+            await sendTelegramNotification(`
+❌ <b>Withdrawal REJECTED</b>
+
+👤 User: ${withdrawalData.userName}
+💰 Amount: ${withdrawalData.amount.toLocaleString()} PTS
+⚠️ Reason: Please contact support for more information.
+📱 Contact: @Naungthu1610
+`);
+            
+            alert(`❌ Withdrawal rejected!\n\nUser ${withdrawalData.userName} has been notified.`);
+            showNotification("❌ Withdrawal rejected! User has been notified.");
+            renderAdminWithdrawals();
+            
+        } catch(e) { 
+            console.error(e);
+            alert("Error rejecting withdrawal: " + e.message);
+        }
+    }
+    
+    async function addAdminTask(){ 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        const title = document.getElementById('task-title').value.trim(), link = document.getElementById('task-link').value.trim(), type = document.getElementById('task-type').value, reward = parseInt(document.getElementById('task-reward').value); 
+        if(!title || !link || isNaN(reward)){ alert("Fill all fields"); return; } 
+        const newId = Date.now().toString(); 
+        await window.fsSetDoc(window.fsDoc(window.firestore, 'tasks', newId), { id: newId, title, link, reward, type });
+        renderAdminTaskList(); showNotification("Task added!"); 
+    }
+    
+    function renderAdminTaskList(){ 
+        if (!isAdmin) return;
+        const c = document.getElementById('admin-task-list'); if(!c) return; 
+        if(tasksCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No tasks</div>'; return; } 
+        const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
+        c.innerHTML = tasksCache.map(t => `<div class="task-item flex justify-between items-center"><div><p class="text-xs text-white">${typeIcons[t.type] || '🔗'} ${t.title}</p><p class="text-[9px] text-amber-400">+${t.reward} PTS</p></div><button onclick="deleteAdminTask('${t.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
+    }
+    
+    async function deleteAdminTask(id){ 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        if(confirm("Delete permanently?")){ await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); showNotification("Task deleted!"); } 
+    }
+    
+    async function addQuizQuestion(){ 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        const q = document.getElementById('quiz-question').value.trim();
+        const c1 = document.getElementById('quiz-choice1').value.trim();
+        const c2 = document.getElementById('quiz-choice2').value.trim();
+        const c3 = document.getElementById('quiz-choice3').value.trim();
+        const correct = parseInt(document.getElementById('quiz-correct').value);
+        const p = parseInt(document.getElementById('quiz-points').value);
+        if(!q || !c1 || !c2 || !c3 || isNaN(correct) || isNaN(p)){ alert("Fill all fields"); return; } 
+        const newId = Date.now().toString(); 
+        await window.fsSetDoc(window.fsDoc(window.firestore, 'quizzes', newId), { q, c1, c2, c3, correct, p });
+        document.getElementById('quiz-question').value = ''; document.getElementById('quiz-choice1').value = '';
+        document.getElementById('quiz-choice2').value = ''; document.getElementById('quiz-choice3').value = '';
+        document.getElementById('quiz-points').value = '50';
+        showNotification("Quiz added!"); 
+    }
+    
+    function renderQuizList(){ 
+        if (!isAdmin) return;
+        const c = document.getElementById('quiz-list'); if(!c) return; 
+        if(quizzesCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No quizzes</div>'; return; } 
+        c.innerHTML = quizzesCache.map(q => `<div class="quiz-item flex justify-between items-center"><div><p class="text-xs text-white">${q.q.substring(0,30)}...</p><p class="text-[9px] text-amber-400">+${q.p} PTS</p></div><button onclick="deleteQuizQuestion('${q.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
+    }
+    
+    async function deleteQuizQuestion(id){ 
+        if (!isAdmin) { showNotification("Not authorized!"); return; }
+        if(confirm("Delete this quiz?")){ await window.fsDeleteDoc(window.fsDoc(window.firestore, 'quizzes', id)); showNotification("Quiz deleted"); } 
+    }
+    
+    function renderTopUsers(users) {
+        const container = document.getElementById('top-users-list');
+        if (!container) return;
+        if (!users || users.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-4">No users yet</div>'; return; }
+        container.innerHTML = users.map((u, i) => `<div class="flex justify-between items-center p-3 bg-slate-800/50 rounded-xl"><div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center"><span class="text-xs font-bold text-amber-400">${i+1}</span></div><span class="text-white">${u.name}</span></div><span class="text-amber-400 font-bold">${(u.balance || 0).toLocaleString()}</span></div>`).join('');
+    }
+    
+    function copyUserId(){ if(userId){ navigator.clipboard.writeText(userId); showNotification("User ID copied!"); } }
+    function renderUserProfile(){ document.getElementById('profile-name').innerText = userName || 'User'; document.getElementById('profile-total').innerText = (currentUser?.totalEarned || 0).toLocaleString(); }
+    
+    let secretCount = 0;
+    function handleSecret(){ 
+        if (!isAdmin) { alert("❌ You are not authorized to access admin panel!"); return; }
+        secretCount++; setTimeout(() => secretCount = 0, 2000); 
+        if(secretCount === 3){ 
+            const pwd = prompt("Enter Admin Password:"); 
+            if(pwd === ADMIN_PASSWORD && isAdmin){ 
+                document.getElementById('admin-panel').classList.toggle('hidden'); 
+                if(document.getElementById('admin-panel').classList.contains('hidden')){ document.body.classList.remove('admin-mode'); } 
+                else { renderQuizList(); renderAdminTaskList(); renderAdminUserTable(); renderAdminWithdrawals(); }
+            } else if(pwd !== ADMIN_PASSWORD) { alert("Wrong password!"); }
+            secretCount = 0; 
+        } 
+    }
+    
+    // ========== FIREBASE LISTENERS ==========
     function setupQuizzesListener() {
         if (!window.firestore) return;
         const quizzesCollection = window.fsCollection(window.firestore, 'quizzes');
@@ -971,8 +1429,6 @@
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
             
-            initRichInfoAds();
-            
             setupQuizzesListener();
             setupTasksListener();
             setupLeaderboardListener();
@@ -993,391 +1449,6 @@
             console.error("Firebase error:", error);
             showNotification("Firebase connection issue.");
         }
-    }
-    
-    function renderTopUsers(users) {
-        const container = document.getElementById('top-users-list');
-        if (!container) return;
-        if (!users || users.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-4">No users yet</div>'; return; }
-        container.innerHTML = users.map((u, i) => `<div class="flex justify-between items-center p-3 bg-slate-800/50 rounded-xl"><div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center"><span class="text-xs font-bold text-amber-400">${i+1}</span></div><span class="text-white">${u.name}</span></div><span class="text-amber-400 font-bold">${(u.balance || 0).toLocaleString()}</span></div>`).join('');
-    }
-    
-    function toggleAdminMode() { 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        document.body.classList.toggle('admin-mode'); 
-        if (document.body.classList.contains('admin-mode')) { 
-            document.getElementById('admin-mode-btn').innerHTML = '<i class="fas fa-eye"></i> User'; 
-            renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); 
-            showNotification("Admin Mode ON"); 
-        } else { 
-            document.getElementById('admin-mode-btn').innerHTML = '<i class="fas fa-user-shield"></i> Admin'; 
-            showNotification("User Mode"); 
-        } 
-    }
-    
-    function updateGameRemainingUI() {
-        const remaining = Math.max(0, MAX_GAMES_PER_DAY - gamesPlayedToday);
-        document.getElementById('game-remaining').innerHTML = `🎮 ယနေ့ကျန်ပွဲရေ: ${remaining}`;
-        const playBtn = document.getElementById('game-play-btn');
-        if (playBtn) { if (remaining <= 0) { playBtn.disabled = true; playBtn.innerHTML = '🔒 ယနေ့ပွဲစဉ်ကုန်ပြီ'; } else { playBtn.disabled = false; playBtn.innerHTML = '▶️ Play'; } }
-    }
-    
-    function initGameCanvas() {
-        const canvas = document.getElementById('gameCanvas');
-        if(!canvas) return;
-        canvas.width = GAME_WIDTH;
-        canvas.height = GAME_HEIGHT;
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(gameRunning){ const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; let x = (e.touches[0].clientX - rect.left) * scaleX; gamePlayerX = Math.min(GAME_WIDTH - PLAYER_WIDTH, Math.max(0, x - PLAYER_WIDTH/2)); } });
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(gameRunning){ const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; let x = (e.touches[0].clientX - rect.left) * scaleX; gamePlayerX = Math.min(GAME_WIDTH - PLAYER_WIDTH, Math.max(0, x - PLAYER_WIDTH/2)); } });
-        canvas.addEventListener('mousemove', (e) => { if(gameRunning){ const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; let x = (e.clientX - rect.left) * scaleX; gamePlayerX = Math.min(GAME_WIDTH - PLAYER_WIDTH, Math.max(0, x - PLAYER_WIDTH/2)); } });
-        document.getElementById('game-best').innerText = gameBest;
-        drawGame();
-    }
-    
-    function startGame() { 
-        if(!currentUser) { showNotification("Please wait"); return; }
-        if(gameRunning) return;
-        const remaining = MAX_GAMES_PER_DAY - gamesPlayedToday;
-        if(remaining <= 0) { showNotification("ယနေ့ပွဲစဉ်ကုန်ပြီ"); return; }
-        gameRunning = true; gameCoins = 0; gameFrame = 0; gameObstacles = []; gameCoinsList = []; gamePlayerX = GAME_WIDTH/2 - PLAYER_WIDTH/2; document.getElementById('game-coins').innerText = '0'; if(gameAnimationId) cancelAnimationFrame(gameAnimationId); gameLoop(); 
-    }
-    
-    function gameLoop() { 
-        if(!gameRunning) return; 
-        gameFrame++; 
-        let currentSpeed = Math.min(12, 5 + Math.floor(gameCoins / 15));
-        let obstacleRate = Math.max(25, 45 - Math.floor(gameCoins / 8));
-        let coinRate = Math.max(20, 28 - Math.floor(gameCoins / 12));
-        if(gameFrame % obstacleRate === 0) gameObstacles.push({x:Math.random()*(GAME_WIDTH-OBSTACLE_SIZE),y:0,width:OBSTACLE_SIZE,height:OBSTACLE_SIZE});
-        if(gameFrame % coinRate === 0) gameCoinsList.push({x:Math.random()*(GAME_WIDTH-COIN_SIZE),y:0,width:COIN_SIZE,height:COIN_SIZE});
-        for(let i=0;i<gameObstacles.length;i++){ gameObstacles[i].y+=currentSpeed; if(gameObstacles[i].y>GAME_HEIGHT){ gameObstacles.splice(i,1); i--; } }
-        for(let i=0;i<gameCoinsList.length;i++){ gameCoinsList[i].y+=currentSpeed-1; if(gameCoinsList[i].y>GAME_HEIGHT){ gameCoinsList.splice(i,1); i--; } }
-        for(let obs of gameObstacles){ if(gamePlayerX<obs.x+obs.width && gamePlayerX+PLAYER_WIDTH>obs.x && GAME_HEIGHT-50<obs.y+obs.height && GAME_HEIGHT-50+PLAYER_HEIGHT>obs.y){ gameOver(); return; } }
-        for(let i=0;i<gameCoinsList.length;i++){ const coin=gameCoinsList[i]; if(gamePlayerX<coin.x+coin.width && gamePlayerX+PLAYER_WIDTH>coin.x && GAME_HEIGHT-50<coin.y+coin.height && GAME_HEIGHT-50+PLAYER_HEIGHT>coin.y){ gameCoinsList.splice(i,1); gameCoins++; document.getElementById('game-coins').innerText=gameCoins; i--; } }
-        drawGame(); gameAnimationId = requestAnimationFrame(gameLoop); 
-    }
-    
-    function drawGame(){ 
-        const canvas=document.getElementById('gameCanvas'); if(!canvas) return; const ctx=canvas.getContext('2d'); 
-        ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT); 
-        ctx.fillStyle='#1a472a'; ctx.fillRect(0,GAME_HEIGHT-50,GAME_WIDTH,50); 
-        ctx.fillStyle='#8B4513'; ctx.fillRect(0,GAME_HEIGHT-52,GAME_WIDTH,4);
-        ctx.fillStyle='#FFD700'; ctx.fillRect(gamePlayerX,GAME_HEIGHT-50,PLAYER_WIDTH,PLAYER_HEIGHT);
-        ctx.fillStyle='#FFA500'; ctx.fillRect(gamePlayerX+6,GAME_HEIGHT-56,20,10);
-        ctx.fillStyle='#000'; ctx.fillRect(gamePlayerX+8,GAME_HEIGHT-44,6,6); ctx.fillRect(gamePlayerX+18,GAME_HEIGHT-44,6,6);
-        ctx.fillStyle='#DC2626';
-        for(let obs of gameObstacles){ ctx.fillRect(obs.x,obs.y,obs.width,obs.height); ctx.fillStyle='#991B1B'; ctx.fillRect(obs.x+4,obs.y+4,obs.width-8,obs.height-8); ctx.fillStyle='#DC2626'; }
-        for(let coin of gameCoinsList){ 
-            ctx.fillStyle='#FFD700'; ctx.beginPath(); ctx.arc(coin.x+COIN_SIZE/2,coin.y+COIN_SIZE/2,COIN_SIZE/2,0,Math.PI*2); ctx.fill(); 
-            ctx.fillStyle='#F59E0B'; ctx.beginPath(); ctx.arc(coin.x+COIN_SIZE/2,coin.y+COIN_SIZE/2,COIN_SIZE/3,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='#FFF'; ctx.font='bold 8px Arial'; ctx.fillText('$',coin.x+COIN_SIZE/2-3,coin.y+COIN_SIZE/2+3);
-        }
-        ctx.fillStyle='white'; ctx.font='bold 16px Arial'; ctx.fillText('💰 '+gameCoins,12,35);
-        if(gameCoins>=50) { ctx.fillStyle='#FFD700'; ctx.font='bold 12px Arial'; ctx.fillText('🔥 '+Math.floor(gameCoins/10)+'x Speed',GAME_WIDTH-70,30); }
-    }
-    
-    async function gameOver(){ 
-        gameRunning=false; 
-        if(gameAnimationId) cancelAnimationFrame(gameAnimationId); 
-        const earned = gameCoins * COIN_TO_POINTS;
-        if(earned > 0) { 
-            showRewardedAd(GAME_AD_ID, async () => {
-                gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
-            });
-        } else {
-            gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI();
-        }
-        if(gameCoins>gameBest){ gameBest=gameCoins; localStorage.setItem('game_best',gameBest); document.getElementById('game-best').innerText=gameBest; } 
-        const overlayStars = '⭐'.repeat(Math.min(5, Math.floor(gameCoins/20)));
-        const overlay=document.createElement('div'); overlay.className='game-overlay'; 
-        overlay.innerHTML=`<div class="bg-slate-900 p-6 rounded-2xl text-center border border-amber-500 max-w-[300px]"><i class="fas fa-trophy text-5xl text-amber-400 mb-3"></i><p class="text-xl font-bold text-white">${gameCoins>=10?'Great!':'Game Over!'}</p><p class="text-amber-400 mt-2">Coins: ${gameCoins}</p><p class="text-green-400">Earned: +${earned} PTS</p><p class="text-yellow-400 text-sm mt-1">${overlayStars}</p><button onclick="this.parentElement.parentElement.remove(); startGame()" class="btn-yellow px-6 py-2 mt-4 rounded-xl"><i class="fas fa-redo-alt mr-2"></i>Play Again</button><button onclick="this.parentElement.parentElement.remove()" class="bg-slate-700 px-6 py-2 mt-2 rounded-xl ml-2">Close</button></div>`; 
-        document.body.appendChild(overlay); 
-    }
-    
-    function renderTasks() { 
-        const c=document.getElementById('task-list-display'); if(!c)return; 
-        if(tasksCache.length===0){ c.innerHTML='<div class="gold-card p-6 text-center text-slate-500">No tasks yet</div>'; return; } 
-        const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        const availableTasks = tasksCache.filter(t => !completedTasks.includes(t.id));
-        if(availableTasks.length === 0){
-            c.innerHTML='<div class="gold-card p-6 text-center text-green-400">✅ All tasks completed!</div>';
-        } else {
-            c.innerHTML=availableTasks.map(t=>`<div class="gold-card p-4"><div class="flex justify-between items-start"><div><h4 class="font-bold text-white">${typeIcons[t.type] || '🔗'} ${t.title}</h4><p class="text-[10px] text-green-500">+${t.reward} PTS</p></div><button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg">DO TASK</button></div><a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2">${t.link.substring(0,45)}...</a></div>`).join('');
-        }
-        const completedContainer = document.getElementById('completed-tasks-list');
-        if (completedContainer) {
-            const completedTaskItems = completedTasks.filter(taskId => tasksCache.some(t => t.id === taskId));
-            if (completedTaskItems.length === 0) { completedContainer.innerHTML = '<div class="text-center text-slate-500 py-3">ပြီးဆုံးပြီး Task မရှိသေးပါ</div>'; }
-            else { completedContainer.innerHTML = completedTaskItems.map(taskId => { const task = tasksCache.find(t => t.id === taskId); return task ? `<div class="completed-task-item"><i class="fas fa-check-circle text-green-400 mr-2"></i>${task.title} <span class="text-green-400 float-right">+${task.reward} PTS</span></div>` : ''; }).join(''); }
-        }
-    }
-    
-    async function completeTask(id,reward){ 
-        if(completedTasks.includes(id)){ showNotification("Already completed!"); return; } 
-        showRewardedAd(TASK_AD_ID, async () => {
-            completedTasks.push(id); 
-            await addPointsOptimized(reward, "Task");
-            await saveToFirebase(); 
-            renderTasks(); 
-            showNotification(`✅ +${reward} PTS!`);
-        });
-    }
-    
-    function renderRefUI() { 
-        if(!userId) return;
-        const inviteLink = `https://t.me/${BOT_USERNAME}?start=${userId}`;
-        document.getElementById('ref-link').innerHTML = inviteLink; 
-        document.getElementById('ref-count').innerText = invitedFriends.length; 
-        document.getElementById('ref-earned').innerText = (invitedFriends.length * REFERRAL_POINTS).toLocaleString(); 
-        const c = document.getElementById('ref-list'); 
-        if(!c) return; 
-        if(invitedFriends.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-6">No referrals yet</div>'; return; } 
-        c.innerHTML = invitedFriends.map(id => `<div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-xs">${id.substring(0,15)}...</span><span class="text-green-400 font-bold">+${REFERRAL_POINTS} PTS</span></div>`).join(''); 
-    }
-    
-    function showUserProfile(){ showSec('sec-profile'); }
-    function renderUserProfile(){ document.getElementById('profile-name').innerText = userName || 'User'; document.getElementById('profile-total').innerText = (currentUser?.totalEarned || 0).toLocaleString(); }
-    
-    function renderUserWithdrawalHistory(){ 
-        const c = document.getElementById('user-withdrawal-history'); 
-        if(!c) return; 
-        const userWithdrawals = withdrawalsCache.filter(w => w.userId === userId);
-        if(userWithdrawals.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-4">No withdrawal requests yet</div>'; return; }
-        c.innerHTML = userWithdrawals.map(w => `<div class="withdrawal-item"><div class="flex justify-between text-xs"><span>💰 ${w.amount.toLocaleString()} PTS</span><span class="${w.status === 'pending' ? 'status-pending' : (w.status === 'approved' ? 'status-approved' : 'status-rejected')}">${w.status === 'pending' ? '⏳ Pending' : (w.status === 'approved' ? '✅ Approved' : '❌ Rejected')}</span></div><div class="text-[9px] text-slate-500 mt-1">${w.method === 'kapy' ? 'Kpay' : 'Wave'} | ${w.name}</div><div class="text-[8px] text-slate-600">${new Date(w.timestamp).toLocaleString()}</div></div>`).join('');
-    }
-    
-    function copyUserId(){ if(userId){ navigator.clipboard.writeText(userId); showNotification("User ID copied!"); } }
-    
-    let selectedMethod = 'kapy';
-    function updateWithdrawMethod(m){ selectedMethod = m; }
-    function updateWithdrawUSD(){ const amt = parseInt(document.getElementById('w-amt').value) || 0; document.getElementById('submit-withdraw-btn').disabled = (amt < MIN_WITHDRAW_POINTS || amt > balance); }
-    function checkWithdrawEligibility(){ if(!currentUser) return false; if(balance < MIN_WITHDRAW_POINTS){ alert(`Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`); return false; } showSec('sec-withdraw'); return true; }
-    
-    async function submitWithdraw(){ 
-        const name = document.getElementById('w-name').value.trim(), phone = document.getElementById('w-phone').value.trim(), amount = parseInt(document.getElementById('w-amt').value); 
-        if(!name || !phone || isNaN(amount)){ alert("Fill all fields"); return; } 
-        if(amount < MIN_WITHDRAW_POINTS || amount > balance){ alert("Invalid amount"); return; } 
-        const usdAmount = (amount * USD_PER_POINT).toFixed(4); 
-        if(!confirm(`${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n${name}\n${amount.toLocaleString()} PTS = $${usdAmount} USD\nConfirm withdrawal?`)) return; 
-        const withdrawalId = Date.now().toString();
-        const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', withdrawalId);
-        await window.fsSetDoc(withdrawalRef, {
-            id: withdrawalId, userId: userId, userName: userName, name: name, phone: phone,
-            amount: amount, method: selectedMethod, status: 'pending', timestamp: new Date().toISOString()
-        });
-        balance -= amount; await saveToFirebase(); updateBalanceUI(); 
-        
-        // Send notification to admin
-        await sendTelegramNotification(`🆕 New Withdrawal Request!\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💰 Amount: ${amount.toLocaleString()} PTS ($${usdAmount})\n📱 Method: ${selectedMethod === 'kapy' ? 'KPay' : 'Wave'}\n📞 Phone: ${phone}\n🏦 Name: ${name}`);
-        
-        alert("✅ Withdrawal request submitted! Admin will review it.");
-        document.getElementById('w-name').value = ''; document.getElementById('w-phone').value = ''; document.getElementById('w-amt').value = '';
-        showSec('sec-home'); 
-    }
-    
-    async function claimDailyBonus() {
-        if (!currentUser) return;
-        const today = new Date().toDateString();
-        const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
-        if (lastBonus === today) { alert("နောက်တစ်နေ့မှ ထပ်မံရယူနိုင်ပါသည်။"); return; }
-        showRewardedAd(DAILY_BONUS_AD_ID, async () => {
-            await addPointsOptimized(100, "Daily Bonus");
-            localStorage.setItem(`daily_bonus_${userId}`, today);
-            showNotification("✅ Daily bonus claimed! +100 PTS");
-        });
-        const btn = document.getElementById('daily-bonus-btn');
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        setTimeout(() => { btn.innerHTML = '<i class="fas fa-play-circle mr-2"></i>Claim Daily Bonus'; btn.disabled = false; }, 5000);
-    }
-    
-    // ========== ADMIN FUNCTIONS ==========
-    async function renderAdminUserTable(){ 
-        if (!isAdmin) return;
-        const tbody = document.getElementById('admin-user-table'); if(!tbody) return; 
-        try {
-            const usersCollection = window.fsCollection(window.firestore, 'users');
-            const usersSnapshot = await window.fsGetDocs(usersCollection);
-            const users = [];
-            usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></td>'; return; }
-            tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
-        } catch(e) { console.error(e); }
-    }
-    
-    async function quickAdjustPoints(uid, amount){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        if(!confirm(`Add ${amount} points to this user?`)) return; 
-        try {
-            const userRef = window.fsDoc(window.firestore, 'users', uid);
-            const userSnap = await window.fsGetDoc(userRef);
-            if(userSnap.exists()){ 
-                const userData = userSnap.data(); 
-                const newBalance = (userData.balance || 0) + amount; 
-                await window.fsUpdateDoc(userRef, { balance: newBalance });
-                if(uid === userId){ balance = newBalance; updateBalanceUI(); await addActivityLog(`Admin added ${amount} points`, amount, 'earn'); }
-                const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', uid);
-                await window.fsSetDoc(leaderboardRef, { balance: newBalance, name: userData.name }, { merge: true });
-                showNotification(`Added ${amount} points to user!`); renderAdminUserTable(); 
-            } 
-        } catch(e) { console.error(e); }
-    }
-    
-    async function viewUserDetails(uid){ 
-        try {
-            const userRef = window.fsDoc(window.firestore, 'users', uid);
-            const userSnap = await window.fsGetDoc(userRef);
-            if(userSnap.exists()){ 
-                const user = userSnap.data(); 
-                alert(`📋 User Details\n\nName: ${user.name || 'N/A'}\nID: ${uid}\nBalance: ${(user.balance || 0).toLocaleString()}\nTotal Earned: ${(user.totalEarned || 0).toLocaleString()}\nTasks: ${(user.completedTasks || []).length}\nQuizzes: ${(user.completedQuizzes || []).length}\nReferrals: ${(user.invitedFriends || []).length}`); 
-            } 
-        } catch(e) { console.error(e); }
-    }
-    
-    async function adjustUserPoints(){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        const searchTerm = document.getElementById('search-user').value.trim();
-        const points = parseInt(document.getElementById('adjust-points').value);
-        const action = document.getElementById('adjust-action').value;
-        if(!searchTerm || isNaN(points)){ alert("Enter user name/ID and points"); return; }
-        try {
-            const usersCollection = window.fsCollection(window.firestore, 'users');
-            const usersSnapshot = await window.fsGetDocs(usersCollection);
-            let foundUser = null, foundUid = null;
-            for (const doc of usersSnapshot.docs) {
-                const userData = doc.data();
-                if (userData.name === searchTerm || doc.id === searchTerm) {
-                    foundUser = userData; foundUid = doc.id; break;
-                }
-            }
-            if(!foundUser){ alert("User not found"); return; }
-            let newBalance = foundUser.balance || 0;
-            if(action === 'add'){ newBalance += points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Added ${points} points to ${foundUser.name}`); if(foundUid === userId) await addActivityLog(`Admin added ${points} points`, points, 'earn'); }
-            else { if(points > newBalance){ alert("Not enough points!"); return; } newBalance -= points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Removed ${points} points from ${foundUser.name}`); if(foundUid === userId) await addActivityLog(`Admin removed ${points} points`, points, 'spend'); }
-            await window.fsSetDoc(window.fsDoc(window.firestore, 'leaderboard', foundUid), { balance: newBalance, name: foundUser.name }, { merge: true });
-            if(foundUid === userId){ balance = newBalance; updateBalanceUI(); }
-            renderAdminUserTable();
-        } catch(e) { console.error(e); }
-    }
-    
-    function renderAdminWithdrawals(){ 
-        const c = document.getElementById('admin-withdraw-list'); 
-        if(!c) return; 
-        if(withdrawalsCache.length === 0){ 
-            c.innerHTML = '<p class="text-slate-500 text-center py-4">No withdrawal requests</p>'; 
-            return; 
-        }
-        c.innerHTML = withdrawalsCache.map(w => `
-            <div class="withdrawal-item">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-bold text-white">${w.userName || w.userId.substring(0,8)}</p>
-                        <p class="text-[10px]">💰 ${w.amount.toLocaleString()} PTS</p>
-                        <p class="text-[9px] text-slate-500">${w.method === 'kapy' ? 'KPay' : 'Wave'} | ${w.name} | ${w.phone}</p>
-                    </div>
-                    <div class="flex gap-1">
-                        <button onclick="approveWithdrawal('${w.id}', ${w.amount})" class="admin-action-btn approve text-[8px] px-2 py-1">✅ Approve</button>
-                        <button onclick="rejectWithdrawal('${w.id}')" class="admin-action-btn reject text-[8px] px-2 py-1">❌ Reject</button>
-                    </div>
-                </div>
-                <div class="text-[8px] text-slate-600 mt-1">${new Date(w.timestamp).toLocaleString()}</div>
-            </div>
-        `).join('');
-    }
-    
-    async function approveWithdrawal(id, amount) {
-        if (!isAdmin) return;
-        if(!confirm(`Approve withdrawal of ${amount.toLocaleString()} PTS?`)) return;
-        try {
-            const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', id);
-            await window.fsUpdateDoc(withdrawalRef, { status: 'approved' });
-            
-            // Send notification to user via bot (if user started the bot)
-            await sendTelegramNotification(`✅ Your withdrawal request of ${amount.toLocaleString()} PTS has been approved!`);
-            
-            showNotification("Withdrawal approved!");
-            renderAdminWithdrawals();
-        } catch(e) { console.error(e); }
-    }
-    
-    async function rejectWithdrawal(id) {
-        if (!isAdmin) return;
-        if(!confirm(`Reject this withdrawal?`)) return;
-        try {
-            const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', id);
-            await window.fsUpdateDoc(withdrawalRef, { status: 'rejected' });
-            
-            await sendTelegramNotification(`❌ Your withdrawal request has been rejected. Please contact support.`);
-            
-            showNotification("Withdrawal rejected!");
-            renderAdminWithdrawals();
-        } catch(e) { console.error(e); }
-    }
-    
-    async function addAdminTask(){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        const title = document.getElementById('task-title').value.trim(), link = document.getElementById('task-link').value.trim(), type = document.getElementById('task-type').value, reward = parseInt(document.getElementById('task-reward').value); 
-        if(!title || !link || isNaN(reward)){ alert("Fill all fields"); return; } 
-        const newId = Date.now().toString(); 
-        await window.fsSetDoc(window.fsDoc(window.firestore, 'tasks', newId), { id: newId, title, link, reward, type });
-        renderAdminTaskList(); showNotification("Task added!"); 
-    }
-    
-    function renderAdminTaskList(){ 
-        if (!isAdmin) return;
-        const c = document.getElementById('admin-task-list'); if(!c) return; 
-        if(tasksCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No tasks</div>'; return; } 
-        const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        c.innerHTML = tasksCache.map(t => `<div class="task-item flex justify-between items-center"><div><p class="text-xs text-white">${typeIcons[t.type] || '🔗'} ${t.title}</p><p class="text-[9px] text-amber-400">+${t.reward} PTS</p></div><button onclick="deleteAdminTask('${t.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
-    }
-    
-    async function deleteAdminTask(id){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        if(confirm("Delete permanently?")){ await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); showNotification("Task deleted!"); } 
-    }
-    
-    async function addQuizQuestion(){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        const q = document.getElementById('quiz-question').value.trim();
-        const c1 = document.getElementById('quiz-choice1').value.trim();
-        const c2 = document.getElementById('quiz-choice2').value.trim();
-        const c3 = document.getElementById('quiz-choice3').value.trim();
-        const correct = parseInt(document.getElementById('quiz-correct').value);
-        const p = parseInt(document.getElementById('quiz-points').value);
-        const adCode = document.getElementById('quiz-ad-code').value.trim();
-        if(!q || !c1 || !c2 || !c3 || isNaN(correct) || isNaN(p)){ alert("Fill all fields"); return; } 
-        const newId = Date.now().toString(); 
-        await window.fsSetDoc(window.fsDoc(window.firestore, 'quizzes', newId), { q, c1, c2, c3, correct, p, adCode });
-        document.getElementById('quiz-question').value = ''; document.getElementById('quiz-choice1').value = '';
-        document.getElementById('quiz-choice2').value = ''; document.getElementById('quiz-choice3').value = '';
-        document.getElementById('quiz-points').value = '50'; document.getElementById('quiz-ad-code').value = '';
-        showNotification("Quiz added!"); 
-    }
-    
-    function renderQuizList(){ 
-        if (!isAdmin) return;
-        const c = document.getElementById('quiz-list'); if(!c) return; 
-        if(quizzesCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No quizzes</div>'; return; } 
-        c.innerHTML = quizzesCache.map(q => `<div class="quiz-item flex justify-between items-center"><div><p class="text-xs text-white">${q.q.substring(0,30)}...</p><p class="text-[9px] text-amber-400">+${q.p} PTS</p></div><button onclick="deleteQuizQuestion('${q.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
-    }
-    
-    async function deleteQuizQuestion(id){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        if(confirm("Delete this quiz?")){ await window.fsDeleteDoc(window.fsDoc(window.firestore, 'quizzes', id)); showNotification("Quiz deleted"); } 
-    }
-    
-    let secretCount = 0;
-    function handleSecret(){ 
-        if (!isAdmin) { alert("❌ You are not authorized to access admin panel!"); return; }
-        secretCount++; setTimeout(() => secretCount = 0, 2000); 
-        if(secretCount === 3){ 
-            const pwd = prompt("Enter Admin Password:"); 
-            if(pwd === ADMIN_PASSWORD && isAdmin){ 
-                document.getElementById('admin-panel').classList.toggle('hidden'); 
-                if(document.getElementById('admin-panel').classList.contains('hidden')){ document.body.classList.remove('admin-mode'); } 
-                else { renderQuizList(); renderAdminTaskList(); renderAdminUserTable(); renderAdminWithdrawals(); }
-            } else if(pwd !== ADMIN_PASSWORD) { alert("Wrong password!"); }
-            secretCount = 0; 
-        } 
     }
     
     setTimeout(() => {
