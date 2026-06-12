@@ -679,7 +679,7 @@
             window.Telegram.WebApp.showPopup({
                 title: "📤 Share MM GOLDEN",
                 message: "Invite friends and earn 500 PTS each!\n\n" + link,
-                buttons: [{ type: "default", text: , id: "copy" }]
+                buttons: [{ type: "default", text: "📋 Copy Link", id: "copy" }]
             }, (buttonId) => {
                 if (buttonId === "copy") {
                     navigator.clipboard.writeText(link);
