@@ -50,6 +50,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
+        /* Your existing styles remain the same */
         @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;500;600;700&display=swap');
         * { user-select: none; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Pyidaungsu', sans-serif; background: #0a0e1a; color: white; overflow-x: hidden; min-height: 100vh; }
@@ -100,11 +101,10 @@
         .admin-action-btn.approve { background: #10b981; }
         .admin-action-btn.reject { background: #ef4444; }
         .ref-container { position: relative; background: #1e293b; border-radius: 16px; border: 1px solid #fbbf24; padding: 12px; margin-bottom: 16px; }
-        .ref-link-text { font-size: 11px; word-break: break-all; color: #fbbf24; font-family: monospace; }
-        .copy-btn { background: linear-gradient(135deg, #f59e0b, #fbbf24); border: none; border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: bold; color: #0a0e1a; cursor: pointer; margin: 5px; }
+        .ref-link-text { font-size: 11px; word-break: break-all; color: #fbbf24; font-family: monospace; padding-right: 60px; }
+        .copy-btn { position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #f59e0b, #fbbf24); border: none; border-radius: 10px; padding: 6px 12px; font-size: 11px; font-weight: bold; color: #0a0e1a; cursor: pointer; }
         .copy-btn:active { transform: scale(0.95); }
-        .ref-buttons { display: flex; gap: 10px; margin-top: 12px; justify-content: center; }
-        .ref-buttons button { flex: 1; max-width: 120px; }
+        .copy-success { background: #10b981 !important; color: white !important; }
         .quiz-choice { background: #1e293b; border: 1px solid #fbbf24; border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; text-align: left; }
         .quiz-choice:hover { background: #2d3a5e; transform: scale(1.01); }
         .quiz-choice.selected { background: #fbbf24; color: #0a0e1a; border-color: #f59e0b; }
@@ -114,15 +114,6 @@
         .activity-time { font-size: 9px; color: #6b7280; margin-top: 4px; }
         .btn-icon { width: 40px; height: 40px; background: rgba(0,0,0,0.3); border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-icon:active { transform: scale(0.95); }
-        .scratch-card { background: linear-gradient(145deg, #2a2f4a, #1a1f33); border: 2px solid #fbbf24; border-radius: 20px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; }
-        .scratch-card:active { transform: scale(0.98); }
-        .scratch-card.disabled { opacity: 0.5; cursor: not-allowed; }
-        .game-sub-section { background: rgba(0,0,0,0.2); border-radius: 16px; padding: 15px; margin-top: 10px; }
-        .sub-nav { display: flex; gap: 10px; margin-bottom: 15px; }
-        .sub-nav-btn { background: #334155; padding: 8px 16px; border-radius: 20px; cursor: pointer; text-align: center; flex: 1; }
-        .sub-nav-btn.active { background: #fbbf24; color: #0a0e1a; }
-        .sub-content { display: none; }
-        .sub-content.active { display: block; }
     </style>
 </head>
 <body>
@@ -173,7 +164,7 @@
 </div>
 
 <main class="max-w-md mx-auto pt-28 px-4" style="display: none;" id="mainContent">
-    <!-- Home Section -->
+    <!-- Home Section (same as before) -->
     <div id="sec-home" class="section active space-y-5">
         <div class="gold-card p-6 text-center">
             <div class="flex items-center justify-between mb-4">
@@ -243,65 +234,14 @@
                 <div class="milestone-item" id="milestone-500">500 → 550 PTS</div>
             </div>
         </div>
-    </div>
-
-    <!-- Game Section with Sub Navigation -->
-    <div id="sec-game" class="section space-y-5">
         <div class="gold-card p-5">
-            <div class="sub-nav">
-                <div class="sub-nav-btn" data-sub="coin-runner" onclick="showGameSub('coin-runner')">🎮 Coin Runner</div>
-                <div class="sub-nav-btn" data-sub="scratch-card" onclick="showGameSub('scratch-card')">🎲 ခဲခြစ်ကံစမ်း</div>
-            </div>
-            
-            <!-- Coin Runner Sub Section -->
-            <div id="sub-coin-runner" class="sub-content active">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-gamepad text-purple-400 text-xl"></i>
-                        </div>
-                        <h3 class="text-amber-400 font-bold text-lg">🎮 Coin Runner</h3>
-                    </div>
-                    <span class="text-xs bg-amber-500/20 px-3 py-1 rounded-full">1 Coin = 10 PTS</span>
-                </div>
-                <div class="text-center mb-3">
-                    <span id="game-remaining" class="text-sm bg-slate-800 px-4 py-1.5 rounded-full">🎮 ယနေ့ကျန်ပွဲရေ: 5</span>
-                </div>
-                <canvas id="gameCanvas" width="340" height="420"></canvas>
-                <div class="flex justify-between mt-4 gap-3">
-                    <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center">
-                        <span class="text-[10px] text-slate-500">Coins</span>
-                        <p id="game-coins" class="text-2xl font-bold text-amber-400">0</p>
-                    </div>
-                    <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center">
-                        <span class="text-[10px] text-slate-500">Best</span>
-                        <p id="game-best" class="text-2xl font-bold text-green-400">0</p>
-                    </div>
-                    <button id="game-play-btn" onclick="startGame()" class="btn-yellow px-5 py-2 text-sm font-bold rounded-xl">
-                        <i class="fas fa-play mr-1"></i> Play
-                    </button>
-                </div>
-                <div class="text-center text-xs text-slate-500 mt-3">
-                    💡 Coin 10 ခုစုရမှ အနိုင်ရမယ်။ မစုနိုင်ရင် ရှုံးမယ်။
-                </div>
-            </div>
-            
-            <!-- Scratch Card Sub Section -->
-            <div id="sub-scratch-card" class="sub-content">
-                <div class="text-center mb-4">
-                    <div class="w-24 h-24 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-ticket-alt text-4xl text-amber-400"></i>
-                    </div>
-                    <h3 class="text-white font-bold text-xl mb-2">🎲 ခဲခြစ်ကံစမ်းမဲ</h3>
-                    <p class="text-sm text-slate-400 mb-2">1 - 100 အထိ ကံစမ်းပါ။ တစ်ခါခဲခြစ်တိုင်း Ad ကြည့်ရမယ်။</p>
-                    <p class="text-xs text-amber-400" id="scratch-remaining">ယနေ့ကျန်ကြိမ်ရေ: 5</p>
-                </div>
-                <div id="scratch-card-btn" class="scratch-card" onclick="playScratchCard()">
-                    <i class="fas fa-hand-peace text-5xl text-amber-400 mb-3"></i>
-                    <p class="text-xl font-bold text-white">✨ ခဲခြစ်ရန် နှိပ်ပါ ✨</p>
-                    <p class="text-xs text-slate-400 mt-2">1 - 100 PTS ရရှိနိုင်</p>
-                </div>
-                <div id="scratch-result" class="text-center mt-4 text-green-400 font-bold"></div>
+            <div class="flex justify-between items-center mb-4"><div class="flex items-center gap-2"><div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-gamepad text-purple-400 text-xl"></i></div><h3 class="text-amber-400 font-bold text-lg">🎮 Coin Runner</h3></div><span class="text-xs bg-amber-500/20 px-3 py-1 rounded-full">1 Coin = 10 PTS</span></div>
+            <div class="text-center mb-3"><span id="game-remaining" class="text-sm bg-slate-800 px-4 py-1.5 rounded-full">🎮 ယနေ့ကျန်ပွဲရေ: 5</span></div>
+            <canvas id="gameCanvas" width="340" height="420"></canvas>
+            <div class="flex justify-between mt-4 gap-3">
+                <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Coins</span><p id="game-coins" class="text-2xl font-bold text-amber-400">0</p></div>
+                <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Best</span><p id="game-best" class="text-2xl font-bold text-green-400">0</p></div>
+                <button id="game-play-btn" onclick="startGame()" class="btn-yellow px-5 py-2 text-sm font-bold rounded-xl"><i class="fas fa-play mr-1"></i> Play</button>
             </div>
         </div>
     </div>
@@ -320,10 +260,14 @@
                 </div>
             </div>
             <div class="ref-container">
-                <div id="ref-link" class="ref-link-text mb-3">Loading...</div>
-                <div class="ref-buttons">
-                    <button class="copy-btn" onclick="copyRef()"><i class="fas fa-copy mr-1"></i> Copy</button>
-                    <button class="copy-btn" onclick="shareRef()"><i class="fas fa-share-alt mr-1"></i> Share</button>
+                <div id="ref-link" class="ref-link-text">Loading...</div>
+                <div class="flex gap-2 mt-2">
+                    <button id="copyRefBtn" class="copy-btn flex-1" onclick="copyRef()">
+                        <i class="fas fa-copy mr-1"></i> Copy
+                    </button>
+                    <button id="shareRefBtn" class="copy-btn flex-1" onclick="shareRef()">
+                        <i class="fas fa-share-alt mr-1"></i> Share
+                    </button>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-6">
@@ -388,8 +332,7 @@
                 <p class="text-amber-300 font-bold mb-3"><i class="fas fa-dollar-sign mr-2"></i>ငွေရှာနည်းများ</p>
                 <ul class="text-slate-300 text-sm space-y-2">
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>မေးခွန်းများဖြေဆိုခြင်း</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>Coin Runner (1 coin = 10 PTS, တစ်နေ့ 5 ပွဲ)</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>ခဲခြစ်ကံစမ်းမဲ (1-100 PTS, တစ်နေ့ 5 ကြိမ်)</li>
+                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>Coin Runner ဂိမ်း (1 coin = 10 PTS, တစ်နေ့ 5 ပွဲသာ)</li>
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>သူငယ်ချင်းဖိတ်ခေါ်ခြင်း (+500 PTS)</li>
                     <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>နေ့စဉ် Bonus (+100 PTS)</li>
                 </ul>
@@ -443,7 +386,6 @@
 <nav class="fixed bottom-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm border-t border-white/10 flex justify-around py-3 z-50">
     <button onclick="showSec('sec-home')" class="nav-btn flex flex-col items-center text-amber-500 nav-active py-1"><i class="fas fa-home text-xl"></i><span class="text-[9px] mt-0.5">Home</span></button>
     <button onclick="showSec('sec-quiz')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-brain text-xl"></i><span class="text-[9px] mt-0.5">Quiz</span></button>
-    <button onclick="showSec('sec-game')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-gamepad text-xl"></i><span class="text-[9px] mt-0.5">Game</span></button>
     <button onclick="showSec('sec-invite')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-user-plus text-xl"></i><span class="text-[9px] mt-0.5">Invite</span></button>
     <button onclick="showSec('sec-tasks')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-tasks text-xl"></i><span class="text-[9px] mt-0.5">Tasks</span></button>
     <button onclick="showSec('sec-about')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-cog text-xl"></i><span class="text-[9px] mt-0.5">Setting</span></button>
@@ -456,26 +398,23 @@
     const COIN_TO_POINTS = 10;
     const REFERRAL_POINTS = 500;
     const MAX_GAMES_PER_DAY = 5;
-    const MAX_SCRATCH_PER_DAY = 5;
     const BOT_USERNAME = "MMGOLDEN_bot";
     const ADMIN_PASSWORD = "871033";
     const ADMIN_USER_IDS = ["6099430589"];
+    const BOT_TOKEN = "8127304160:AAFuF38iFon6UpHB_mheY17Spp77OmpnziI"; // Add your bot token here
+    const ADMIN_CHAT_ID = "6099430589"; // Admin chat ID for notifications
     
     // Ad Unit IDs
     const DAILY_BONUS_AD_ID = "399125";
     const QUIZ_AD_ID = "399123";
     const GAME_AD_ID = "399124";
     const TASK_AD_ID = "399126";
-    const BONUS_AD_ID = "399125";
     
     // RichInfo Ad Controller
     let tgAdsController = null;
     let isAdReady = false;
     
-    // Scratch Card State
-    let scratchGamePlayedToday = 0;
-    let scratchLastDate = '';
-    
+    // Initialize RichInfo Ads
     function initRichInfoAds() {
         try {
             if (typeof window.TelegramAdsController !== 'undefined') {
@@ -496,9 +435,11 @@
         }
     }
     
+    // Show Rewarded Ad with specific ad unit (can show multiple times)
     function showRewardedAd(adUnitId, callback) {
         if (tgAdsController && isAdReady) {
             try {
+                // Re-create controller if needed
                 if (!tgAdsController) {
                     tgAdsController = new window.TelegramAdsController();
                     tgAdsController.initialize({
@@ -527,79 +468,24 @@
         }
     }
     
-    // Scratch Card Function
-    async function playScratchCard() {
-        if (!currentUser) { showNotification("Please wait"); return; }
-        
-        const today = new Date().toDateString();
-        if (scratchLastDate !== today) {
-            scratchGamePlayedToday = 0;
-            scratchLastDate = today;
-            saveScratchData();
-        }
-        
-        if (scratchGamePlayedToday >= MAX_SCRATCH_PER_DAY) {
-            showNotification("ဒီနေ့အတွက် ခဲခြစ်ခွင့် ကုန်ပါပြီ။ နောက်တစ်နေ့မှ ထပ်မံ ကံစမ်းပါ။");
-            return;
-        }
-        
-        showRewardedAd(BONUS_AD_ID, async () => {
-            const randomPoints = Math.floor(Math.random() * 100) + 1;
-            await addPointsOptimized(randomPoints, "Scratch Card");
-            scratchGamePlayedToday++;
-            saveScratchData();
-            updateScratchUI();
-            
-            const resultDiv = document.getElementById('scratch-result');
-            resultDiv.innerHTML = `<div class="bg-green-900/50 p-4 rounded-xl">🎉 ဂုဏ်ယူပါတယ်! သင်ရရှိသော PTS: <span class="text-2xl font-bold text-amber-400">${randomPoints}</span> 🎉</div>`;
-            setTimeout(() => {
-                resultDiv.innerHTML = '';
-            }, 3000);
-        });
-    }
-    
-    function saveScratchData() {
-        if (userId) {
-            localStorage.setItem(`scratch_${userId}_count`, scratchGamePlayedToday);
-            localStorage.setItem(`scratch_${userId}_date`, scratchLastDate);
-        }
-    }
-    
-    function loadScratchData() {
-        if (userId) {
-            const savedCount = localStorage.getItem(`scratch_${userId}_count`);
-            const savedDate = localStorage.getItem(`scratch_${userId}_date`);
-            const today = new Date().toDateString();
-            if (savedDate === today) {
-                scratchGamePlayedToday = parseInt(savedCount) || 0;
-                scratchLastDate = savedDate;
-            } else {
-                scratchGamePlayedToday = 0;
-                scratchLastDate = today;
-            }
-        }
-    }
-    
-    function updateScratchUI() {
-        const remaining = MAX_SCRATCH_PER_DAY - scratchGamePlayedToday;
-        document.getElementById('scratch-remaining').innerHTML = `ယနေ့ကျန်ကြိမ်ရေ: ${remaining}`;
-        const scratchBtn = document.getElementById('scratch-card-btn');
-        if (remaining <= 0) {
-            scratchBtn.classList.add('disabled');
-            scratchBtn.style.opacity = '0.5';
-        } else {
-            scratchBtn.classList.remove('disabled');
-            scratchBtn.style.opacity = '1';
-        }
-    }
-    
-    function showGameSub(subId) {
-        document.querySelectorAll('.sub-content').forEach(el => el.classList.remove('active'));
-        document.getElementById(`sub-${subId}`).classList.add('active');
-        document.querySelectorAll('.sub-nav-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.sub-nav-btn[data-sub="${subId}"]`).classList.add('active');
-        if (subId === 'scratch-card') {
-            updateScratchUI();
+    // Send Telegram notification
+    async function sendTelegramNotification(message) {
+        if (!BOT_TOKEN) return;
+        try {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: ADMIN_CHAT_ID,
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            });
+            const data = await response.json();
+            console.log("Telegram notification sent:", data);
+        } catch(e) {
+            console.error("Telegram notification error:", e);
         }
     }
     
@@ -741,8 +627,6 @@
                     claimedMilestones: claimedMilestones || [],
                     gamesPlayedToday: gamesPlayedToday || 0,
                     lastGameDate: lastGameDate || '',
-                    scratchPlayedToday: scratchGamePlayedToday || 0,
-                    scratchLastDate: scratchLastDate || '',
                     activityLog: activityLog || [],
                     lastActive: new Date().toLocaleString()
                 }, { merge: true });
@@ -872,16 +756,12 @@
     function showSec(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        const map = { 'sec-home':0, 'sec-quiz':1, 'sec-game':2, 'sec-invite':3, 'sec-tasks':4, 'sec-about':5 };
+        const map = { 'sec-home':0, 'sec-quiz':1, 'sec-invite':2, 'sec-tasks':3, 'sec-about':4 };
         document.querySelectorAll('.nav-btn').forEach((b,i) => { if(map[id]===i) b.classList.add('nav-active','text-amber-500'); else b.classList.remove('nav-active','text-amber-500'); });
         if(id === 'sec-profile') { renderUserProfile(); renderUserWithdrawalHistory(); }
         if(id === 'sec-about') { renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); }
         if(id === 'sec-quiz') updateQuizCounterUI();
         if(id === 'sec-history') renderHistoryLog();
-        if(id === 'sec-game') { 
-            updateGameRemainingUI(); 
-            updateScratchUI(); 
-        }
     }
     
     // ========== QUIZ FUNCTIONS ==========
@@ -1024,8 +904,6 @@
                 claimedMilestones = data.claimedMilestones || [];
                 gamesPlayedToday = data.gamesPlayedToday || 0;
                 lastGameDate = data.lastGameDate || '';
-                scratchGamePlayedToday = data.scratchPlayedToday || 0;
-                scratchLastDate = data.scratchLastDate || '';
                 activityLog = data.activityLog || [];
                 if (currentUser) {
                     currentUser.balance = balance;
@@ -1039,8 +917,6 @@
                 updateQuizCounterUI();
                 renderActivityLog();
                 renderHistoryLog();
-                loadScratchData();
-                updateScratchUI();
             }
         });
     }
@@ -1081,8 +957,6 @@
                 claimedMilestones = data.claimedMilestones || [];
                 gamesPlayedToday = data.gamesPlayedToday || 0;
                 lastGameDate = data.lastGameDate || '';
-                scratchGamePlayedToday = data.scratchPlayedToday || 0;
-                scratchLastDate = data.scratchLastDate || '';
                 activityLog = data.activityLog || [];
             } else {
                 currentUser = { id: userId, name: userName, balance: 0, totalEarned: 0 };
@@ -1096,7 +970,6 @@
             }
             const today = new Date().toDateString();
             if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
-            loadScratchData();
             
             initRichInfoAds();
             
@@ -1111,7 +984,6 @@
             renderQuiz();
             updateGameRemainingUI();
             updateQuizCounterUI();
-            updateScratchUI();
             renderActivityLog();
             renderHistoryLog();
             showNotification(`Welcome ${userName}! 🎉`);
@@ -1209,16 +1081,9 @@
         if(gameAnimationId) cancelAnimationFrame(gameAnimationId); 
         const earned = gameCoins * COIN_TO_POINTS;
         if(earned > 0) { 
-            if (gameCoins >= 10) {
-                showRewardedAd(GAME_AD_ID, async () => {
-                    gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
-                });
-            } else {
-                showRewardedAd(GAME_AD_ID, async () => {
-                    gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI();
-                });
-                showNotification("😢 ရှုံးသွားပါပြီ! Coin 10 ခုပြည့်အောင် စုပါ။");
-            }
+            showRewardedAd(GAME_AD_ID, async () => {
+                gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
+            });
         } else {
             gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI();
         }
@@ -1301,6 +1166,10 @@
             amount: amount, method: selectedMethod, status: 'pending', timestamp: new Date().toISOString()
         });
         balance -= amount; await saveToFirebase(); updateBalanceUI(); 
+        
+        // Send notification to admin
+        await sendTelegramNotification(`🆕 New Withdrawal Request!\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💰 Amount: ${amount.toLocaleString()} PTS ($${usdAmount})\n📱 Method: ${selectedMethod === 'kapy' ? 'KPay' : 'Wave'}\n📞 Phone: ${phone}\n🏦 Name: ${name}`);
+        
         alert("✅ Withdrawal request submitted! Admin will review it.");
         document.getElementById('w-name').value = ''; document.getElementById('w-phone').value = ''; document.getElementById('w-amt').value = '';
         showSec('sec-home'); 
@@ -1330,7 +1199,7 @@
             const usersSnapshot = await window.fsGetDocs(usersCollection);
             const users = [];
             usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></tr>'; return; }
+            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></td>'; return; }
             tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
         } catch(e) { console.error(e); }
     }
@@ -1393,12 +1262,11 @@
     function renderAdminWithdrawals(){ 
         const c = document.getElementById('admin-withdraw-list'); 
         if(!c) return; 
-        const pendingWithdrawals = withdrawalsCache.filter(w => w.status === 'pending');
-        if(pendingWithdrawals.length === 0){ 
-            c.innerHTML = '<p class="text-slate-500 text-center py-4">No pending withdrawal requests</p>'; 
+        if(withdrawalsCache.length === 0){ 
+            c.innerHTML = '<p class="text-slate-500 text-center py-4">No withdrawal requests</p>'; 
             return; 
         }
-        c.innerHTML = pendingWithdrawals.map(w => `
+        c.innerHTML = withdrawalsCache.map(w => `
             <div class="withdrawal-item">
                 <div class="flex justify-between items-center">
                     <div>
@@ -1422,6 +1290,10 @@
         try {
             const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', id);
             await window.fsUpdateDoc(withdrawalRef, { status: 'approved' });
+            
+            // Send notification to user via bot (if user started the bot)
+            await sendTelegramNotification(`✅ Your withdrawal request of ${amount.toLocaleString()} PTS has been approved!`);
+            
             showNotification("Withdrawal approved!");
             renderAdminWithdrawals();
         } catch(e) { console.error(e); }
@@ -1433,6 +1305,9 @@
         try {
             const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', id);
             await window.fsUpdateDoc(withdrawalRef, { status: 'rejected' });
+            
+            await sendTelegramNotification(`❌ Your withdrawal request has been rejected. Please contact support.`);
+            
             showNotification("Withdrawal rejected!");
             renderAdminWithdrawals();
         } catch(e) { console.error(e); }
