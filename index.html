@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>777 Big WIN -</title>
+    <title>777 Big WIN</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -12,16 +12,40 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #080c14; }
         @keyframes subtleShake { 0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.03) translateY(-2px); } }
+        @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 5px rgba(59,130,246,0.3); } 50% { box-shadow: 0 0 20px rgba(59,130,246,0.6); } }
         .neon-text-small { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.6), 0 0 30px rgba(56, 189, 248, 0.3); animation: subtleShake 3s ease-in-out infinite; }
         .neon-text-big { color: #c084fc; text-shadow: 0 0 10px rgba(192, 132, 252, 0.6), 0 0 30px rgba(192, 132, 252, 0.3); animation: subtleShake 3s ease-in-out infinite; }
         .panel-glow { box-shadow: 0 0 25px rgba(59, 130, 246, 0.15); }
-        .user-row:hover { background: rgba(255,255,255,0.03); }
-        .search-highlight { background: rgba(59, 130, 246, 0.2); border-radius: 4px; padding: 0 4px; }
+        .password-container { animation: pulse-glow 2s ease-in-out infinite; }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <!-- MAIN APP CONTAINER -->
+    <!-- PASSWORD GATEWAY SCREEN -->
+    <div id="passwordGateway" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl relative text-center panel-glow password-container">
+        <div class="w-20 h-20 mx-auto bg-blue-500/10 border border-blue-500/30 rounded-full flex items-center justify-center mb-4 text-blue-400">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+        </div>
+        <h3 class="text-xl font-bold mb-1">🔐 ACCESS CODE REQUIRED</h3>
+        <p class="text-xs text-gray-400 mb-6">Please enter the access code to continue</p>
+        
+        <div class="bg-gray-950 border border-gray-855 rounded-2xl p-4 mb-5">
+            <input type="password" id="passwordInput" placeholder="Enter access code..." 
+                   class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-all">
+            <div id="passwordError" class="text-xs text-rose-400 mt-2 hidden">❌ Invalid access code. Please try again.</div>
+        </div>
+
+        <button onclick="verifyPassword()" id="unlockBtn" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+            🔓 UNLOCK
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+        
+        <div class="mt-4 text-[9px] text-gray-600">Enter the access code provided by the administrator</div>
+    </div>
+
+    <!-- MAIN APP CONTAINER (Hidden until password is correct) -->
     <div id="mainApp" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden panel-glow hidden">
         
         <!-- Timer Overlay -->
@@ -45,9 +69,11 @@
                 <button onclick="switchTab('game')" id="tab-game" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-400 hover:text-white">GAME</button>
             </div>
             
-            <button onclick="toggleModal('settingsModal')" class="p-2 bg-gray-800 hover:bg-gray-700 rounded-xl border border-gray-700/50 transition-all">
-                <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </button>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-mono text-gray-400 bg-gray-800/50 px-3 py-1.5 rounded-lg border border-gray-700/30">
+                    <span id="clockTime">00:00:00</span>
+                </span>
+            </div>
         </div>
 
         <!-- TAB PAGE: HOME -->
@@ -68,7 +94,9 @@
 
             <div class="bg-gray-950 border border-gray-855 rounded-2xl p-7 mb-6 text-center shadow-inner">
                 <span class="text-[11px] uppercase tracking-wider text-gray-500 font-bold block mb-1">PREDICTION TYPE</span>
-                <div id="predictionDisplay" class="text-6xl font-black tracking-widest text-gray-600 transition-all duration-300">-</div>
+                <div id="predictionDisplay" class="text-6xl font-black tracking-widest text-gray-600 transition-all duration-300">
+                    -
+                </div>
             </div>
 
             <div class="grid grid-cols-5 gap-2.5 mb-5">
@@ -85,7 +113,9 @@
             </button>
 
             <div class="mt-4 mb-5 bg-gray-950/60 border border-gray-855 rounded-xl p-3 text-center min-h-[48px] flex items-center justify-center">
-                <div id="gameStatusText" class="text-sm font-bold tracking-wide text-gray-500">Please select a number above</div>
+                <div id="gameStatusText" class="text-sm font-bold tracking-wide text-gray-500">
+                    Please select a number above
+                </div>
             </div>
 
             <div class="grid grid-cols-3 gap-3 border-t border-gray-800 pt-5 text-center">
@@ -115,276 +145,83 @@
         </div>
     </div>
 
-    <!-- GATEWAY LOCK SCREEN -->
-    <div id="gatewayLock" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl relative text-center panel-glow">
-        <div class="flex justify-end mb-2">
-            <button onclick="toggleModal('settingsModal')" class="p-2 bg-gray-800/80 hover:bg-gray-700 rounded-xl border border-gray-700/50 transition-all">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </button>
-        </div>
-        <div class="w-16 h-16 mx-auto bg-blue-500/10 border border-blue-500/30 rounded-full flex items-center justify-center mb-4 text-blue-400">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-        </div>
-        <h3 class="text-xl font-bold mb-1">DEVICE ACCESS LOCKED</h3>
-        <p class="text-xs text-gray-400 mb-6">Your device ID requires verification from the administrator</p>
-        
-        <div class="bg-gray-950 border border-gray-855 rounded-2xl p-4 mb-5">
-            <span class="text-[10px] font-bold text-gray-500 block mb-1 uppercase">YOUR UNIQUE DEVICE ID</span>
-            <div id="displayDeviceID" class="text-sm font-mono tracking-wider font-bold text-white mb-2">GENERATING...</div>
-            <button onclick="copyDeviceID()" class="text-xs text-blue-400 hover:text-blue-300 font-medium underline">Copy ID to Clipboard</button>
-        </div>
-
-        <a href="https://t.me/Naungthu1610" target="_blank" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl inline-flex items-center justify-center gap-2 transition-all">
-            Contact Admin (@Naungthu1610)
-        </a>
-    </div>
-
-    <!-- SETTINGS MODAL -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-6 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-5 border-b border-gray-800 pb-3">
-                <h3 class="text-lg font-bold">SYSTEM SETTINGS</h3>
-                <button onclick="toggleModal('settingsModal')" class="text-gray-400 hover:text-white">&times;</button>
-            </div>
-
-            <div class="flex gap-2 border-b border-gray-800 pb-4 mb-4 text-xs font-bold">
-                <button onclick="switchSettingsSection('about')" id="btn-sec-about" class="px-3 py-1.5 bg-gray-800 text-white rounded-lg">ABOUT</button>
-                <button onclick="switchSettingsSection('help')" id="btn-sec-help" class="px-3 py-1.5 text-gray-400 rounded-lg">HELP</button>
-                <button onclick="switchSettingsSection('admin')" id="btn-sec-admin" class="px-3 py-1.5 text-gray-400 rounded-lg">ADMIN</button>
-            </div>
-
-            <div id="sec-about" class="settings-sec space-y-3 text-xs text-gray-400 leading-relaxed">
-                <p class="font-bold text-gray-200 text-sm">HOW TO PLAY:</p>
-                <p>1. Select any number from <span class="text-gray-200">0 to 9</span>.</p>
-                <p>2. <span class="text-blue-400">0-4 = SMALL</span>, <span class="text-purple-400">5-9 = BIG</span>.</p>
-                <p>3. Win if your guess matches the previous category.</p>
-                <p>4. <span class="text-amber-400">3 consecutive losses</span> = REVERSE MODE.</p>
-                <p>5. <span class="text-rose-400">15 rounds</span> = System limit.</p>
-            </div>
-
-            <div id="sec-help" class="settings-sec hidden space-y-4 text-center py-4">
-                <p class="text-sm text-gray-300">Need support or registration?</p>
-                <a href="https://t.me/Naungthu1610" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg text-white transition-all">
-                    Message @Naungthu1610
-                </a>
-            </div>
-
-            <div id="sec-admin" class="settings-sec hidden space-y-4">
-                <div id="adminAuthForm" class="space-y-3">
-                    <div>
-                        <label class="text-[10px] font-bold text-gray-500 block mb-1 uppercase">🔑 ADMIN KEYPASS</label>
-                        <input type="password" id="adminPassInput" placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-white">
-                    </div>
-                    <button onclick="verifyAdminAuth()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-xl text-white transition-all">VERIFY SYSTEM IDENTITY</button>
-                </div>
-
-                <div id="adminContentArea" class="hidden space-y-4">
-                    <!-- 🔍 SEARCH BAR - ID ရှာဖွေရန် -->
-                    <div class="bg-gray-950 p-3 border border-gray-800 rounded-xl">
-                        <div class="flex gap-2">
-                            <input type="text" id="searchUserId" placeholder="🔍 Search User ID..." class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
-                            <button onclick="searchAndApproveUser()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded-lg text-white transition-all whitespace-nowrap">
-                                🔍 FIND & APPROVE
-                            </button>
-                        </div>
-                        <div id="searchResult" class="mt-2 text-xs text-gray-400 min-h-[20px]"></div>
-                    </div>
-
-                    <div class="bg-gray-950 p-4 border border-gray-800 rounded-2xl">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">🌐 CENTRALIZED USER DATABASE</span>
-                            <span id="userCount" class="text-[10px] text-gray-500">Total: 0 users</span>
-                        </div>
-                        <div class="overflow-x-auto text-[11px] max-h-[300px] overflow-y-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="sticky top-0 bg-gray-950">
-                                    <tr class="border-b border-gray-800 text-gray-500 text-[10px] uppercase">
-                                        <th class="pb-2 font-semibold">USER ID</th>
-                                        <th class="pb-2 font-semibold text-center">LOCKOUT</th>
-                                        <th class="pb-2 font-semibold text-right">ACTIONS</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="dbTableBody" class="text-gray-300 divide-y divide-gray-900">
-                                    <tr><td colspan="3" class="py-4 text-center text-gray-500 text-xs">No users registered yet</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         // ============================================================
-        // CENTRALIZED DATABASE SYSTEM (No Firebase)
+        // 🔐 PASSWORD VERIFICATION
         // ============================================================
-        
-        function getDB() {
-            let db = localStorage.getItem('central_user_db');
-            if (!db) {
-                db = {};
-                localStorage.setItem('central_user_db', JSON.stringify(db));
-                return {};
-            }
-            try {
-                return JSON.parse(db);
-            } catch(e) {
-                return {};
-            }
-        }
+        const CORRECT_PASSWORD = "NTX871033SM";
 
-        function saveDB(db) {
-            localStorage.setItem('central_user_db', JSON.stringify(db));
-            window.dispatchEvent(new StorageEvent('storage', {
-                key: 'central_user_db',
-                newValue: JSON.stringify(db)
-            }));
-        }
-
-        function registerUser(deviceId) {
-            let db = getDB();
-            if (!db[deviceId]) {
-                db[deviceId] = {
-                    approved: false,
-                    lockedUntil: 0,
-                    registeredAt: Date.now()
-                };
-                saveDB(db);
-            }
-            return db[deviceId];
-        }
-
-        // ============================================================
-        // 🔍 SEARCH & APPROVE FUNCTION
-        // ============================================================
-        function searchAndApproveUser() {
-            const searchInput = document.getElementById('searchUserId');
-            const searchResult = document.getElementById('searchResult');
-            const query = searchInput.value.trim();
+        function verifyPassword() {
+            const input = document.getElementById('passwordInput');
+            const error = document.getElementById('passwordError');
+            const password = input.value.trim();
             
-            if (!query) {
-                searchResult.innerHTML = '⚠️ Please enter a User ID to search';
-                searchResult.className = 'mt-2 text-xs text-amber-400';
-                return;
-            }
-
-            const db = getDB();
-            const keys = Object.keys(db);
-            
-            // Case-insensitive search
-            const found = keys.filter(id => id.toLowerCase().includes(query.toLowerCase()));
-            
-            if (found.length === 0) {
-                searchResult.innerHTML = `❌ No user found matching "<strong>${query}</strong>"`;
-                searchResult.className = 'mt-2 text-xs text-rose-400';
-                return;
-            }
-
-            if (found.length === 1) {
-                const userId = found[0];
-                const user = db[userId];
-                const isApproved = user.approved;
+            if (password === CORRECT_PASSWORD) {
+                // Password correct - hide gateway, show app
+                document.getElementById('passwordGateway').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                error.classList.add('hidden');
                 
-                if (isApproved) {
-                    searchResult.innerHTML = `✅ User <strong>${userId}</strong> is already <span class="text-emerald-400">APPROVED</span>`;
-                    searchResult.className = 'mt-2 text-xs text-emerald-400';
-                } else {
-                    // Auto-approve the user
-                    window.setAccessStatusForUser(userId, true);
-                    searchResult.innerHTML = `✅ User <strong>${userId}</strong> has been <span class="text-emerald-400">APPROVED</span> successfully!`;
-                    searchResult.className = 'mt-2 text-xs text-emerald-400';
-                    searchInput.value = '';
-                    renderDBTable();
-                }
+                // Clear input for security
+                input.value = '';
+                
+                // Show success feedback
+                const btn = document.getElementById('unlockBtn');
+                btn.textContent = '✅ UNLOCKED';
+                btn.className = 'w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2';
+                setTimeout(() => {
+                    btn.textContent = '🔓 UNLOCK';
+                    btn.className = 'w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2';
+                }, 1500);
             } else {
-                // Multiple matches found - show list
-                let html = `🔍 Found <strong>${found.length}</strong> users matching "<strong>${query}</strong>":<br>`;
-                found.forEach(id => {
-                    const isApproved = db[id].approved;
-                    html += `<span class="inline-block px-2 py-0.5 m-0.5 bg-gray-800 rounded text-[10px] ${isApproved ? 'text-emerald-400' : 'text-amber-400'}">${id} ${isApproved ? '✅' : '⏳'}</span>`;
-                });
-                html += `<br><span class="text-gray-500 text-[10px]">Click specific user from table below to approve</span>`;
-                searchResult.innerHTML = html;
-                searchResult.className = 'mt-2 text-xs text-blue-400';
+                // Password incorrect
+                error.classList.remove('hidden');
+                input.value = '';
+                input.focus();
                 
-                // Scroll to table and highlight matches
-                const table = document.querySelector('#dbTableBody');
-                if (table) {
-                    table.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
+                // Shake animation
+                const container = document.getElementById('passwordGateway');
+                container.style.animation = 'none';
+                setTimeout(() => {
+                    container.style.animation = 'pulse-glow 2s ease-in-out infinite';
+                }, 10);
             }
         }
 
-        // Enter key support for search
+        // Enter key support for password input
         document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchUserId');
-            if (searchInput) {
-                searchInput.addEventListener('keypress', function(e) {
+            const input = document.getElementById('passwordInput');
+            if (input) {
+                input.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
-                        searchAndApproveUser();
+                        verifyPassword();
                     }
                 });
+                // Auto focus
+                input.focus();
             }
         });
 
         // ============================================================
-        // SYSTEM IDENTIFICATION
+        // 🕐 CLOCK FUNCTION
         // ============================================================
-        let deviceID = localStorage.getItem('app_device_id');
-        if (!deviceID) {
-            deviceID = 'UID-' + Math.floor(100000 + Math.random() * 900000);
-            localStorage.setItem('app_device_id', deviceID);
-        }
-        window.deviceID = deviceID;
-        document.getElementById('displayDeviceID').innerText = deviceID;
-
-        registerUser(deviceID);
-
-        // ============================================================
-        // ACCESS CONTROL
-        // ============================================================
-        function enforceAccessControl() {
-            const db = getDB();
-            const userRecord = db[deviceID];
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}:${seconds}`;
             
-            if (userRecord && userRecord.approved) {
-                document.getElementById('gatewayLock').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                checkLockoutTimer(userRecord);
-            } else {
-                document.getElementById('gatewayLock').classList.remove('hidden');
-                document.getElementById('mainApp').classList.add('hidden');
-            }
+            const clockTime = document.getElementById('clockTime');
+            if (clockTime) clockTime.textContent = timeString;
         }
 
-        // ============================================================
-        // ADMIN FUNCTIONS
-        // ============================================================
-        window.setAccessStatusForUser = function(targetId, status) {
-            let db = getDB();
-            if (db[targetId]) {
-                db[targetId].approved = status;
-                saveDB(db);
-                alert(`✅ User ${targetId} access changed to: ${status ? 'APPROVED' : 'REVOKED'}`);
-                
-                if (targetId === deviceID) {
-                    enforceAccessControl();
-                }
-                renderDBTable();
-            } else {
-                alert(`❌ User ${targetId} not found in database`);
-            }
-        };
+        setInterval(updateClock, 1000);
+        updateClock();
 
         // ============================================================
-        // UI FUNCTIONS
+        // TAB MANAGEMENT
         // ============================================================
-        function copyDeviceID() {
-            navigator.clipboard.writeText(window.deviceID);
-            alert("Device ID copied: " + window.deviceID);
-        }
-
         function switchTab(target) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById('page-' + target).classList.remove('hidden');
@@ -392,105 +229,21 @@
             document.getElementById('tab-game').className = target === 'game' ? 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white' : 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-400 hover:text-white';
         }
 
-        function toggleModal(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('hidden');
-            if (!el.classList.contains('hidden')) {
-                renderDBTable();
-                // Clear search result when opening
-                document.getElementById('searchResult').innerHTML = '';
-                document.getElementById('searchResult').className = 'mt-2 text-xs text-gray-400';
-            }
-        }
-
-        function switchSettingsSection(sec) {
-            document.querySelectorAll('.settings-sec').forEach(el => el.classList.add('hidden'));
-            document.getElementById('sec-' + sec).classList.remove('hidden');
-            ['about', 'help', 'admin'].forEach(k => {
-                document.getElementById('btn-sec-' + k).className = k === sec ? 'px-3 py-1.5 bg-gray-800 text-white rounded-lg' : 'px-3 py-1.5 text-gray-400 rounded-lg';
-            });
-        }
-
-        function verifyAdminAuth() {
-            const pass = document.getElementById('adminPassInput').value;
-            if (pass === '871033') {
-                document.getElementById('adminAuthForm').classList.add('hidden');
-                document.getElementById('adminContentArea').classList.remove('hidden');
-                renderDBTable();
-                document.getElementById('searchResult').innerHTML = '🔍 Enter User ID to search and auto-approve';
-                document.getElementById('searchResult').className = 'mt-2 text-xs text-gray-400';
-            } else {
-                alert("❌ INVALID DECRYPTION CREDENTIALS");
-            }
-        }
-
-        // ============================================================
-        // RENDER DATABASE TABLE
-        // ============================================================
-        function renderDBTable() {
-            const db = getDB();
-            const tbody = document.getElementById('dbTableBody');
-            const userCount = document.getElementById('userCount');
-            
-            if (!tbody) return;
-            
-            tbody.innerHTML = '';
-            
-            const keys = Object.keys(db);
-            if (keys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-gray-500 text-xs">No users registered yet</td></tr>`;
-                if (userCount) userCount.textContent = 'Total: 0 users';
-                return;
-            }
-
-            if (userCount) userCount.textContent = `Total: ${keys.length} users`;
-
-            // Sort: show current device first, then pending, then approved
-            keys.sort((a, b) => {
-                if (a === deviceID) return -1;
-                if (b === deviceID) return 1;
-                if (db[a].approved !== db[b].approved) {
-                    return db[a].approved ? 1 : -1;
-                }
-                return a.localeCompare(b);
-            });
-
-            keys.forEach(id => {
-                const row = document.createElement('tr');
-                const user = db[id];
-                const isLocked = user.lockedUntil > Date.now();
-                const isApproved = user.approved;
-                const isCurrent = id === deviceID;
-                
-                row.className = "border-b border-gray-950 hover:bg-gray-855/50 user-row";
-                row.innerHTML = `
-                    <td class="py-2.5 font-mono text-[11px]">
-                        <div class="${isApproved ? 'text-emerald-400 font-bold' : 'text-amber-400'}">${id}</div>
-                        ${isCurrent ? '<span class="text-[9px] text-blue-500 font-bold">⬅️ YOU</span>' : ''}
-                        ${!isApproved && !isCurrent ? '<span class="text-[9px] text-amber-500 ml-1">⏳ PENDING</span>' : ''}
-                    </td>
-                    <td class="py-2.5 text-center">
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-black tracking-wide ${isLocked ? 'bg-red-500/20 text-red-400 border border-red-500/20' : 'bg-gray-855 text-gray-600'}">
-                            ${isLocked ? '🔒 LOCKED' : '✅ ACTIVE'}
-                        </span>
-                    </td>
-                    <td class="py-2.5 text-right space-x-1">
-                        ${!isApproved ? 
-                            `<button onclick="window.setAccessStatusForUser('${id}', true)" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-[10px] font-bold rounded text-white transition-all">APPROVE</button>` :
-                            `<button onclick="window.setAccessStatusForUser('${id}', false)" class="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-[10px] font-bold rounded text-white transition-all">REVOKE</button>`
-                        }
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
         // ============================================================
         // GAME LOGIC ENGINE
         // ============================================================
         let rounds = 0, wins = 0, losses = 0, consecutiveLosses = 0;
-        let isInverted = false, selectedNumber = null, previousNumber = null;
+        let selectedNumber = null; 
+        let previousNumber = null;
         let timerInterval = null;
+
+        function getPrediction(num) {
+            let isSmall = num <= 4;
+            if (consecutiveLosses >= 3) {
+                isSmall = !isSmall;
+            }
+            return isSmall ? "SMALL" : "BIG";
+        }
 
         function selectNumber(num) {
             selectedNumber = num;
@@ -501,18 +254,22 @@
             });
 
             const display = document.getElementById('predictionDisplay');
-            let isSmall = num <= 4;
-            if (isInverted) isSmall = !isSmall;
-
-            if (isSmall) {
+            const prediction = getPrediction(num);
+            
+            if (prediction === "SMALL") {
                 display.innerText = "SMALL";
                 display.className = "text-5xl font-black tracking-widest neon-text-small";
             } else {
                 display.innerText = "BIG";
                 display.className = "text-5xl font-black tracking-widest neon-text-big";
             }
-            document.getElementById('gameStatusText').innerText = "Ready to proceed. Press NEXT STEP.";
-            document.getElementById('gameStatusText').className = "text-sm font-bold tracking-wide text-blue-400";
+            
+            let modeText = "";
+            if (consecutiveLosses >= 3) {
+                modeText = " (REVERSE MODE)";
+            }
+            document.getElementById('gameStatusText').innerText = "Ready to proceed. Press NEXT STEP." + modeText;
+            document.getElementById('gameStatusText').className = consecutiveLosses >= 3 ? "text-sm font-bold tracking-wide text-red-400" : "text-sm font-bold tracking-wide text-blue-400";
         }
 
         function handleNext() {
@@ -522,20 +279,24 @@
             }
 
             let currentOutcome = "Win";
+            
             if (previousNumber !== null) {
-                const isPrevSmall = previousNumber <= 4;
-                const isCurrSmall = selectedNumber <= 4;
-                currentOutcome = (!isInverted) ? ((isPrevSmall === isCurrSmall) ? "Win" : "Loss") : ((isPrevSmall !== isCurrSmall) ? "Win" : "Loss");
+                const prevPrediction = getPrediction(previousNumber);
+                const currPrediction = getPrediction(selectedNumber);
+                
+                if (prevPrediction === currPrediction) {
+                    currentOutcome = "Win";
+                } else {
+                    currentOutcome = "Loss";
+                }
             }
 
             if (currentOutcome === "Win") {
                 wins++;
                 consecutiveLosses = 0;
-                isInverted = false;
             } else {
                 losses++;
                 consecutiveLosses++;
-                if (consecutiveLosses >= 3) isInverted = true;
             }
 
             rounds++;
@@ -545,12 +306,22 @@
             document.getElementById('streakCount').innerText = `${consecutiveLosses} / 3`;
 
             const statusText = document.getElementById('gameStatusText');
-            statusText.innerText = currentOutcome === "Win" ? "OUTCOME: WIN ✔" : "OUTCOME: LOSS ✘";
-            statusText.className = currentOutcome === "Win" ? "text-sm font-bold tracking-wide text-emerald-400" : "text-sm font-bold tracking-wide text-rose-500";
+            if (currentOutcome === "Win") {
+                statusText.innerText = "OUTCOME: WIN ✔";
+                statusText.className = "text-sm font-bold tracking-wide text-emerald-400";
+            } else {
+                statusText.innerText = "OUTCOME: LOSS ✘";
+                statusText.className = "text-sm font-bold tracking-wide text-rose-500";
+            }
 
             const modeBadge = document.getElementById('modeBadge');
-            modeBadge.innerHTML = isInverted ? `<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> REVERSE MODE` : `<span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> NORMAL MODE`;
-            modeBadge.className = isInverted ? "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full text-xs font-semibold" : "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-xs font-semibold";
+            if (consecutiveLosses >= 3) {
+                modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> REVERSE MODE (Loss ${consecutiveLosses}/3)`;
+                modeBadge.className = "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full text-xs font-semibold";
+            } else {
+                modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> NORMAL MODE`;
+                modeBadge.className = "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-xs font-semibold";
+            }
 
             addHistoryLog(currentOutcome, selectedNumber);
             previousNumber = selectedNumber;
@@ -559,6 +330,9 @@
             document.querySelectorAll('.num-btn').forEach(btn => {
                 btn.className = "num-btn h-12 bg-gray-800/40 border border-gray-700/40 rounded-xl font-bold text-lg text-gray-300 transition-all";
             });
+
+            document.getElementById('predictionDisplay').innerText = "-";
+            document.getElementById('predictionDisplay').className = "text-6xl font-black tracking-widest text-gray-600";
 
             if (rounds >= 15) {
                 if (currentOutcome === "Loss") {
@@ -578,36 +352,25 @@
         }
 
         function triggerLockout() {
-            let db = getDB();
-            if (db[deviceID]) {
-                const lockoutDuration = 2 * 60 * 60 * 1000;
-                db[deviceID].lockedUntil = Date.now() + lockoutDuration;
-                saveDB(db);
-                checkLockoutTimer(db[deviceID]);
-            }
+            const lockoutDuration = 2 * 60 * 60 * 1000;
+            const lockedUntil = Date.now() + lockoutDuration;
+            startLockoutTimer(lockedUntil);
         }
 
-        function checkLockoutTimer(userRecord) {
-            if (!userRecord || !userRecord.lockedUntil) return;
+        function startLockoutTimer(lockedUntil) {
+            document.getElementById('timerOverlay').classList.remove('hidden');
+            if (timerInterval) clearInterval(timerInterval);
 
-            const remainingTime = userRecord.lockedUntil - Date.now();
-            if (remainingTime > 0) {
-                document.getElementById('timerOverlay').classList.remove('hidden');
-                if (timerInterval) clearInterval(timerInterval);
-
-                timerInterval = setInterval(() => {
-                    const timeLeft = userRecord.lockedUntil - Date.now();
-                    if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        document.getElementById('timerOverlay').classList.add('hidden');
-                        resetLocalGameSession();
-                    } else {
-                        updateTimerDisplay(timeLeft);
-                    }
-                }, 1000);
-            } else {
-                document.getElementById('timerOverlay').classList.add('hidden');
-            }
+            timerInterval = setInterval(() => {
+                const timeLeft = lockedUntil - Date.now();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('timerOverlay').classList.add('hidden');
+                    resetLocalGameSession();
+                } else {
+                    updateTimerDisplay(timeLeft);
+                }
+            }, 1000);
         }
 
         function updateTimerDisplay(ms) {
@@ -626,8 +389,9 @@
             wins = 0;
             losses = 0;
             consecutiveLosses = 0;
-            isInverted = false;
             previousNumber = null;
+            selectedNumber = null;
+            
             document.getElementById('roundCount').innerText = "0 / 15";
             document.getElementById('roundCount').className = "text-lg font-black text-gray-200 mt-0.5";
             document.getElementById('winCount').innerText = "0";
@@ -638,50 +402,19 @@
             document.getElementById('predictionDisplay').className = "text-6xl font-black tracking-widest text-gray-600";
             document.getElementById('gameStatusText').innerText = "Please select a number above";
             document.getElementById('gameStatusText').className = "text-sm font-bold tracking-wide text-gray-500";
-
-            let db = getDB();
-            if (db[deviceID]) {
-                db[deviceID].lockedUntil = 0;
-                saveDB(db);
-            }
+            
+            const modeBadge = document.getElementById('modeBadge');
+            modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> NORMAL MODE`;
+            modeBadge.className = "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-xs font-semibold";
         }
 
         // ============================================================
-        // LISTEN FOR DATABASE CHANGES
+        // MAKE FUNCTIONS GLOBALLY ACCESSIBLE
         // ============================================================
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'central_user_db') {
-                if (!document.getElementById('settingsModal').classList.contains('hidden')) {
-                    renderDBTable();
-                }
-                enforceAccessControl();
-            }
-        });
-
-        // ============================================================
-        // INITIALIZATION
-        // ============================================================
-        enforceAccessControl();
-
-        if (!document.getElementById('settingsModal').classList.contains('hidden')) {
-            renderDBTable();
-        }
-
-        // Make functions globally accessible
-        window.getDB = getDB;
-        window.saveDB = saveDB;
-        window.registerUser = registerUser;
-        window.enforceAccessControl = enforceAccessControl;
-        window.renderDBTable = renderDBTable;
-        window.verifyAdminAuth = verifyAdminAuth;
         window.selectNumber = selectNumber;
         window.handleNext = handleNext;
         window.switchTab = switchTab;
-        window.toggleModal = toggleModal;
-        window.switchSettingsSection = switchSettingsSection;
-        window.copyDeviceID = copyDeviceID;
-        window.searchAndApproveUser = searchAndApproveUser;
-        window.setAccessStatusForUser = window.setAccessStatusForUser;
+        window.verifyPassword = verifyPassword;
     </script>
 </body>
 </html>
