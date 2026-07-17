@@ -17,6 +17,10 @@
         .neon-text-big { color: #c084fc; text-shadow: 0 0 10px rgba(192, 132, 252, 0.6), 0 0 30px rgba(192, 132, 252, 0.3); animation: subtleShake 3s ease-in-out infinite; }
         .panel-glow { box-shadow: 0 0 25px rgba(59, 130, 246, 0.15); }
         .password-container { animation: pulse-glow 2s ease-in-out infinite; }
+        .result-btn { transition: all 0.2s ease; }
+        .result-btn:hover { transform: scale(1.05); }
+        .result-btn:active { transform: scale(0.95); }
+        .manual-mode { border: 2px dashed rgba(251, 191, 36, 0.3); }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen flex items-center justify-center p-4">
@@ -45,7 +49,7 @@
         <div class="mt-4 text-[9px] text-gray-600">Enter the access code provided by the administrator</div>
     </div>
 
-    <!-- MAIN APP CONTAINER (Hidden until password is correct) -->
+    <!-- MAIN APP CONTAINER -->
     <div id="mainApp" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden panel-glow hidden">
         
         <!-- Timer Overlay -->
@@ -92,6 +96,7 @@
                 </div>
             </div>
 
+            <!-- Prediction Display -->
             <div class="bg-gray-950 border border-gray-855 rounded-2xl p-7 mb-6 text-center shadow-inner">
                 <span class="text-[11px] uppercase tracking-wider text-gray-500 font-bold block mb-1">PREDICTION TYPE</span>
                 <div id="predictionDisplay" class="text-6xl font-black tracking-widest text-gray-600 transition-all duration-300">
@@ -99,6 +104,7 @@
                 </div>
             </div>
 
+            <!-- Number Buttons -->
             <div class="grid grid-cols-5 gap-2.5 mb-5">
                 <script>
                     for(let i=0; i<=9; i++) {
@@ -107,17 +113,37 @@
                 </script>
             </div>
 
+            <!-- NEXT Button -->
             <button onclick="handleNext()" id="nextBtn" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
                 NEXT STEP
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
             </button>
 
-            <div class="mt-4 mb-5 bg-gray-950/60 border border-gray-855 rounded-xl p-3 text-center min-h-[48px] flex items-center justify-center">
+            <!-- ⭐ MANUAL WIN/LOSS SELECTION -->
+            <div class="mt-4 mb-3 p-3 bg-gray-950/80 border border-amber-500/20 rounded-xl manual-mode">
+                <div class="text-center mb-2">
+                    <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">🎯 MANUAL RESULT SELECTION</span>
+                    <p class="text-[9px] text-gray-500">Choose the actual result to test the logic</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="setManualResult('Win')" id="manualWinBtn" class="result-btn flex-1 py-2.5 bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/30 rounded-xl font-bold text-sm text-emerald-400 transition-all">
+                        ✅ WIN
+                    </button>
+                    <button onclick="setManualResult('Loss')" id="manualLossBtn" class="result-btn flex-1 py-2.5 bg-rose-600/30 hover:bg-rose-600/50 border border-rose-500/30 rounded-xl font-bold text-sm text-rose-400 transition-all">
+                        ❌ LOSS
+                    </button>
+                </div>
+                <div id="manualResultStatus" class="text-center mt-2 text-[10px] text-gray-500">Select WIN or LOSS after NEXT STEP</div>
+            </div>
+
+            <!-- Status Text -->
+            <div class="mt-2 mb-5 bg-gray-950/60 border border-gray-855 rounded-xl p-3 text-center min-h-[48px] flex items-center justify-center">
                 <div id="gameStatusText" class="text-sm font-bold tracking-wide text-gray-500">
                     Please select a number above
                 </div>
             </div>
 
+            <!-- Score Board -->
             <div class="grid grid-cols-3 gap-3 border-t border-gray-800 pt-5 text-center">
                 <div class="bg-gray-950/40 p-3 border border-gray-855 rounded-xl">
                     <span class="text-[10px] font-bold text-gray-500 uppercase block">WIN</span>
@@ -133,6 +159,7 @@
                 </div>
             </div>
 
+            <!-- History Logs -->
             <div class="mt-5">
                 <span class="text-[10px] font-bold text-gray-500 uppercase block mb-2">RECENT OUTCOMES</span>
                 <div id="historyLogs" class="flex flex-wrap gap-1.5 min-h-[24px]"></div>
@@ -147,7 +174,35 @@
 
     <script>
         // ============================================================
-        // 🔐 PASSWORD VERIFICATION
+        // 🔐 DATABASE - localStorage (အားလုံးအတွက် တူညီတဲ့ Database)
+        // ============================================================
+        function getDB() {
+            let db = localStorage.getItem('game_system_db');
+            if (!db) {
+                db = JSON.stringify({
+                    users: {}  // { deviceId: { rounds, wins, losses, consecutiveLosses, lockedUntil } }
+                });
+                localStorage.setItem('game_system_db', db);
+            }
+            return JSON.parse(db);
+        }
+
+        function saveDB(db) {
+            localStorage.setItem('game_system_db', JSON.stringify(db));
+        }
+
+        // ============================================================
+        // 🔐 DEVICE ID
+        // ============================================================
+        let deviceID = localStorage.getItem('app_device_id');
+        if (!deviceID) {
+            deviceID = 'UID-' + Math.floor(100000 + Math.random() * 900000);
+            localStorage.setItem('app_device_id', deviceID);
+        }
+        window.deviceID = deviceID;
+
+        // ============================================================
+        // 🔐 PASSWORD VERIFICATION (အကောင့်ဖွင့်ရန်)
         // ============================================================
         const CORRECT_PASSWORD = "NTX871033SM";
 
@@ -157,15 +212,11 @@
             const password = input.value.trim();
             
             if (password === CORRECT_PASSWORD) {
-                // Password correct - hide gateway, show app
                 document.getElementById('passwordGateway').classList.add('hidden');
                 document.getElementById('mainApp').classList.remove('hidden');
                 error.classList.add('hidden');
-                
-                // Clear input for security
                 input.value = '';
                 
-                // Show success feedback
                 const btn = document.getElementById('unlockBtn');
                 btn.textContent = '✅ UNLOCKED';
                 btn.className = 'w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2';
@@ -173,13 +224,13 @@
                     btn.textContent = '🔓 UNLOCK';
                     btn.className = 'w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2';
                 }, 1500);
+                
+                // Load user data from database
+                loadUserData();
             } else {
-                // Password incorrect
                 error.classList.remove('hidden');
                 input.value = '';
                 input.focus();
-                
-                // Shake animation
                 const container = document.getElementById('passwordGateway');
                 container.style.animation = 'none';
                 setTimeout(() => {
@@ -188,7 +239,6 @@
             }
         }
 
-        // Enter key support for password input
         document.addEventListener('DOMContentLoaded', function() {
             const input = document.getElementById('passwordInput');
             if (input) {
@@ -197,10 +247,84 @@
                         verifyPassword();
                     }
                 });
-                // Auto focus
                 input.focus();
             }
         });
+
+        // ============================================================
+        // 👤 USER DATA MANAGEMENT (Database နဲ့ Sync)
+        // ============================================================
+        function loadUserData() {
+            const db = getDB();
+            
+            // Create user if not exists
+            if (!db.users[deviceID]) {
+                db.users[deviceID] = {
+                    rounds: 0,
+                    wins: 0,
+                    losses: 0,
+                    consecutiveLosses: 0,
+                    lockedUntil: 0
+                };
+                saveDB(db);
+            }
+            
+            const user = db.users[deviceID];
+            
+            // Check if locked
+            if (user.lockedUntil > Date.now()) {
+                startLockoutTimer(user.lockedUntil);
+                return;
+            }
+            
+            // Load data
+            rounds = user.rounds || 0;
+            wins = user.wins || 0;
+            losses = user.losses || 0;
+            consecutiveLosses = user.consecutiveLosses || 0;
+            
+            updateUI();
+            
+            // Check if 15 rounds reached and not locked
+            if (rounds >= 15) {
+                document.getElementById('gameStatusText').innerText = '🎯 15 rounds completed! Start a new game?';
+                document.getElementById('gameStatusText').className = 'text-sm font-bold tracking-wide text-amber-400';
+                // Auto lock if 15 rounds reached with win
+                if (wins > losses) {
+                    triggerLockout();
+                }
+            }
+        }
+
+        function saveUserData() {
+            const db = getDB();
+            if (db.users[deviceID]) {
+                db.users[deviceID] = {
+                    rounds: rounds,
+                    wins: wins,
+                    losses: losses,
+                    consecutiveLosses: consecutiveLosses,
+                    lockedUntil: db.users[deviceID].lockedUntil || 0
+                };
+                saveDB(db);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('roundCount').innerText = `${rounds} / 15`;
+            document.getElementById('winCount').innerText = wins;
+            document.getElementById('lossCount').innerText = losses;
+            document.getElementById('streakCount').innerText = `${consecutiveLosses} / 3`;
+            
+            const modeBadge = document.getElementById('modeBadge');
+            if (consecutiveLosses >= 3) {
+                modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 🔄 REVERSE MODE (Loss ${consecutiveLosses}/3)`;
+                modeBadge.className = "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full text-xs font-semibold";
+            } else {
+                modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> NORMAL MODE`;
+                modeBadge.className = "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-xs font-semibold";
+            }
+        }
 
         // ============================================================
         // 🕐 CLOCK FUNCTION
@@ -236,17 +360,32 @@
         let selectedNumber = null; 
         let previousNumber = null;
         let timerInterval = null;
+        let isFirstRound = true;
+        let waitingForResult = false;
 
-        function getPrediction(num) {
-            let isSmall = num <= 4;
-            if (consecutiveLosses >= 3) {
+        function isTopRow(num) {
+            return num >= 0 && num <= 4;
+        }
+
+        function getPrediction(num, isReverse) {
+            let isSmall = isTopRow(num);
+            if (isReverse) {
                 isSmall = !isSmall;
             }
             return isSmall ? "SMALL" : "BIG";
         }
 
         function selectNumber(num) {
+            // Check if locked
+            const db = getDB();
+            if (db.users[deviceID] && db.users[deviceID].lockedUntil > Date.now()) {
+                alert('⏳ Your session is locked! Please wait for the timer to expire.');
+                return;
+            }
+            
             selectedNumber = num;
+            waitingForResult = false;
+            
             document.querySelectorAll('.num-btn').forEach((btn, index) => {
                 btn.className = (index === num) ? 
                     "num-btn h-12 bg-blue-600 border-blue-400 text-white rounded-xl font-bold text-lg scale-95 transition-all shadow-[0_0_15px_rgba(59,130,246,0.5)]" : 
@@ -254,7 +393,38 @@
             });
 
             const display = document.getElementById('predictionDisplay');
-            const prediction = getPrediction(num);
+            display.innerText = "⏳";
+            display.className = "text-5xl font-black tracking-widest text-gray-500 animate-pulse";
+            
+            let modeText = "";
+            if (consecutiveLosses >= 3) {
+                modeText = " (REVERSE MODE ACTIVE)";
+            }
+            document.getElementById('gameStatusText').innerText = "Number selected. Press NEXT STEP to see prediction." + modeText;
+            document.getElementById('gameStatusText').className = consecutiveLosses >= 3 ? "text-sm font-bold tracking-wide text-red-400" : "text-sm font-bold tracking-wide text-blue-400";
+            
+            document.getElementById('manualResultStatus').innerHTML = '⏳ Press NEXT STEP first, then select WIN or LOSS';
+            document.getElementById('manualResultStatus').className = 'text-center mt-2 text-[10px] text-amber-400';
+        }
+
+        function handleNext() {
+            // Check if locked
+            const db = getDB();
+            if (db.users[deviceID] && db.users[deviceID].lockedUntil > Date.now()) {
+                alert('⏳ Your session is locked! Please wait for the timer to expire.');
+                return;
+            }
+            
+            if (selectedNumber === null) {
+                alert("Please select a number first!");
+                return;
+            }
+
+            const isReverseMode = (consecutiveLosses >= 3);
+            
+            // Show Prediction
+            const display = document.getElementById('predictionDisplay');
+            const prediction = getPrediction(selectedNumber, isReverseMode);
             
             if (prediction === "SMALL") {
                 display.innerText = "SMALL";
@@ -263,34 +433,33 @@
                 display.innerText = "BIG";
                 display.className = "text-5xl font-black tracking-widest neon-text-big";
             }
-            
-            let modeText = "";
-            if (consecutiveLosses >= 3) {
-                modeText = " (REVERSE MODE)";
-            }
-            document.getElementById('gameStatusText').innerText = "Ready to proceed. Press NEXT STEP." + modeText;
-            document.getElementById('gameStatusText').className = consecutiveLosses >= 3 ? "text-sm font-bold tracking-wide text-red-400" : "text-sm font-bold tracking-wide text-blue-400";
+
+            // Wait for manual result
+            waitingForResult = true;
+            document.getElementById('gameStatusText').innerText = "🎯 Select WIN or LOSS below to continue";
+            document.getElementById('gameStatusText').className = "text-sm font-bold tracking-wide text-amber-400 animate-pulse";
+            document.getElementById('manualResultStatus').innerHTML = '👇 Click WIN or LOSS button below';
+            document.getElementById('manualResultStatus').className = 'text-center mt-2 text-[10px] text-emerald-400 font-bold';
         }
 
-        function handleNext() {
+        function setManualResult(result) {
+            if (!waitingForResult) {
+                alert("Please press NEXT STEP first!");
+                return;
+            }
+            
             if (selectedNumber === null) {
                 alert("Please select a number first!");
                 return;
             }
 
-            let currentOutcome = "Win";
-            
-            if (previousNumber !== null) {
-                const prevPrediction = getPrediction(previousNumber);
-                const currPrediction = getPrediction(selectedNumber);
-                
-                if (prevPrediction === currPrediction) {
-                    currentOutcome = "Win";
-                } else {
-                    currentOutcome = "Loss";
-                }
-            }
+            waitingForResult = false;
+            processResult(result);
+        }
 
+        function processResult(result) {
+            const currentOutcome = result;
+            
             if (currentOutcome === "Win") {
                 wins++;
                 consecutiveLosses = 0;
@@ -300,6 +469,11 @@
             }
 
             rounds++;
+            
+            // Save to database
+            saveUserData();
+            updateUI();
+
             document.getElementById('roundCount').innerText = `${rounds} / 15`;
             document.getElementById('winCount').innerText = wins;
             document.getElementById('lossCount').innerText = losses;
@@ -307,16 +481,16 @@
 
             const statusText = document.getElementById('gameStatusText');
             if (currentOutcome === "Win") {
-                statusText.innerText = "OUTCOME: WIN ✔";
+                statusText.innerText = "OUTCOME: WIN ✔ (Manual)";
                 statusText.className = "text-sm font-bold tracking-wide text-emerald-400";
             } else {
-                statusText.innerText = "OUTCOME: LOSS ✘";
+                statusText.innerText = "OUTCOME: LOSS ✘ (Manual)";
                 statusText.className = "text-sm font-bold tracking-wide text-rose-500";
             }
 
             const modeBadge = document.getElementById('modeBadge');
             if (consecutiveLosses >= 3) {
-                modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> REVERSE MODE (Loss ${consecutiveLosses}/3)`;
+                modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> 🔄 REVERSE MODE (Loss ${consecutiveLosses}/3)`;
                 modeBadge.className = "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full text-xs font-semibold";
             } else {
                 modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> NORMAL MODE`;
@@ -331,9 +505,10 @@
                 btn.className = "num-btn h-12 bg-gray-800/40 border border-gray-700/40 rounded-xl font-bold text-lg text-gray-300 transition-all";
             });
 
-            document.getElementById('predictionDisplay').innerText = "-";
-            document.getElementById('predictionDisplay').className = "text-6xl font-black tracking-widest text-gray-600";
+            document.getElementById('manualResultStatus').innerHTML = `✅ Result recorded: ${currentOutcome}`;
+            document.getElementById('manualResultStatus').className = `text-center mt-2 text-[10px] ${currentOutcome === 'Win' ? 'text-emerald-400' : 'text-rose-400'} font-bold`;
 
+            // Check if 15 rounds reached
             if (rounds >= 15) {
                 if (currentOutcome === "Loss") {
                     document.getElementById('roundCount').innerText = `${rounds} (OVERTIME)`;
@@ -354,6 +529,14 @@
         function triggerLockout() {
             const lockoutDuration = 2 * 60 * 60 * 1000;
             const lockedUntil = Date.now() + lockoutDuration;
+            
+            // Save to database
+            const db = getDB();
+            if (db.users[deviceID]) {
+                db.users[deviceID].lockedUntil = lockedUntil;
+                saveDB(db);
+            }
+            
             startLockoutTimer(lockedUntil);
         }
 
@@ -391,6 +574,21 @@
             consecutiveLosses = 0;
             previousNumber = null;
             selectedNumber = null;
+            isFirstRound = true;
+            waitingForResult = false;
+            
+            // Save to database
+            const db = getDB();
+            if (db.users[deviceID]) {
+                db.users[deviceID].rounds = 0;
+                db.users[deviceID].wins = 0;
+                db.users[deviceID].losses = 0;
+                db.users[deviceID].consecutiveLosses = 0;
+                db.users[deviceID].lockedUntil = 0;
+                saveDB(db);
+            }
+            
+            updateUI();
             
             document.getElementById('roundCount').innerText = "0 / 15";
             document.getElementById('roundCount').className = "text-lg font-black text-gray-200 mt-0.5";
@@ -402,6 +600,8 @@
             document.getElementById('predictionDisplay').className = "text-6xl font-black tracking-widest text-gray-600";
             document.getElementById('gameStatusText').innerText = "Please select a number above";
             document.getElementById('gameStatusText').className = "text-sm font-bold tracking-wide text-gray-500";
+            document.getElementById('manualResultStatus').innerHTML = 'Select WIN or LOSS after NEXT STEP';
+            document.getElementById('manualResultStatus').className = 'text-center mt-2 text-[10px] text-gray-500';
             
             const modeBadge = document.getElementById('modeBadge');
             modeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> NORMAL MODE`;
@@ -415,6 +615,7 @@
         window.handleNext = handleNext;
         window.switchTab = switchTab;
         window.verifyPassword = verifyPassword;
+        window.setManualResult = setManualResult;
     </script>
 </body>
 </html>
