@@ -1,1529 +1,526 @@
 <!DOCTYPE html>
-<html lang="my">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>MM GOLDEN - Web App</title>
-    
-    <!-- RichInfo Telegram Ad Network -->
-    <script src="https://richinfo.co/richpartners/telegram/js/tg-ob.js"></script>
-    
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where, orderBy, limit, arrayUnion, arrayRemove, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyAou0HLlJEhcarQw0FocghOPw9AAMsZlq8",
-            authDomain: "mm-golden-game.firebaseapp.com",
-            projectId: "mm-golden-game",
-            storageBucket: "mm-golden-game.firebasestorage.app",
-            messagingSenderId: "502185650154",
-            appId: "1:502185650154:web:8419088df32a6e29a57493",
-            measurementId: "G-3K0MEYCQQP"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        window.firestore = db;
-        window.fsDoc = doc;
-        window.fsSetDoc = setDoc;
-        window.fsGetDoc = getDoc;
-        window.fsUpdateDoc = updateDoc;
-        window.fsDeleteDoc = deleteDoc;
-        window.fsCollection = collection;
-        window.fsGetDocs = getDocs;
-        window.fsQuery = query;
-        window.fsWhere = where;
-        window.fsOrderBy = orderBy;
-        window.fsLimit = limit;
-        window.fsArrayUnion = arrayUnion;
-        window.fsArrayRemove = arrayRemove;
-        window.fsOnSnapshot = onSnapshot;
-        
-        console.log('✅ Firebase Firestore connected');
-    </script>
-    
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>777 Big Win </title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
-        /* Your existing styles remain the same */
-        @import url('https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@400;500;600;700&display=swap');
-        * { user-select: none; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Pyidaungsu', sans-serif; background: #0a0e1a; color: white; overflow-x: hidden; min-height: 100vh; }
-        .section { display: none; padding-bottom: 120px; animation: fadeInUp 0.4s ease; }
-        .section.active { display: block; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .gold-card { background: linear-gradient(145deg, #1a1f33, #0f1424); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 24px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); transition: transform 0.2s ease; }
-        .gold-card:hover { transform: translateY(-2px); border-color: rgba(251, 191, 36, 0.4); }
-        .btn-yellow { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); color: #0a0e1a; font-weight: 800; border-radius: 16px; transition: all 0.2s ease; border: none; cursor: pointer; }
-        .btn-yellow:active { transform: scale(0.97); }
-        .btn-yellow:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
-        .nav-active { color: #fbbf24 !important; border-top: 3px solid #fbbf24; background: rgba(245, 158, 11, 0.1); border-radius: 12px 12px 0 0; }
-        input, textarea, select { background: #1e293b !important; border: 1px solid #334155 !important; color: #fbbf24 !important; padding: 14px 16px; border-radius: 16px; width: 100%; margin-bottom: 12px; }
-        input:focus, textarea:focus, select:focus { border-color: #fbbf24 !important; outline: none; }
-        .withdraw-btn { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; border-radius: 18px; padding: 18px; font-weight: bold; cursor: pointer; width: 100%; }
-        .withdraw-btn:disabled { background: #4b5563; cursor: not-allowed; }
-        .progress-bar { width: 100%; height: 8px; background: #334155; border-radius: 20px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 20px; transition: width 0.3s ease; }
-        .gradient-text { background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        #gameCanvas { background: linear-gradient(180deg, #1a472a 0%, #0d2818 100%); border-radius: 20px; display: block; margin: 0 auto; cursor: pointer; width: 100%; height: auto; max-width: 340px; }
-        .game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-        .admin-table { width: 100%; font-size: 10px; border-collapse: collapse; }
-        .admin-table th, .admin-table td { padding: 8px 6px; border-bottom: 1px solid rgba(251,191,36,0.15); }
-        .admin-table th { color: #fbbf24; background: rgba(0,0,0,0.3); }
-        .user-row:hover { background: rgba(251,191,36,0.1); cursor: pointer; }
-        .quiz-list, .task-list { max-height: 200px; overflow-y: auto; }
-        .quiz-item, .task-item { background: rgba(0,0,0,0.25); padding: 8px; margin-bottom: 6px; border-radius: 10px; }
-        .completed-tasks-list { max-height: 180px; overflow-y: auto; border-top: 1px solid rgba(251,191,36,0.2); margin-top: 12px; padding-top: 12px; }
-        .completed-task-item { background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 8px; margin-bottom: 5px; font-size: 11px; border-left: 2px solid #10b981; }
-        .quiz-counter { background: #1e293b; border-radius: 20px; padding: 15px; margin-top: 15px; text-align: center; }
-        .counter-value { font-size: 32px; font-weight: bold; color: #fbbf24; }
-        .milestone-item { display: inline-block; background: rgba(0,0,0,0.35); padding: 5px 12px; border-radius: 30px; margin: 4px; font-size: 10px; }
-        .milestone-completed { background: rgba(16,185,129,0.25); border: 1px solid #10b981; color: #10b981; }
-        .milestone-pending { background: #334155; color: #94a3b8; }
-        .milestone-ready { background: rgba(245,158,11,0.3); border: 1px solid #f59e0b; color: #fbbf24; cursor: pointer; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0e1a; z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .error-message { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; padding: 20px; border-radius: 16px; text-align: center; z-index: 3000; border: 1px solid #f59e0b; }
-        .real-time-badge { position: fixed; bottom: 70px; right: 10px; background: #10b981; padding: 4px 8px; border-radius: 20px; font-size: 8px; z-index: 100; }
-        .withdrawal-item { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid #fbbf24; }
-        .status-pending { color: #fbbf24; }
-        .status-approved { color: #10b981; }
-        .status-rejected { color: #ef4444; }
-        .admin-action-btn { background: #334155; border: none; padding: 4px 10px; border-radius: 8px; font-size: 10px; cursor: pointer; margin-left: 5px; }
-        .admin-action-btn.approve { background: #10b981; }
-        .admin-action-btn.reject { background: #ef4444; }
-        .ref-container { position: relative; background: #1e293b; border-radius: 16px; border: 1px solid #fbbf24; padding: 12px; margin-bottom: 16px; }
-        .ref-link-text { font-size: 11px; word-break: break-all; color: #fbbf24; font-family: monospace; padding-right: 60px; }
-        .copy-btn { position: absolute; top: 8px; right: 8px; background: linear-gradient(135deg, #f59e0b, #fbbf24); border: none; border-radius: 10px; padding: 6px 12px; font-size: 11px; font-weight: bold; color: #0a0e1a; cursor: pointer; }
-        .copy-btn:active { transform: scale(0.95); }
-        .copy-success { background: #10b981 !important; color: white !important; }
-        .quiz-choice { background: #1e293b; border: 1px solid #fbbf24; border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; text-align: left; }
-        .quiz-choice:hover { background: #2d3a5e; transform: scale(1.01); }
-        .quiz-choice.selected { background: #fbbf24; color: #0a0e1a; border-color: #f59e0b; }
-        .nav-btn { transition: all 0.2s; }
-        .nav-btn:active { transform: scale(0.95); }
-        .activity-item { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; margin-bottom: 8px; border-left: 3px solid #fbbf24; }
-        .activity-time { font-size: 9px; color: #6b7280; margin-top: 4px; }
-        .btn-icon { width: 40px; height: 40px; background: rgba(0,0,0,0.3); border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .btn-icon:active { transform: scale(0.95); }
-        .cooldown-timer { background: #1e293b; padding: 8px 14px; border-radius: 30px; font-size: 12px; color: #fbbf24; border: 1px solid #fbbf24; display: inline-block; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #080c14;
+        }
+        @keyframes subtleShake {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.03) translateY(-2px); }
+        }
+        .neon-text-small {
+            color: #38bdf8;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.6), 0 0 30px rgba(56, 189, 248, 0.3);
+            animation: subtleShake 3s ease-in-out infinite;
+        }
+        .neon-text-big {
+            color: #c084fc;
+            text-shadow: 0 0 10px rgba(192, 132, 252, 0.6), 0 0 30px rgba(192, 132, 252, 0.3);
+            animation: subtleShake 3s ease-in-out infinite;
+        }
+        .panel-glow {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.15);
+        }
     </style>
 </head>
-<body>
+<body class="text-gray-100 min-h-screen flex items-center justify-center p-4">
 
-<div class="loading-overlay" id="loadingOverlay">
-    <i class="fas fa-spinner fa-spin text-4xl text-amber-400 mb-4"></i>
-    <p class="text-white">Loading MM GOLDEN...</p>
-</div>
-
-<div class="error-message hidden" id="errorMessage">
-    <i class="fas fa-exclamation-triangle text-amber-400 text-3xl mb-3"></i>
-    <p class="text-white mb-2">⚠️ Please open this app from a browser!</p>
-    <p class="text-slate-400 text-xs">ကျေးဇူးပြု၍ ဘရောင်ဇာမှ ဝင်ရောက်ပါ။</p>
-</div>
-
-<div class="real-time-badge hidden" id="realtimeBadge">🔴 Real-time Updates Active</div>
-
-<div class="fixed top-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm p-4 z-50 border-b border-amber-500/20">
-    <div class="max-w-md mx-auto">
-        <div class="flex justify-between items-center mb-2">
-            <div class="flex items-center gap-2">
-                <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-crown text-white text-lg"></i>
+    <!-- MAIN APP CONTAINER -->
+    <div id="mainApp" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden panel-glow hidden">
+        
+        <!-- Local User Timer Lockout Overlay -->
+        <div id="timerOverlay" class="absolute inset-0 bg-gray-950/95 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 hidden">
+            <div class="text-center">
+                <div class="w-20 h-20 mx-auto bg-red-500/10 border border-red-500/30 rounded-full flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                    <svg class="w-10 h-10 text-red-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h1 class="text-2xl font-black gradient-text">MM GOLDEN</h1>
-            </div>
-            <div class="text-right">
-                <span id="total-pts" class="text-2xl font-bold text-amber-400">0</span> 
-                <span class="text-[10px] text-amber-500 font-bold">PTS</span>
+                <h2 class="text-2xl font-bold text-red-400 mb-1">LIMIT REACHED</h2>
+                <p class="text-sm text-gray-400 mb-6">Your session is temporarily locked for 2 hours</p>
+                <div id="countdownDisplay" class="text-4xl font-extrabold tracking-wider text-white font-mono bg-gray-900 border border-gray-800 px-6 py-3 rounded-2xl inline-block shadow-inner">
+                    02:00:00
+                </div>
             </div>
         </div>
-        <div class="flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fas fa-user-circle text-amber-400"></i>
-                <span id="display-name" class="text-sm font-medium text-amber-300">Loading...</span>
-            </div>
-            <div class="flex gap-2">
-                <div class="btn-icon" onclick="showSec('sec-history')">
-                    <i class="fas fa-history text-amber-400 text-sm"></i>
-                </div>
-                <button id="admin-mode-btn" onclick="toggleAdminMode()" class="text-xs text-red-400 bg-red-900/30 px-3 py-1.5 rounded-full hidden">
-                    <i class="fas fa-user-shield"></i> Admin
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<main class="max-w-md mx-auto pt-28 px-4" style="display: none;" id="mainContent">
-    <!-- Home Section -->
-    <div id="sec-home" class="section active space-y-5">
-        <div class="gold-card p-6 text-center">
-            <div class="flex items-center justify-between mb-4">
-                <p class="text-xs text-amber-400 font-bold uppercase"><i class="fas fa-calendar-day mr-2"></i>Daily Bonus</p>
-                <div class="text-[10px] text-green-400 bg-green-900/30 px-3 py-1 rounded-full"><i class="fas fa-coins mr-1"></i>+100 PTS</div>
+        <!-- TOP BAR (Tabs & Settings Toggle) -->
+        <div class="flex items-center justify-between mb-6 border-b border-gray-800 pb-4">
+            <div class="flex gap-2 bg-gray-950 p-1 rounded-xl border border-gray-800">
+                <button onclick="switchTab('home')" id="tab-home" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white">HOME</button>
+                <button onclick="switchTab('game')" id="tab-game" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-400 hover:text-white">GAME</button>
             </div>
-            <div class="flex justify-center mb-6">
-                <div class="w-28 h-28 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-full flex items-center justify-center border-2 border-amber-500/50">
-                    <i class="fas fa-gift text-5xl text-amber-400"></i>
-                </div>
-            </div>
-            <button id="daily-bonus-btn" onclick="claimDailyBonus()" class="w-full btn-yellow py-4 text-sm font-bold rounded-xl">
-                <i class="fas fa-play-circle mr-2"></i>Claim Daily Bonus (Watch Ad)
+            
+            <button onclick="toggleModal('settingsModal')" class="p-2 bg-gray-800 hover:bg-gray-700 rounded-xl border border-gray-700/50 transition-all">
+                <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </button>
-            <p id="bonus-status" class="text-[10px] text-slate-500 mt-3">တစ်နေ့တစ်ကြိမ်သာ ရယူနိုင်ပါသည်။</p>
         </div>
-        <div class="gold-card p-5 text-center">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-black/30 p-3 rounded-2xl"><p class="text-xs text-amber-300">Your Points</p><p id="current-points" class="text-2xl font-bold text-white">0</p></div>
-                <div class="bg-green-900/30 p-3 rounded-2xl"><p class="text-xs text-green-300">USD Value</p><p id="usd-equivalent" class="text-2xl font-bold text-green-400">$0.0000</p></div>
-            </div>
-            <p class="text-xs text-amber-300 mt-3">100,000 PTS = $1.00 USD</p>
-        </div>
-        <div class="gold-card p-5">
-            <div class="flex justify-between mb-2"><span class="text-sm font-bold text-white"><i class="fas fa-chart-line mr-2 text-amber-400"></i>Withdrawal Progress</span><span class="text-sm font-bold text-amber-400">100,000 PTS</span></div>
-            <div class="progress-bar"><div id="withdraw-progress-fill" class="progress-fill" style="width: 0%"></div></div>
-            <div class="flex justify-between text-[10px] text-slate-500 mt-2"><span>လက်ရှိ:</span><span id="withdraw-progress-current" class="text-amber-300 font-bold">0</span><span>PTS</span></div>
-        </div>
-        <div class="gold-card p-6">
-            <div class="flex items-center gap-3 mb-5"><i class="fas fa-trophy text-2xl text-amber-400"></i><h3 class="text-amber-400 font-bold text-lg">🏆 Top 5 Users</h3></div>
-            <div id="top-users-list" class="space-y-3"><div class="text-center py-4 text-slate-500">Loading...</div></div>
-        </div>
-        <button id="withdraw-home-btn" onclick="checkWithdrawEligibility()" class="w-full withdraw-btn py-5 text-lg font-bold rounded-xl">
-            <i class="fas fa-wallet mr-2"></i> ငွေထုတ်ယူရန်
-        </button>
-    </div>
 
-    <!-- History Section -->
-    <div id="sec-history" class="section space-y-5">
-        <div class="gold-card p-6">
-            <div class="flex items-center gap-3 mb-5">
-                <div class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-history text-2xl text-blue-400"></i>
-                </div>
-                <h3 class="text-white font-bold text-xl">Activity History</h3>
-            </div>
-            <div id="history-activity-log" class="space-y-2 max-h-96 overflow-y-auto"></div>
-            <button onclick="showSec('sec-home')" class="w-full text-slate-500 mt-4 py-3">← Back to Home</button>
-        </div>
-    </div>
-
-    <!-- Quiz Section -->
-    <div id="sec-quiz" class="section space-y-5">
-        <div class="gold-card p-6 text-center">
-            <div class="flex justify-center mb-3"><div class="w-16 h-16 bg-purple-500/20 rounded-2xl flex items-center justify-center"><i class="fas fa-brain text-3xl text-purple-400"></i></div></div>
-            <h3 class="text-white font-bold text-xl mb-2">Daily Quiz Challenge</h3>
-            <div id="quiz-q-display" class="bg-slate-800/80 p-6 rounded-2xl mb-4 text-lg font-medium text-white">Loading...</div>
-            <div id="quiz-choices-container" class="space-y-3"></div>
-            <button id="submit-quiz-btn" onclick="submitQuizAnswer()" class="btn-yellow py-3 px-8 mt-3 rounded-xl text-lg font-bold w-full">Submit Answer</button>
-        </div>
-        <div class="quiz-counter">
-            <div class="flex justify-between items-center mb-3"><span class="text-sm text-amber-300"><i class="fas fa-chart-line mr-2"></i>စုစုပေါင်းဖြေဆိုပြီး</span><span class="counter-value" id="total-quiz-count">0</span></div>
-            <div class="flex flex-wrap justify-center gap-2">
-                <div class="milestone-item" id="milestone-50">50 → 50 PTS</div>
-                <div class="milestone-item" id="milestone-100">100 → 100 PTS</div>
-                <div class="milestone-item" id="milestone-200">200 → 150 PTS</div>
-                <div class="milestone-item" id="milestone-500">500 → 550 PTS</div>
-            </div>
-        </div>
-        <div class="gold-card p-5">
-            <div class="flex justify-between items-center mb-4"><div class="flex items-center gap-2"><div class="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center"><i class="fas fa-gamepad text-purple-400 text-xl"></i></div><h3 class="text-amber-400 font-bold text-lg">🎮 Coin Runner</h3></div><span class="text-xs bg-amber-500/20 px-3 py-1 rounded-full">1 Coin = 10 PTS</span></div>
-            <div class="text-center mb-3"><span id="game-remaining" class="text-sm bg-slate-800 px-4 py-1.5 rounded-full">🎮 ယနေ့ကျန်ပွဲရေ: 5</span></div>
-            <canvas id="gameCanvas" width="340" height="420"></canvas>
-            <div class="flex justify-between mt-4 gap-3">
-                <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Coins</span><p id="game-coins" class="text-2xl font-bold text-amber-400">0</p></div>
-                <div class="bg-black/50 px-5 py-2 rounded-xl flex-1 text-center"><span class="text-[10px] text-slate-500">Best</span><p id="game-best" class="text-2xl font-bold text-green-400">0</p></div>
-                <button id="game-play-btn" onclick="startGame()" class="btn-yellow px-5 py-2 text-sm font-bold rounded-xl"><i class="fas fa-play mr-1"></i> Play</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Invite Section -->
-    <div id="sec-invite" class="section space-y-5">
-        <div class="gold-card p-6 text-center">
-            <div class="flex justify-center mb-4"><div class="w-20 h-20 bg-gradient-to-br from-green-500/30 to-emerald-600/30 rounded-2xl flex items-center justify-center"><i class="fas fa-users text-3xl text-green-400"></i></div></div>
-            <h3 class="text-white font-bold text-xl mb-2">သူငယ်ချင်းဖိတ်ခေါ်ပါ</h3>
-            <p class="text-xs text-slate-500 mb-4">သင့်မိတ်ဆက်ကုဒ်ကို မျှဝေပါ</p>
-            <div class="mb-6 bg-gradient-to-r from-amber-900/20 to-orange-900/20 p-5 rounded-2xl">
-                <div class="inline-flex items-center gap-4 p-4 bg-black/40 rounded-xl">
-                    <div><div class="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center"><i class="fas fa-user-plus text-green-400 text-xl"></i></div><p class="text-sm font-bold">1 ယောက် ဖိတ်</p></div>
-                    <div class="text-3xl text-amber-400">=</div>
-                    <div><div class="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center"><i class="fas fa-coins text-amber-400 text-xl"></i></div><p class="text-sm font-bold">500 PTS</p></div>
-                </div>
-            </div>
-            <div class="ref-container">
-                <div id="ref-link" class="ref-link-text">Loading...</div>
-                <div class="flex gap-2 mt-2">
-                    <button id="copyRefBtn" class="copy-btn flex-1" onclick="copyRef()">
-                        <i class="fas fa-copy mr-1"></i> Copy
-                    </button>
-                    <button id="shareRefBtn" class="copy-btn flex-1" onclick="shareRef()">
-                        <i class="fas fa-share-alt mr-1"></i> Share
-                    </button>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-slate-800/70 p-4 rounded-xl text-center"><p class="text-2xl font-bold text-amber-400" id="ref-count">0</p><p class="text-[9px] text-slate-500">ဖိတ်ခေါ်ထားသူ</p></div>
-                <div class="bg-emerald-900/30 p-4 rounded-xl text-center"><p class="text-2xl font-bold text-green-400" id="ref-earned">0</p><p class="text-[9px] text-green-400">ရရှိပြီး PTS</p></div>
-            </div>
-            <div id="ref-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
-        </div>
-    </div>
-
-    <!-- Tasks Section -->
-    <div id="sec-tasks" class="section space-y-5">
-        <div id="task-list-display" class="space-y-3"></div>
-        <div class="gold-card p-4">
-            <h4 class="text-amber-400 font-bold text-sm mb-3"><i class="fas fa-check-circle mr-2 text-green-400"></i>ပြီးဆုံးပြီး Task များ</h4>
-            <div id="completed-tasks-list" class="completed-tasks-list"></div>
-        </div>
-    </div>
-
-    <!-- Profile Section -->
-    <div id="sec-profile" class="section space-y-5">
-        <div class="gold-card p-6">
-            <div class="flex items-center gap-3 mb-6"><div class="w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center"><i class="fas fa-id-card text-2xl text-blue-400"></i></div><div><h3 class="text-white font-bold text-xl">My Profile</h3></div></div>
-            <div class="space-y-3">
-                <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded-xl"><span class="text-slate-500 text-sm">User ID:</span><code id="profile-user-id" class="text-amber-300 text-sm font-mono">-</code><button onclick="copyUserId()" class="text-xs text-blue-400 bg-blue-900/30 px-2 py-1 rounded">Copy</button></div>
-                <div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-slate-500">Name:</span><span id="profile-name" class="text-white font-medium">-</span></div>
-                <div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-slate-500">Total Earned:</span><span id="profile-total" class="text-green-400 font-bold text-lg">0</span></div>
-            </div>
-        </div>
-        <div class="gold-card p-6"><h3 class="text-white font-bold text-lg mb-4"><i class="fas fa-history mr-2 text-amber-400"></i>Withdrawal History</h3><div id="user-withdrawal-history" class="space-y-2 max-h-64 overflow-y-auto"></div></div>
-        <button onclick="showSec('sec-home')" class="w-full text-slate-500 mt-2 py-3">← Back to Home</button>
-    </div>
-
-    <!-- Withdraw Section -->
-    <div id="sec-withdraw" class="section">
-        <div class="gold-card p-6">
-            <div class="flex items-center gap-3 mb-6"><div class="w-14 h-14 bg-green-600/20 rounded-2xl flex items-center justify-center"><i class="fas fa-university text-2xl text-green-400"></i></div><div><h3 class="text-white font-bold text-xl">Withdrawal</h3><p class="text-[10px] text-green-400">ငွေထုတ်ယူရန် (အနည်းဆုံး 100,000 PTS)</p></div></div>
-            <div class="mb-6 p-5 bg-gradient-to-r from-amber-900/20 to-amber-800/20 rounded-2xl">
-                <div class="flex justify-between mb-3"><span class="text-amber-300">လက်ရှိ Point</span><span id="withdraw-current-points" class="text-2xl text-amber-400 font-bold">0</span></div>
-                <div class="flex justify-between mb-4"><span class="text-green-300">USD တန်ဖိုး</span><span id="withdraw-usd-value" class="text-2xl text-green-400 font-bold">$0.0000</span></div>
-                <div class="progress-bar mt-2"><div id="withdraw-progress-fill-modal" class="progress-fill" style="width:0%"></div></div>
-            </div>
-            <div class="mb-6"><label class="block mb-3 text-sm text-amber-300 font-medium"><i class="fas fa-credit-card mr-2"></i>ငွေထုတ်နည်းလမ်း ရွေးပါ</label>
-                <div class="grid grid-cols-2 gap-4">
-                    <label class="cursor-pointer"><input type="radio" name="withdraw-method" value="kapy" checked class="hidden peer" onchange="updateWithdrawMethod('kapy')"><div class="p-4 text-center border border-amber-500/30 rounded-xl peer-checked:border-blue-500 peer-checked:bg-blue-500/10 transition"><i class="fas fa-wallet text-blue-400 text-2xl"></i><div class="font-bold text-sm mt-1">Kpay</div></div></label>
-                    <label class="cursor-pointer"><input type="radio" name="withdraw-method" value="wave" class="hidden peer" onchange="updateWithdrawMethod('wave')"><div class="p-4 text-center border border-amber-500/30 rounded-xl peer-checked:border-green-500 peer-checked:bg-green-500/10 transition"><i class="fas fa-mobile-alt text-green-400 text-2xl"></i><div class="font-bold text-sm mt-1">Wave</div></div></label>
-                </div>
-            </div>
-            <input type="text" id="w-name" placeholder="အမည်">
-            <input type="text" id="w-phone" placeholder="ဖုန်းနံပါတ် (09xxxxxxxxx)">
-            <input type="number" id="w-amt" placeholder="Point ပမာဏ (အနည်းဆုံး 100,000)" oninput="updateWithdrawUSD()">
-            <button id="submit-withdraw-btn" onclick="submitWithdraw()" class="w-full withdraw-btn py-4 mt-4 rounded-xl text-lg font-bold">ထုတ်ယူရန်တောင်းဆိုမည်</button>
-            <button onclick="showSec('sec-home')" class="w-full text-slate-500 mt-4 py-3">← Back</button>
-        </div>
-    </div>
-
-    <!-- About & Admin Section -->
-    <div id="sec-about" class="section space-y-5">
-        <div class="gold-card p-6">
-            <div class="text-center mb-6"><div onclick="handleSecret()" class="inline-block cursor-pointer"><i class="fas fa-crown text-5xl text-amber-400 mb-2"></i><h3 class="text-2xl font-black gradient-text">MM GOLDEN ELITE</h3><p class="text-[9px] text-slate-500 mt-1">Click logo for admin access</p></div></div>
-            <div class="p-5 bg-blue-900/20 rounded-2xl">
-                <p class="text-amber-300 font-bold mb-3"><i class="fas fa-dollar-sign mr-2"></i>ငွေရှာနည်းများ</p>
-                <ul class="text-slate-300 text-sm space-y-2">
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>မေးခွန်းများဖြေဆိုခြင်း</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>Coin Runner ဂိမ်း (1 coin = 10 PTS, တစ်နေ့ 5 ပွဲသာ)</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>သူငယ်ချင်းဖိတ်ခေါ်ခြင်း (+500 PTS)</li>
-                    <li><i class="fas fa-check-circle text-green-500 mr-2 text-xs"></i>နေ့စဉ် Bonus (+100 PTS)</li>
-                </ul>
-            </div>
-            <div class="p-5 bg-amber-900/20 rounded-2xl mt-4">
-                <p class="text-green-300 font-bold mb-3"><i class="fas fa-exchange-alt mr-2"></i>ငွေထုတ်ယူနည်း</p>
-                <p class="text-slate-300 text-sm">100,000 Point = $1.00 USD (KPay/Wave)</p>
-            </div>
-            <div id="admin-panel" class="hidden mt-6">
-                <div class="bg-red-900/30 p-5 rounded-2xl border border-red-500">
-                    <h4 class="text-white font-bold mb-4"><i class="fas fa-user-shield mr-2 text-red-400"></i>Admin Control Panel</h4>
-                    <div class="mb-5"><h5 class="text-amber-300 text-sm font-bold mb-3">➕ Add Task</h5>
-                        <div class="grid grid-cols-1 gap-2">
-                            <input type="text" id="task-title" placeholder="Task Title" class="text-sm p-3">
-                            <input type="text" id="task-link" placeholder="Link (https://...)" class="text-sm p-3">
-                            <div class="flex gap-2">
-                                <select id="task-type" class="text-sm p-3 flex-1"><option value="link">🔗 Link</option><option value="video">🎬 Video (YouTube)</option><option value="telegram">📱 Telegram Channel</option></select>
-                                <input type="number" id="task-reward" placeholder="Points" class="text-sm p-3 w-28" value="50">
-                            </div>
-                            <button onclick="addAdminTask()" class="btn-yellow py-2 text-sm rounded-xl mt-1">Add Task</button>
-                        </div>
+        <!-- TAB PAGE: HOME (PREDICTION INTERFACE) -->
+        <div id="page-home" class="tab-content">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <span class="text-[11px] uppercase tracking-wider text-gray-500 font-bold">SYSTEM STATUS</span>
+                    <div id="modeBadge" class="flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-xs font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+                        NORMAL MODE
                     </div>
-                    <div id="admin-task-list" class="task-list mb-5"></div>
-                    <div class="mb-5"><h5 class="text-amber-300 text-sm font-bold mb-3">📝 Add Quiz</h5>
-                        <div class="grid grid-cols-1 gap-2">
-                            <input type="text" id="quiz-question" placeholder="Question" class="text-sm p-3">
-                            <input type="text" id="quiz-choice1" placeholder="Choice 1" class="text-sm p-3">
-                            <input type="text" id="quiz-choice2" placeholder="Choice 2" class="text-sm p-3">
-                            <input type="text" id="quiz-choice3" placeholder="Choice 3" class="text-sm p-3">
-                            <select id="quiz-correct" class="text-sm p-3">
-                                <option value="1">Choice 1 is correct</option>
-                                <option value="2">Choice 2 is correct</option>
-                                <option value="3">Choice 3 is correct</option>
-                            </select>
-                            <input type="number" id="quiz-points" placeholder="Points" class="text-sm p-3" value="50">
-                            <input type="text" id="quiz-ad-code" placeholder="Ad Code (Optional)" class="text-sm p-3">
-                            <button onclick="addQuizQuestion()" class="btn-yellow py-2 text-sm rounded-xl">Add Quiz</button>
-                        </div>
-                    </div>
-                    <div id="quiz-list" class="quiz-list mb-5"></div>
-                    <div class="overflow-x-auto mb-5"><table class="admin-table w-full"><thead><tr><th>User</th><th>Balance</th><th>Actions</th></tr></thead><tbody id="admin-user-table"></tbody></table></div>
-                    <div class="grid grid-cols-3 gap-2 mb-5"><input type="text" id="search-user" placeholder="User ID/Name" class="text-sm p-3"><input type="number" id="adjust-points" placeholder="Points" class="text-sm p-3"><select id="adjust-action" class="text-sm p-3"><option value="add">Add</option><option value="remove">Remove</option></select><button onclick="adjustUserPoints()" class="btn-yellow py-2 text-sm col-span-3 rounded-xl">Adjust Points</button></div>
-                    <div id="admin-withdraw-list" class="space-y-3 max-h-60 overflow-y-auto"></div>
+                </div>
+                <div class="text-right">
+                    <span class="text-[11px] uppercase tracking-wider text-gray-500 font-bold">ROUND PROGRESS</span>
+                    <div id="roundCount" class="text-lg font-black text-gray-200 mt-0.5">0 / 15</div>
                 </div>
             </div>
-            <a href="https://t.me/Naungthu1610" target="_blank" class="gold-card p-4 flex justify-between items-center mt-5 rounded-2xl"><div class="flex items-center gap-3"><i class="fab fa-telegram text-blue-400 text-xl"></i><span class="text-sm font-bold">အကူညီယူရန် @Naungthu1610</span></div><i class="fas fa-arrow-right text-amber-500"></i></a>
-        </div>
-    </div>
-</main>
 
-<nav class="fixed bottom-0 w-full bg-[#0a0e1a]/95 backdrop-blur-sm border-t border-white/10 flex justify-around py-3 z-50">
-    <button onclick="showSec('sec-home')" class="nav-btn flex flex-col items-center text-amber-500 nav-active py-1"><i class="fas fa-home text-xl"></i><span class="text-[9px] mt-0.5">Home</span></button>
-    <button onclick="showSec('sec-quiz')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-brain text-xl"></i><span class="text-[9px] mt-0.5">Quiz</span></button>
-    <button onclick="showSec('sec-invite')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-user-plus text-xl"></i><span class="text-[9px] mt-0.5">Invite</span></button>
-    <button onclick="showSec('sec-tasks')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-tasks text-xl"></i><span class="text-[9px] mt-0.5">Tasks</span></button>
-    <button onclick="showSec('sec-about')" class="nav-btn flex flex-col items-center text-slate-500 py-1"><i class="fas fa-cog text-xl"></i><span class="text-[9px] mt-0.5">Setting</span></button>
-</nav>
+            <div class="bg-gray-950 border border-gray-850 rounded-2xl p-7 mb-6 text-center shadow-inner">
+                <span class="text-[11px] uppercase tracking-wider text-gray-500 font-bold block mb-1">PREDICTION TYPE</span>
+                <div id="predictionDisplay" class="text-6xl font-black tracking-widest text-gray-600 transition-all duration-300">
+                    -
+                </div>
+            </div>
 
-<script>
-    // ========== CONFIGURATION ==========
-    const MIN_WITHDRAW_POINTS = 100000;
-    const USD_PER_POINT = 1 / 100000;
-    const COIN_TO_POINTS = 10;
-    const REFERRAL_POINTS = 500;
-    const MAX_GAMES_PER_DAY = 5;
-    const BOT_USERNAME = "MMGOLDEN_bot";
-    const ADMIN_PASSWORD = "871033";
-    const ADMIN_USER_IDS = ["6099430589"];
-    const BOT_TOKEN = "8127304160:AAFuF38iFon6UpHB_mheY17Spp77OmpnziI";
-    const ADMIN_CHAT_ID = "6099430589";
-    
-    // NEW: Bonus Task cooldown
-    const BONUS_TASK_COOLDOWN = 100; // seconds
-    const BONUS_TASK_REWARD = 50;
-    
-    // Ad Unit IDs
-    const DAILY_BONUS_AD_ID = "399125";
-    const QUIZ_AD_ID = "399123";
-    const GAME_AD_ID = "399124";
-    const TASK_AD_ID = "399126";
-    const BONUS_TASK_AD_ID = "399127";
-    
-    // RichInfo Ad Controller
-    let tgAdsController = null;
-    let isAdReady = false;
-    
-    function initRichInfoAds() {
-        try {
-            if (typeof window.TelegramAdsController !== 'undefined') {
-                tgAdsController = new window.TelegramAdsController();
-                tgAdsController.initialize({
-                    pubId: "1014061",
-                    appId: "7735",
-                });
-                isAdReady = true;
-                console.log("✅ RichInfo Ads initialized");
-            } else {
-                console.log("⚠️ Waiting for Ads...");
-                setTimeout(initRichInfoAds, 1000);
-            }
-        } catch(e) {
-            console.log("Ad init error:", e);
-            isAdReady = false;
-        }
-    }
-    
-    function showRewardedAd(adUnitId, callback) {
-        if (tgAdsController && isAdReady) {
-            try {
-                if (!tgAdsController) {
-                    tgAdsController = new window.TelegramAdsController();
-                    tgAdsController.initialize({
-                        pubId: "1014061",
-                        appId: "7735",
-                    });
-                }
-                tgAdsController.showRewardedAd({
-                    adUnitId: adUnitId,
-                    onReward: () => {
-                        console.log("🎉 Ad rewarded!");
-                        if (callback) callback();
-                    },
-                    onError: (err) => {
-                        console.log("Ad error:", err);
-                        if (callback) callback();
+            <div class="grid grid-cols-5 gap-2.5 mb-5">
+                <script>
+                    for(let i=0; i<=9; i++) {
+                        document.write(`<button onclick="selectNumber(${i})" class="num-btn h-12 bg-gray-800/40 hover:bg-gray-800 border border-gray-700/40 rounded-xl font-bold text-lg transition-all text-gray-300">${i}</button>`);
                     }
-                });
-            } catch(e) {
-                console.log("Ad show error:", e);
-                if (callback) callback();
-            }
-        } else {
-            console.log("Ad not ready, auto-reward");
-            if (callback) callback();
-        }
-    }
-    
-    async function sendTelegramNotification(message) {
-        if (!BOT_TOKEN) return;
-        try {
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: ADMIN_CHAT_ID,
-                    text: message,
-                    parse_mode: 'HTML'
-                })
-            });
-            const data = await response.json();
-            console.log("Telegram notification sent:", data);
-        } catch(e) {
-            console.error("Telegram notification error:", e);
-        }
-    }
-    
-    let quizAttemptCount = 0;
-    const QUIZ_ATTEMPTS_BEFORE_AD = 2;
-    
-    const QUIZ_MILESTONES = [
-        { target: 50, reward: 50 },
-        { target: 100, reward: 100 },
-        { target: 200, reward: 150 },
-        { target: 500, reward: 550 }
-    ];
-    
-    // ========== GLOBAL STATE ==========
-    let currentUser = null;
-    let userId = null;
-    let userName = 'User';
-    let balance = 0;
-    let invitedFriends = [];
-    let completedTasks = [];
-    let completedQuizzes = [];
-    let totalQuizzesAnswered = 0;
-    let claimedMilestones = [];
-    let gamesPlayedToday = 0;
-    let lastGameDate = '';
-    let isAdmin = false;
-    let activityLog = [];
-    
-    // NEW: Bonus task cooldown state
-    let bonusTaskCooldownUntil = 0;
-    
-    let unsubscribeQuizzes = null;
-    let unsubscribeTasks = null;
-    let unsubscribeLeaderboard = null;
-    let unsubscribeWithdrawals = null;
-    
-    let gameRunning = false, gameCoins = 0, gameBest = parseInt(localStorage.getItem('game_best')) || 0;
-    let gameAnimationId = null, gamePlayerX = 155, gameObstacles = [], gameCoinsList = [], gameFrame = 0;
-    const GAME_WIDTH = 340, GAME_HEIGHT = 420, PLAYER_WIDTH = 32, PLAYER_HEIGHT = 32, OBSTACLE_SIZE = 28, COIN_SIZE = 14;
-    
-    let quizzesCache = [];
-    let tasksCache = [];
-    let withdrawalsCache = [];
-    let saveTimeout = null;
-    
-    let currentQuiz = null;
-    let selectedChoice = null;
-    
-    // NEW: Bonus task as a special task
-    let bonusTaskId = 'bonus_daily_task';
-    
-    document.getElementById('realtimeBadge').classList.remove('hidden');
-    
-    function checkWebApp() {
-        // For web browser, always allow
-        return true;
-    }
-    
-    setTimeout(() => {
-        if (checkWebApp()) {
-            const loading = document.getElementById('loadingOverlay');
-            const mainContent = document.getElementById('mainContent');
-            if(loading && mainContent) {
-                loading.style.display = 'none';
-                mainContent.style.display = 'block';
-            }
-        }
-    }, 500);
-    
-    async function addActivityLog(action, amount, type) {
-        const timestamp = new Date().toLocaleString();
-        const logEntry = { action, amount, type, timestamp, date: new Date().toISOString() };
-        activityLog.unshift(logEntry);
-        if (activityLog.length > 50) activityLog.pop();
-        renderActivityLog();
-        renderHistoryLog();
-        if (window.firestore && userId) {
-            try {
-                const userRef = window.fsDoc(window.firestore, 'users', userId);
-                await window.fsUpdateDoc(userRef, { activityLog: activityLog });
-            } catch(e) { console.error("Save activity error:", e); }
-        }
-    }
-    
-    function renderActivityLog() {
-        const container = document.getElementById('user-activity-log');
-        if (!container) return;
-        if (activityLog.length === 0) {
-            container.innerHTML = '<div class="text-center text-slate-500 py-4">No activity yet</div>';
-            return;
-        }
-        container.innerHTML = activityLog.map(log => `
-            <div class="activity-item">
-                <div class="flex justify-between items-center">
-                    <span class="${log.type === 'earn' ? 'text-green-400' : 'text-red-400'} font-bold">
-                        ${log.type === 'earn' ? '+ ' + log.amount + ' PTS' : '- ' + log.amount + ' PTS'}
-                    </span>
-                    <span class="text-amber-400 text-xs">${log.action}</span>
-                </div>
-                <div class="activity-time">${log.timestamp}</div>
+                </script>
             </div>
-        `).join('');
-    }
-    
-    function renderHistoryLog() {
-        const container = document.getElementById('history-activity-log');
-        if (!container) return;
-        if (activityLog.length === 0) {
-            container.innerHTML = '<div class="text-center text-slate-500 py-4">No activity yet</div>';
-            return;
-        }
-        container.innerHTML = activityLog.map(log => `
-            <div class="activity-item">
-                <div class="flex justify-between items-center">
-                    <span class="${log.type === 'earn' ? 'text-green-400' : 'text-red-400'} font-bold">
-                        ${log.type === 'earn' ? '+ ' + log.amount + ' PTS' : '- ' + log.amount + ' PTS'}
-                    </span>
-                    <span class="text-amber-400 text-xs">${log.action}</span>
+
+            <button onclick="handleNext()" id="nextBtn" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                NEXT STEP
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+
+            <div class="mt-4 mb-5 bg-gray-950/60 border border-gray-850 rounded-xl p-3 text-center min-h-[48px] flex items-center justify-center">
+                <div id="gameStatusText" class="text-sm font-bold tracking-wide text-gray-500">
+                    Please select a number above
                 </div>
-                <div class="activity-time">${log.timestamp}</div>
             </div>
-        `).join('');
-    }
-    
-    async function saveToFirebase() {
-        if (!window.firestore || !userId) return;
-        if (saveTimeout) clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(async () => {
-            try {
-                const userRef = window.fsDoc(window.firestore, 'users', userId);
-                await window.fsSetDoc(userRef, {
-                    id: userId,
-                    name: userName || 'User',
-                    balance: balance,
-                    totalEarned: currentUser?.totalEarned || 0,
-                    invitedFriends: invitedFriends || [],
-                    completedTasks: completedTasks || [],
-                    completedQuizzes: completedQuizzes || [],
-                    totalQuizzesAnswered: totalQuizzesAnswered || 0,
-                    claimedMilestones: claimedMilestones || [],
-                    gamesPlayedToday: gamesPlayedToday || 0,
-                    lastGameDate: lastGameDate || '',
-                    activityLog: activityLog || [],
-                    bonusTaskCooldown: bonusTaskCooldownUntil || 0,
-                    lastActive: new Date().toLocaleString()
-                }, { merge: true });
-                
-                const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', userId);
-                await window.fsSetDoc(leaderboardRef, {
-                    name: userName || 'User',
-                    balance: balance
-                }, { merge: true });
-            } catch(e) { console.error("Save error:", e); }
-        }, 1000);
-    }
-    
-    function getUserId() {
-        // For web, use a generated ID or localStorage
-        let id = localStorage.getItem('mm_golden_user_id');
-        if (!id) {
-            id = 'web_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
-            localStorage.setItem('mm_golden_user_id', id);
-        }
-        return id;
-    }
-    
-    function getUserName() {
-        let name = localStorage.getItem('mm_golden_user_name');
-        if (!name) {
-            name = 'User_' + Math.random().toString(36).substring(2, 6);
-            localStorage.setItem('mm_golden_user_name', name);
-        }
-        return name;
-    }
-    
-    function getStartParam() {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('ref');
-    }
-    
-    function copyRef() {
-        const link = document.getElementById('ref-link').innerHTML;
-        navigator.clipboard.writeText(link).then(() => {
-            showNotification("✅ Referral link copied!");
-        }).catch(() => {
-            // Fallback
-            const textarea = document.createElement('textarea');
-            textarea.value = link;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            textarea.remove();
-            showNotification("✅ Referral link copied!");
-        });
-    }
-    
-    function shareRef() {
-        const link = document.getElementById('ref-link').innerHTML;
-        if (navigator.share) {
-            navigator.share({
-                title: "MM GOLDEN",
-                text: "Join MM GOLDEN and earn points! Use my referral: " + link,
-            }).catch(() => {});
-        } else {
-            copyRef();
-        }
-    }
-    
-    async function handleReferral(refId) {
-        if (refId === userId) return;
-        try {
-            console.log("🔗 Referral detected! Inviter:", refId);
-            const inviterRef = window.fsDoc(window.firestore, 'users', refId);
-            const inviterSnap = await window.fsGetDoc(inviterRef);
-            if (!inviterSnap.exists()) return;
-            const inviterData = inviterSnap.data();
-            const alreadyReferred = inviterData.invitedFriends?.includes(userId);
-            if (alreadyReferred) return;
-            
-            const newInviterBalance = (inviterData.balance || 0) + REFERRAL_POINTS;
-            const newInviterTotal = (inviterData.totalEarned || 0) + REFERRAL_POINTS;
-            await window.fsUpdateDoc(inviterRef, {
-                balance: newInviterBalance,
-                totalEarned: newInviterTotal,
-                invitedFriends: window.fsArrayUnion(userId)
-            });
-            
-            const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', refId);
-            await window.fsSetDoc(leaderboardRef, { balance: newInviterBalance, name: inviterData.name }, { merge: true });
-            
-            showNotification(`🎉 +${REFERRAL_POINTS} PTS given to ${inviterData.name} for inviting you!`);
-        } catch(e) { console.error("Referral error:", e); }
-    }
-    
-    async function addPointsOptimized(pts, source) {
-        balance += pts;
-        if (currentUser) { 
-            currentUser.balance = balance; 
-            currentUser.totalEarned = (currentUser.totalEarned || 0) + pts; 
-        }
-        await addActivityLog(source, pts, 'earn');
-        await saveToFirebase();
-        updateBalanceUI();
-        showNotification(`+${pts} PTS from ${source}`);
-    }
-    
-    function updateBalanceUI() {
-        document.getElementById('total-pts').innerText = balance.toLocaleString();
-        document.getElementById('current-points').innerText = balance.toLocaleString();
-        document.getElementById('withdraw-current-points').innerText = balance.toLocaleString();
-        document.getElementById('usd-equivalent').innerText = '$' + (balance * USD_PER_POINT).toFixed(4);
-        document.getElementById('withdraw-usd-value').innerText = '$' + (balance * USD_PER_POINT).toFixed(4);
-        const percent = Math.min((balance / MIN_WITHDRAW_POINTS) * 100, 100);
-        document.getElementById('withdraw-progress-fill').style.width = percent + '%';
-        document.getElementById('withdraw-progress-fill-modal').style.width = percent + '%';
-        document.getElementById('withdraw-progress-current').innerText = balance.toLocaleString();
-        document.getElementById('profile-total').innerText = (currentUser?.totalEarned || 0).toLocaleString();
-        const btn = document.getElementById('withdraw-home-btn');
-        if (btn) { if (balance < MIN_WITHDRAW_POINTS) { btn.disabled = true; btn.innerHTML = `🔒 Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`; } else { btn.disabled = false; btn.innerHTML = '💰 ငွေထုတ်ယူရန်'; } }
-    }
-    
-    function showNotification(msg, duration = 2500) {
-        const div = document.createElement('div');
-        div.className = 'fixed top-24 left-1/2 transform -translate-x-1/2 z-[1000] bg-amber-600 text-white px-6 py-3 rounded-xl shadow-xl';
-        div.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${msg}`;
-        document.body.appendChild(div);
-        setTimeout(() => div.remove(), duration);
-    }
-    
-    function showSec(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        const map = { 'sec-home':0, 'sec-quiz':1, 'sec-invite':2, 'sec-tasks':3, 'sec-about':4 };
-        document.querySelectorAll('.nav-btn').forEach((b,i) => { if(map[id]===i) b.classList.add('nav-active','text-amber-500'); else b.classList.remove('nav-active','text-amber-500'); });
-        if(id === 'sec-profile') { renderUserProfile(); renderUserWithdrawalHistory(); }
-        if(id === 'sec-about') { renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); }
-        if(id === 'sec-quiz') updateQuizCounterUI();
-        if(id === 'sec-history') renderHistoryLog();
-    }
-    
-    // ========== QUIZ FUNCTIONS ==========
-    function renderQuiz() {
-        const availableQuizzes = quizzesCache.filter(q => !completedQuizzes.includes(q.id));
-        if (availableQuizzes.length > 0) {
-            currentQuiz = availableQuizzes[0];
-            selectedChoice = null;
-            document.getElementById('quiz-q-display').innerHTML = `<i class="fas fa-question-circle mr-2 text-purple-400"></i>${currentQuiz.q}`;
-            const choicesContainer = document.getElementById('quiz-choices-container');
-            const choices = [currentQuiz.c1, currentQuiz.c2, currentQuiz.c3];
-            choicesContainer.innerHTML = choices.map((choice, idx) => `
-                <div class="quiz-choice" data-choice="${idx+1}" onclick="selectQuizChoice(${idx+1})">
-                    <span class="choice-letter">${String.fromCharCode(65+idx)}.</span> ${choice}
+
+            <div class="grid grid-cols-3 gap-3 border-t border-gray-800 pt-5 text-center">
+                <div class="bg-gray-950/40 p-3 border border-gray-850 rounded-xl">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase block">WIN</span>
+                    <span id="winCount" class="text-xl font-black text-emerald-400">0</span>
                 </div>
-            `).join('');
-        } else {
-            currentQuiz = null;
-            document.getElementById('quiz-q-display').innerHTML = '🎉 ဂုဏ်ယူပါတယ်! မေးခွန်းအားလုံးဖြေပြီးပါပြီ။';
-            document.getElementById('quiz-choices-container').innerHTML = '';
-        }
-    }
-    
-    function selectQuizChoice(choiceNum) {
-        selectedChoice = choiceNum;
-        document.querySelectorAll('.quiz-choice').forEach(el => {
-            el.classList.remove('selected');
-            if (el.dataset.choice == choiceNum) el.classList.add('selected');
-        });
-    }
-    
-    async function submitQuizAnswer() {
-        if (!currentQuiz) { alert("No quiz available!"); return; }
-        if (!selectedChoice) { alert("Please select an answer!"); return; }
-        const isCorrect = (selectedChoice == currentQuiz.correct);
-        if (isCorrect) {
-            quizAttemptCount++;
-            if (quizAttemptCount >= QUIZ_ATTEMPTS_BEFORE_AD) {
-                quizAttemptCount = 0;
-                showRewardedAd(QUIZ_AD_ID, async () => {
-                    await addPointsOptimized(currentQuiz.p, "Quiz");
-                    completedQuizzes.push(currentQuiz.id);
-                    totalQuizzesAnswered++;
-                    await saveToFirebase();
-                    renderQuiz();
-                    updateQuizCounterUI();
-                    showNotification(`✅ Correct! +${currentQuiz.p} PTS (Total: ${totalQuizzesAnswered})`);
-                    selectedChoice = null;
-                });
-            } else {
-                await addPointsOptimized(currentQuiz.p, "Quiz");
-                completedQuizzes.push(currentQuiz.id);
-                totalQuizzesAnswered++;
-                await saveToFirebase();
-                renderQuiz();
-                updateQuizCounterUI();
-                showNotification(`✅ Correct! +${currentQuiz.p} PTS (Total: ${totalQuizzesAnswered})`);
-                selectedChoice = null;
-            }
-        } else {
-            showNotification("❌ Wrong answer! Better luck next time!");
-            renderQuiz();
-            selectedChoice = null;
-        }
-    }
-    
-    function updateQuizCounterUI() {
-        document.getElementById('total-quiz-count').innerText = totalQuizzesAnswered;
-        QUIZ_MILESTONES.forEach(m => {
-            const el = document.getElementById(`milestone-${m.target}`);
-            if (el) {
-                const isCompleted = claimedMilestones.includes(m.target);
-                const isReached = totalQuizzesAnswered >= m.target;
-                if (isCompleted) { el.className = 'milestone-item milestone-completed'; el.innerHTML = `${m.target} → ${m.reward} PTS ✓`; el.onclick = null; }
-                else if (isReached) { el.className = 'milestone-item milestone-ready'; el.innerHTML = `${m.target} → ${m.reward} PTS 🎁`; el.onclick = () => claimMilestoneReward(m.target, m.reward); }
-                else { el.className = 'milestone-item milestone-pending'; el.innerHTML = `${m.target} → ${m.reward} PTS`; el.onclick = null; }
-            }
-        });
-    }
-    
-    async function claimMilestoneReward(target, reward) {
-        if (claimedMilestones.includes(target)) { showNotification("Already claimed!"); return; }
-        if (totalQuizzesAnswered < target) { showNotification(`Need ${target} answers!`); return; }
-        await addPointsOptimized(reward, `Milestone ${target}`);
-        claimedMilestones.push(target);
-        await saveToFirebase();
-        updateQuizCounterUI();
-        showNotification(`🎉 +${reward} PTS!`);
-    }
-    
-    function setupQuizzesListener() {
-        if (!window.firestore) return;
-        const quizzesCollection = window.fsCollection(window.firestore, 'quizzes');
-        unsubscribeQuizzes = window.fsOnSnapshot(quizzesCollection, (snapshot) => {
-            quizzesCache = [];
-            snapshot.forEach(doc => { quizzesCache.push({ id: doc.id, ...doc.data() }); });
-            if (quizzesCache.length === 0) {
-                const defaultQuiz = { q: "မြန်မာနိုင်ငံ၏ မြို့တော်မှာ?", c1: "ရန်ကုန်", c2: "မန္တလေး", c3: "နေပြည်တော်", correct: 3, p: 50 };
-                window.fsSetDoc(window.fsDoc(window.firestore, 'quizzes', 'default1'), defaultQuiz);
-            }
-            renderQuiz();
-            if (document.getElementById('sec-quiz').classList.contains('active')) updateQuizCounterUI();
-            if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) renderQuizList();
-        });
-    }
-    
-    function setupTasksListener() {
-        if (!window.firestore) return;
-        const tasksCollection = window.fsCollection(window.firestore, 'tasks');
-        unsubscribeTasks = window.fsOnSnapshot(tasksCollection, (snapshot) => {
-            tasksCache = [];
-            snapshot.forEach(doc => { tasksCache.push({ id: doc.id, ...doc.data() }); });
-            renderTasks();
-            if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) renderAdminTaskList();
-        });
-    }
-    
-    function setupLeaderboardListener() {
-        if (!window.firestore) return;
-        const leaderboardCollection = window.fsCollection(window.firestore, 'leaderboard');
-        const leaderboardQuery = window.fsQuery(leaderboardCollection, window.fsOrderBy('balance', 'desc'), window.fsLimit(50));
-        unsubscribeLeaderboard = window.fsOnSnapshot(leaderboardQuery, (snapshot) => {
-            const leaders = [];
-            snapshot.forEach(doc => { leaders.push({ name: doc.data().name, balance: doc.data().balance || 0 }); });
-            renderTopUsers(leaders.slice(0, 5));
-        });
-    }
-    
-    function setupUserListener() {
-        if (!window.firestore || !userId) return;
-        const userRef = window.fsDoc(window.firestore, 'users', userId);
-        window.fsOnSnapshot(userRef, (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
-                balance = data.balance || 0;
-                invitedFriends = data.invitedFriends || [];
-                completedTasks = data.completedTasks || [];
-                completedQuizzes = data.completedQuizzes || [];
-                totalQuizzesAnswered = data.totalQuizzesAnswered || 0;
-                claimedMilestones = data.claimedMilestones || [];
-                gamesPlayedToday = data.gamesPlayedToday || 0;
-                lastGameDate = data.lastGameDate || '';
-                activityLog = data.activityLog || [];
-                bonusTaskCooldown = data.bonusTaskCooldown || 0;
-                if (currentUser) {
-                    currentUser.balance = balance;
-                    currentUser.totalEarned = data.totalEarned || 0;
-                }
-                updateBalanceUI();
-                renderRefUI();
-                renderTasks();
-                renderQuiz();
-                updateGameRemainingUI();
-                updateQuizCounterUI();
-                renderActivityLog();
-                renderHistoryLog();
-                updateBonusTaskUI();
-            }
-        });
-    }
-    
-    function setupWithdrawalsListener() {
-        if (!window.firestore) return;
-        const withdrawalsCollection = window.fsCollection(window.firestore, 'withdrawals');
-        unsubscribeWithdrawals = window.fsOnSnapshot(withdrawalsCollection, (snapshot) => {
-            withdrawalsCache = [];
-            snapshot.forEach(doc => { withdrawalsCache.push({ id: doc.id, ...doc.data() }); });
-            if (isAdmin && document.getElementById('admin-panel') && !document.getElementById('admin-panel').classList.contains('hidden')) {
-                renderAdminWithdrawals();
-            }
-            renderUserWithdrawalHistory();
-        });
-    }
-    
-    async function initTelegramUser() {
-        if (!checkWebApp()) return;
-        userId = getUserId();
-        userName = getUserName();
-        document.getElementById('display-name').innerHTML = `<i class="fas fa-user mr-1"></i>${userName}`;
-        document.getElementById('profile-name').innerText = userName;
-        document.getElementById('profile-user-id').innerText = userId;
-        isAdmin = ADMIN_USER_IDS.includes(userId);
-        if (isAdmin) document.getElementById('admin-mode-btn').classList.remove('hidden');
-        try {
-            const userRef = window.fsDoc(window.firestore, 'users', userId);
-            const userSnap = await window.fsGetDoc(userRef);
-            if (userSnap.exists()) {
-                const data = userSnap.data();
-                currentUser = { id: userId, name: data.name || userName, balance: data.balance || 0, totalEarned: data.totalEarned || 0 };
-                balance = currentUser.balance;
-                invitedFriends = data.invitedFriends || [];
-                completedTasks = data.completedTasks || [];
-                completedQuizzes = data.completedQuizzes || [];
-                totalQuizzesAnswered = data.totalQuizzesAnswered || 0;
-                claimedMilestones = data.claimedMilestones || [];
-                gamesPlayedToday = data.gamesPlayedToday || 0;
-                lastGameDate = data.lastGameDate || '';
-                activityLog = data.activityLog || [];
-                bonusTaskCooldown = data.bonusTaskCooldown || 0;
-            } else {
-                currentUser = { id: userId, name: userName, balance: 0, totalEarned: 0 };
-                balance = 0;
-                activityLog = [];
-                bonusTaskCooldown = 0;
-                await saveToFirebase();
-            }
-            const startParam = getStartParam();
-            if (startParam && startParam !== userId) {
-                setTimeout(() => handleReferral(startParam), 2000);
-            }
-            const today = new Date().toDateString();
-            if (lastGameDate !== today) { gamesPlayedToday = 0; lastGameDate = today; await saveToFirebase(); }
-            
-            initRichInfoAds();
-            
-            setupQuizzesListener();
-            setupTasksListener();
-            setupLeaderboardListener();
-            setupUserListener();
-            setupWithdrawalsListener();
-            updateBalanceUI();
-            renderRefUI();
-            renderTasks();
-            renderQuiz();
-            updateGameRemainingUI();
-            updateQuizCounterUI();
-            renderActivityLog();
-            renderHistoryLog();
-            updateBonusTaskUI();
-            showNotification(`Welcome ${userName}! 🎉`);
-        } catch(error) {
-            console.error("Firebase error:", error);
-            showNotification("Firebase connection issue.");
-        }
-    }
-    
-    function renderTopUsers(users) {
-        const container = document.getElementById('top-users-list');
-        if (!container) return;
-        if (!users || users.length === 0) { container.innerHTML = '<div class="text-center text-slate-500 py-4">No users yet</div>'; return; }
-        container.innerHTML = users.map((u, i) => `<div class="flex justify-between items-center p-3 bg-slate-800/50 rounded-xl"><div class="flex gap-3"><div class="w-6 h-6 rounded-full bg-amber-500/30 flex items-center justify-center"><span class="text-xs font-bold text-amber-400">${i+1}</span></div><span class="text-white">${u.name}</span></div><span class="text-amber-400 font-bold">${(u.balance || 0).toLocaleString()}</span></div>`).join('');
-    }
-    
-    function toggleAdminMode() { 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        document.body.classList.toggle('admin-mode'); 
-        if (document.body.classList.contains('admin-mode')) { 
-            document.getElementById('admin-mode-btn').innerHTML = '<i class="fas fa-eye"></i> User'; 
-            renderAdminUserTable(); renderAdminWithdrawals(); renderQuizList(); renderAdminTaskList(); 
-            showNotification("Admin Mode ON"); 
-        } else { 
-            document.getElementById('admin-mode-btn').innerHTML = '<i class="fas fa-user-shield"></i> Admin'; 
-            showNotification("User Mode"); 
-        } 
-    }
-    
-    function updateGameRemainingUI() {
-        const remaining = Math.max(0, MAX_GAMES_PER_DAY - gamesPlayedToday);
-        document.getElementById('game-remaining').innerHTML = `🎮 ယနေ့ကျန်ပွဲရေ: ${remaining}`;
-        const playBtn = document.getElementById('game-play-btn');
-        if (playBtn) { if (remaining <= 0) { playBtn.disabled = true; playBtn.innerHTML = '🔒 ယနေ့ပွဲစဉ်ကုန်ပြီ'; } else { playBtn.disabled = false; playBtn.innerHTML = '▶️ Play'; } }
-    }
-    
-    function initGameCanvas() {
-        const canvas = document.getElementById('gameCanvas');
-        if(!canvas) return;
-        canvas.width = GAME_WIDTH;
-        canvas.height = GAME_HEIGHT;
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(gameRunning){ const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; let x = (e.touches[0].clientX - rect.left) * scaleX; gamePlayerX = Math.min(GAME_WIDTH - PLAYER_WIDTH, Math.max(0, x - PLAYER_WIDTH/2)); } });
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(gameRunning){ const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; let x = (e.touches[0].clientX - rect.left) * scaleX; gamePlayerX = Math.min(GAME_WIDTH - PLAYER_WIDTH, Math.max(0, x - PLAYER_WIDTH/2)); } });
-        canvas.addEventListener('mousemove', (e) => { if(gameRunning){ const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; let x = (e.clientX - rect.left) * scaleX; gamePlayerX = Math.min(GAME_WIDTH - PLAYER_WIDTH, Math.max(0, x - PLAYER_WIDTH/2)); } });
-        document.getElementById('game-best').innerText = gameBest;
-        drawGame();
-    }
-    
-    function startGame() { 
-        if(!currentUser) { showNotification("Please wait"); return; }
-        if(gameRunning) return;
-        const remaining = MAX_GAMES_PER_DAY - gamesPlayedToday;
-        if(remaining <= 0) { showNotification("ယနေ့ပွဲစဉ်ကုန်ပြီ"); return; }
-        gameRunning = true; gameCoins = 0; gameFrame = 0; gameObstacles = []; gameCoinsList = []; gamePlayerX = GAME_WIDTH/2 - PLAYER_WIDTH/2; document.getElementById('game-coins').innerText = '0'; if(gameAnimationId) cancelAnimationFrame(gameAnimationId); gameLoop(); 
-    }
-    
-    function gameLoop() { 
-        if(!gameRunning) return; 
-        gameFrame++; 
-        let currentSpeed = Math.min(12, 5 + Math.floor(gameCoins / 15));
-        let obstacleRate = Math.max(25, 45 - Math.floor(gameCoins / 8));
-        let coinRate = Math.max(20, 28 - Math.floor(gameCoins / 12));
-        if(gameFrame % obstacleRate === 0) gameObstacles.push({x:Math.random()*(GAME_WIDTH-OBSTACLE_SIZE),y:0,width:OBSTACLE_SIZE,height:OBSTACLE_SIZE});
-        if(gameFrame % coinRate === 0) gameCoinsList.push({x:Math.random()*(GAME_WIDTH-COIN_SIZE),y:0,width:COIN_SIZE,height:COIN_SIZE});
-        for(let i=0;i<gameObstacles.length;i++){ gameObstacles[i].y+=currentSpeed; if(gameObstacles[i].y>GAME_HEIGHT){ gameObstacles.splice(i,1); i--; } }
-        for(let i=0;i<gameCoinsList.length;i++){ gameCoinsList[i].y+=currentSpeed-1; if(gameCoinsList[i].y>GAME_HEIGHT){ gameCoinsList.splice(i,1); i--; } }
-        for(let obs of gameObstacles){ if(gamePlayerX<obs.x+obs.width && gamePlayerX+PLAYER_WIDTH>obs.x && GAME_HEIGHT-50<obs.y+obs.height && GAME_HEIGHT-50+PLAYER_HEIGHT>obs.y){ gameOver(); return; } }
-        for(let i=0;i<gameCoinsList.length;i++){ const coin=gameCoinsList[i]; if(gamePlayerX<coin.x+coin.width && gamePlayerX+PLAYER_WIDTH>coin.x && GAME_HEIGHT-50<coin.y+coin.height && GAME_HEIGHT-50+PLAYER_HEIGHT>coin.y){ gameCoinsList.splice(i,1); gameCoins++; document.getElementById('game-coins').innerText=gameCoins; i--; } }
-        drawGame(); gameAnimationId = requestAnimationFrame(gameLoop); 
-    }
-    
-    function drawGame(){ 
-        const canvas=document.getElementById('gameCanvas'); if(!canvas) return; const ctx=canvas.getContext('2d'); 
-        ctx.clearRect(0,0,GAME_WIDTH,GAME_HEIGHT); 
-        ctx.fillStyle='#1a472a'; ctx.fillRect(0,GAME_HEIGHT-50,GAME_WIDTH,50); 
-        ctx.fillStyle='#8B4513'; ctx.fillRect(0,GAME_HEIGHT-52,GAME_WIDTH,4);
-        ctx.fillStyle='#FFD700'; ctx.fillRect(gamePlayerX,GAME_HEIGHT-50,PLAYER_WIDTH,PLAYER_HEIGHT);
-        ctx.fillStyle='#FFA500'; ctx.fillRect(gamePlayerX+6,GAME_HEIGHT-56,20,10);
-        ctx.fillStyle='#000'; ctx.fillRect(gamePlayerX+8,GAME_HEIGHT-44,6,6); ctx.fillRect(gamePlayerX+18,GAME_HEIGHT-44,6,6);
-        ctx.fillStyle='#DC2626';
-        for(let obs of gameObstacles){ ctx.fillRect(obs.x,obs.y,obs.width,obs.height); ctx.fillStyle='#991B1B'; ctx.fillRect(obs.x+4,obs.y+4,obs.width-8,obs.height-8); ctx.fillStyle='#DC2626'; }
-        for(let coin of gameCoinsList){ 
-            ctx.fillStyle='#FFD700'; ctx.beginPath(); ctx.arc(coin.x+COIN_SIZE/2,coin.y+COIN_SIZE/2,COIN_SIZE/2,0,Math.PI*2); ctx.fill(); 
-            ctx.fillStyle='#F59E0B'; ctx.beginPath(); ctx.arc(coin.x+COIN_SIZE/2,coin.y+COIN_SIZE/2,COIN_SIZE/3,0,Math.PI*2); ctx.fill();
-            ctx.fillStyle='#FFF'; ctx.font='bold 8px Arial'; ctx.fillText('$',coin.x+COIN_SIZE/2-3,coin.y+COIN_SIZE/2+3);
-        }
-        ctx.fillStyle='white'; ctx.font='bold 16px Arial'; ctx.fillText('💰 '+gameCoins,12,35);
-        if(gameCoins>=50) { ctx.fillStyle='#FFD700'; ctx.font='bold 12px Arial'; ctx.fillText('🔥 '+Math.floor(gameCoins/10)+'x Speed',GAME_WIDTH-70,30); }
-    }
-    
-    async function gameOver(){ 
-        gameRunning=false; 
-        if(gameAnimationId) cancelAnimationFrame(gameAnimationId); 
-        const earned = gameCoins * COIN_TO_POINTS;
-        if(earned > 0) { 
-            showRewardedAd(GAME_AD_ID, async () => {
-                gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI(); await addPointsOptimized(earned, "Coin Runner");
-            });
-        } else {
-            gamesPlayedToday++; await saveToFirebase(); updateGameRemainingUI();
-        }
-        if(gameCoins>gameBest){ gameBest=gameCoins; localStorage.setItem('game_best',gameBest); document.getElementById('game-best').innerText=gameBest; } 
-        const overlayStars = '⭐'.repeat(Math.min(5, Math.floor(gameCoins/20)));
-        const overlay=document.createElement('div'); overlay.className='game-overlay'; 
-        overlay.innerHTML=`<div class="bg-slate-900 p-6 rounded-2xl text-center border border-amber-500 max-w-[300px]"><i class="fas fa-trophy text-5xl text-amber-400 mb-3"></i><p class="text-xl font-bold text-white">${gameCoins>=10?'Great!':'Game Over!'}</p><p class="text-amber-400 mt-2">Coins: ${gameCoins}</p><p class="text-green-400">Earned: +${earned} PTS</p><p class="text-yellow-400 text-sm mt-1">${overlayStars}</p><button onclick="this.parentElement.parentElement.remove(); startGame()" class="btn-yellow px-6 py-2 mt-4 rounded-xl"><i class="fas fa-redo-alt mr-2"></i>Play Again</button><button onclick="this.parentElement.parentElement.remove()" class="bg-slate-700 px-6 py-2 mt-2 rounded-xl ml-2">Close</button></div>`; 
-        document.body.appendChild(overlay); 
-    }
-    
-    // ========== BONUS TASK (NEW) ==========
-    function updateBonusTaskUI() {
-        const now = Date.now() / 1000;
-        const remaining = Math.max(0, bonusTaskCooldownUntil - now);
-        const container = document.getElementById('task-list-display');
-        if (!container) return;
-        
-        // Find bonus task element
-        let bonusEl = document.getElementById('bonus-task-element');
-        const bonusCompleted = completedTasks.includes(bonusTaskId);
-        
-        if (!bonusEl) {
-            // Create bonus task element if not exists
-            const bonusHTML = `
-                <div id="bonus-task-element" class="gold-card p-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-bold text-white"><i class="fas fa-star text-amber-400 mr-2"></i>Daily Bonus Task</h4>
-                            <p class="text-[10px] text-green-500">+${BONUS_TASK_REWARD} PTS</p>
-                            <p class="text-[10px] text-slate-400">Watch an ad to claim</p>
-                        </div>
-                        <button id="bonus-task-btn" onclick="claimBonusTask()" class="btn-yellow px-4 py-2 text-xs rounded-lg">
-                            <i class="fas fa-play mr-1"></i> Claim
-                        </button>
-                    </div>
-                    <div id="bonus-cooldown-display" class="mt-2 text-[10px] text-amber-400"></div>
+                <div class="bg-gray-950/40 p-3 border border-gray-850 rounded-xl">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase block">LOSS</span>
+                    <span id="lossCount" class="text-xl font-black text-rose-500">0</span>
                 </div>
-            `;
-            // Insert at top of task list
-            container.insertAdjacentHTML('afterbegin', bonusHTML);
-            bonusEl = document.getElementById('bonus-task-element');
-        }
-        
-        const btn = document.getElementById('bonus-task-btn');
-        const cooldownDisplay = document.getElementById('bonus-cooldown-display');
-        
-        if (bonusCompleted) {
-            btn.disabled = true;
-            btn.innerHTML = '✅ Completed';
-            if (cooldownDisplay) cooldownDisplay.textContent = 'Already claimed today!';
-            return;
-        }
-        
-        if (remaining > 0) {
-            btn.disabled = true;
-            const mins = Math.floor(remaining / 60);
-            const secs = Math.floor(remaining % 60);
-            btn.innerHTML = `⏳ ${mins}m ${secs}s`;
-            if (cooldownDisplay) cooldownDisplay.textContent = `⏱️ Wait ${Math.ceil(remaining)}s before next claim`;
-            // Update every second
-            if (!window._bonusTimer) {
-                window._bonusTimer = setInterval(() => {
-                    updateBonusTaskUI();
-                }, 1000);
-            }
-        } else {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-play mr-1"></i> Claim';
-            if (cooldownDisplay) cooldownDisplay.textContent = '🎯 Ready to claim!';
-            if (window._bonusTimer) {
-                clearInterval(window._bonusTimer);
-                window._bonusTimer = null;
-            }
-        }
-    }
-    
-    async function claimBonusTask() {
-        if (completedTasks.includes(bonusTaskId)) {
-            showNotification("Already completed today!");
-            return;
-        }
-        
-        const now = Date.now() / 1000;
-        if (now < bonusTaskCooldownUntil) {
-            const remaining = Math.ceil(bonusTaskCooldownUntil - now);
-            showNotification(`⏳ Please wait ${remaining} seconds!`);
-            return;
-        }
-        
-        // Show ad then reward
-        showRewardedAd(BONUS_TASK_AD_ID, async () => {
-            // Complete the task
-            completedTasks.push(bonusTaskId);
-            await addPointsOptimized(BONUS_TASK_REWARD, "Bonus Task");
-            
-            // Set cooldown
-            bonusTaskCooldownUntil = Date.now() / 1000 + BONUS_TASK_COOLDOWN;
-            await saveToFirebase();
-            
-            // Update UI
-            renderTasks();
-            updateBonusTaskUI();
-            showNotification(`✅ +${BONUS_TASK_REWARD} PTS from Bonus Task!`);
-        });
-    }
-    
-    // Override renderTasks to include bonus task
-    const originalRenderTasks = renderTasks;
-    renderTasks = function() {
-        originalRenderTasks();
-        updateBonusTaskUI();
-    };
-    
-    // ========== TASK FUNCTIONS ==========
-    function renderTasks() { 
-        const c=document.getElementById('task-list-display'); if(!c)return; 
-        // Keep bonus task at top (it's inserted via updateBonusTaskUI)
-        // Remove all tasks except bonus
-        const bonusEl = document.getElementById('bonus-task-element');
-        const existingTasks = c.querySelectorAll('.gold-card:not(#bonus-task-element)');
-        existingTasks.forEach(el => el.remove());
-        
-        if(tasksCache.length===0){ 
-            // Only show bonus if no tasks
-            if (!bonusEl) {
-                c.innerHTML = '<div class="gold-card p-6 text-center text-slate-500">No tasks available</div>';
-            }
-            return; 
-        } 
-        
-        const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        const availableTasks = tasksCache.filter(t => !completedTasks.includes(t.id) && t.id !== bonusTaskId);
-        
-        let html = '';
-        if(availableTasks.length === 0){
-            html = '<div class="gold-card p-6 text-center text-green-400">✅ All tasks completed!</div>';
-        } else {
-            html = availableTasks.map(t => `
-                <div class="gold-card p-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-bold text-white">${typeIcons[t.type] || '🔗'} ${t.title}</h4>
-                            <p class="text-[10px] text-green-500">+${t.reward} PTS</p>
-                        </div>
-                        <button onclick="completeTask('${t.id}',${t.reward})" class="btn-yellow px-4 py-2 text-xs rounded-lg">DO TASK</button>
-                    </div>
-                    <a href="${t.link}" target="_blank" class="text-[10px] text-amber-400 break-all block mt-2">${t.link.substring(0,45)}...</a>
+                <div class="bg-gray-950/40 p-3 border border-gray-850 rounded-xl">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase block">LEVEN</span>
+                    <span id="streakCount" class="text-xl font-black text-amber-500">0 / 3</span>
                 </div>
-            `).join('');
-        }
+            </div>
+
+            <div class="mt-5">
+                <span class="text-[10px] font-bold text-gray-500 uppercase block mb-2">RECENT OUTCOMES</span>
+                <div id="historyLogs" class="flex flex-wrap gap-1.5 min-h-[24px]"></div>
+            </div>
+        </div>
+
+        <!-- TAB PAGE: GAME (EMBEDDED IFRAME TARGET) -->
+        <div id="page-game" class="tab-content hidden h-[500px] rounded-2xl overflow-hidden border border-gray-800 bg-gray-950">
+            <iframe src="https://www.777bigwingame.bet/#/register?invitationCode=56641569433" class="w-full h-full border-0"></iframe>
+        </div>
+    </div>
+
+
+    <!-- GATEWAY LOCK SCREEN (INITIAL ACCESS CHECK) -->
+    <div id="gatewayLock" class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl relative text-center panel-glow">
+        <div class="flex justify-end mb-2">
+            <button onclick="toggleModal('settingsModal')" class="p-2 bg-gray-800/80 hover:bg-gray-700 rounded-xl border border-gray-700/50 transition-all">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </button>
+        </div>
+        <div class="w-16 h-16 mx-auto bg-blue-500/10 border border-blue-500/30 rounded-full flex items-center justify-center mb-4 text-blue-400">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold mb-1">DEVICE ACCESS LOCKED</h3>
+        <p class="text-xs text-gray-400 mb-6">Your device ID requires verification from the administrator</p>
         
-        // Insert after bonus task
-        if (bonusEl) {
-            c.insertAdjacentHTML('beforeend', html);
-        } else {
-            c.innerHTML = html;
-        }
-        
-        const completedContainer = document.getElementById('completed-tasks-list');
-        if (completedContainer) {
-            const completedTaskItems = completedTasks.filter(taskId => tasksCache.some(t => t.id === taskId) && taskId !== bonusTaskId);
-            if (completedTaskItems.length === 0) { completedContainer.innerHTML = '<div class="text-center text-slate-500 py-3">ပြီးဆုံးပြီး Task မရှိသေးပါ</div>'; }
-            else { completedContainer.innerHTML = completedTaskItems.map(taskId => { const task = tasksCache.find(t => t.id === taskId); return task ? `<div class="completed-task-item"><i class="fas fa-check-circle text-green-400 mr-2"></i>${task.title} <span class="text-green-400 float-right">+${task.reward} PTS</span></div>` : ''; }).join(''); }
-        }
-        
-        updateBonusTaskUI();
-    }
-    
-    async function completeTask(id,reward){ 
-        if(completedTasks.includes(id)){ showNotification("Already completed!"); return; } 
-        showRewardedAd(TASK_AD_ID, async () => {
-            completedTasks.push(id); 
-            await addPointsOptimized(reward, "Task");
-            await saveToFirebase(); 
-            renderTasks(); 
-            showNotification(`✅ +${reward} PTS!`);
-        });
-    }
-    
-    function renderRefUI() { 
-        if(!userId) return;
-        const inviteLink = window.location.href.split('?')[0] + '?ref=' + userId;
-        document.getElementById('ref-link').innerHTML = inviteLink; 
-        document.getElementById('ref-count').innerText = invitedFriends.length; 
-        document.getElementById('ref-earned').innerText = (invitedFriends.length * REFERRAL_POINTS).toLocaleString(); 
-        const c = document.getElementById('ref-list'); 
-        if(!c) return; 
-        if(invitedFriends.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-6">No referrals yet</div>'; return; } 
-        c.innerHTML = invitedFriends.map(id => `<div class="flex justify-between p-3 bg-slate-800/50 rounded-xl"><span class="text-xs">${id.substring(0,15)}...</span><span class="text-green-400 font-bold">+${REFERRAL_POINTS} PTS</span></div>`).join(''); 
-    }
-    
-    function showUserProfile(){ showSec('sec-profile'); }
-    function renderUserProfile(){ document.getElementById('profile-name').innerText = userName || 'User'; document.getElementById('profile-total').innerText = (currentUser?.totalEarned || 0).toLocaleString(); }
-    
-    function renderUserWithdrawalHistory(){ 
-        const c = document.getElementById('user-withdrawal-history'); 
-        if(!c) return; 
-        const userWithdrawals = withdrawalsCache.filter(w => w.userId === userId);
-        if(userWithdrawals.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-4">No withdrawal requests yet</div>'; return; }
-        c.innerHTML = userWithdrawals.map(w => `<div class="withdrawal-item"><div class="flex justify-between text-xs"><span>💰 ${w.amount.toLocaleString()} PTS</span><span class="${w.status === 'pending' ? 'status-pending' : (w.status === 'approved' ? 'status-approved' : 'status-rejected')}">${w.status === 'pending' ? '⏳ Pending' : (w.status === 'approved' ? '✅ Approved' : '❌ Rejected')}</span></div><div class="text-[9px] text-slate-500 mt-1">${w.method === 'kapy' ? 'Kpay' : 'Wave'} | ${w.name}</div><div class="text-[8px] text-slate-600">${new Date(w.timestamp).toLocaleString()}</div></div>`).join('');
-    }
-    
-    function copyUserId(){ if(userId){ navigator.clipboard.writeText(userId); showNotification("User ID copied!"); } }
-    
-    let selectedMethod = 'kapy';
-    function updateWithdrawMethod(m){ selectedMethod = m; }
-    function updateWithdrawUSD(){ const amt = parseInt(document.getElementById('w-amt').value) || 0; document.getElementById('submit-withdraw-btn').disabled = (amt < MIN_WITHDRAW_POINTS || amt > balance); }
-    function checkWithdrawEligibility(){ if(!currentUser) return false; if(balance < MIN_WITHDRAW_POINTS){ alert(`Need ${MIN_WITHDRAW_POINTS.toLocaleString()} PTS`); return false; } showSec('sec-withdraw'); return true; }
-    
-    async function submitWithdraw(){ 
-        const name = document.getElementById('w-name').value.trim(), phone = document.getElementById('w-phone').value.trim(), amount = parseInt(document.getElementById('w-amt').value); 
-        if(!name || !phone || isNaN(amount)){ alert("Fill all fields"); return; } 
-        if(amount < MIN_WITHDRAW_POINTS || amount > balance){ alert("Invalid amount"); return; } 
-        const usdAmount = (amount * USD_PER_POINT).toFixed(4); 
-        if(!confirm(`${selectedMethod === 'kapy' ? 'Kpay' : 'Wave'}\n${name}\n${amount.toLocaleString()} PTS = $${usdAmount} USD\nConfirm withdrawal?`)) return; 
-        const withdrawalId = Date.now().toString();
-        const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', withdrawalId);
-        await window.fsSetDoc(withdrawalRef, {
-            id: withdrawalId, userId: userId, userName: userName, name: name, phone: phone,
-            amount: amount, method: selectedMethod, status: 'pending', timestamp: new Date().toISOString()
-        });
-        balance -= amount; await saveToFirebase(); updateBalanceUI(); 
-        
-        await sendTelegramNotification(`🆕 New Withdrawal Request!\n\n👤 User: ${userName}\n🆔 ID: ${userId}\n💰 Amount: ${amount.toLocaleString()} PTS ($${usdAmount})\n📱 Method: ${selectedMethod === 'kapy' ? 'KPay' : 'Wave'}\n📞 Phone: ${phone}\n🏦 Name: ${name}`);
-        
-        alert("✅ Withdrawal request submitted! Admin will review it.");
-        document.getElementById('w-name').value = ''; document.getElementById('w-phone').value = ''; document.getElementById('w-amt').value = '';
-        showSec('sec-home'); 
-    }
-    
-    async function claimDailyBonus() {
-        if (!currentUser) return;
-        const today = new Date().toDateString();
-        const lastBonus = localStorage.getItem(`daily_bonus_${userId}`);
-        if (lastBonus === today) { alert("နောက်တစ်နေ့မှ ထပ်မံရယူနိုင်ပါသည်။"); return; }
-        showRewardedAd(DAILY_BONUS_AD_ID, async () => {
-            await addPointsOptimized(100, "Daily Bonus");
-            localStorage.setItem(`daily_bonus_${userId}`, today);
-            showNotification("✅ Daily bonus claimed! +100 PTS");
-        });
-        const btn = document.getElementById('daily-bonus-btn');
-        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        setTimeout(() => { btn.innerHTML = '<i class="fas fa-play-circle mr-2"></i>Claim Daily Bonus (Watch Ad)'; btn.disabled = false; }, 5000);
-    }
-    
-    // ========== ADMIN FUNCTIONS ==========
-    async function renderAdminUserTable(){ 
-        if (!isAdmin) return;
-        const tbody = document.getElementById('admin-user-table'); if(!tbody) return; 
-        try {
-            const usersCollection = window.fsCollection(window.firestore, 'users');
-            const usersSnapshot = await window.fsGetDocs(usersCollection);
-            const users = [];
-            usersSnapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
-            if(users.length === 0){ tbody.innerHTML='<tr><td colspan="3" class="text-center text-slate-500">No users yet</td></td>'; return; }
-            tbody.innerHTML = users.slice(0, 50).map(user => `<tr class="user-row" onclick="viewUserDetails('${user.id}')"><td class="text-[9px]">${user.name || user.id.substring(0,8)}</td><td class="text-[9px] text-amber-400">${(user.balance || 0).toLocaleString()}</td><td onclick="event.stopPropagation()"><button onclick="quickAdjustPoints('${user.id}',100)" class="bg-green-600 px-2 py-1 rounded text-[8px]">+100</button><button onclick="quickAdjustPoints('${user.id}',500)" class="bg-blue-600 px-2 py-1 rounded text-[8px] ml-1">+500</button></td></tr>`).join('');
-        } catch(e) { console.error(e); }
-    }
-    
-    async function quickAdjustPoints(uid, amount){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        if(!confirm(`Add ${amount} points to this user?`)) return; 
-        try {
-            const userRef = window.fsDoc(window.firestore, 'users', uid);
-            const userSnap = await window.fsGetDoc(userRef);
-            if(userSnap.exists()){ 
-                const userData = userSnap.data(); 
-                const newBalance = (userData.balance || 0) + amount; 
-                await window.fsUpdateDoc(userRef, { balance: newBalance });
-                if(uid === userId){ balance = newBalance; updateBalanceUI(); await addActivityLog(`Admin added ${amount} points`, amount, 'earn'); }
-                const leaderboardRef = window.fsDoc(window.firestore, 'leaderboard', uid);
-                await window.fsSetDoc(leaderboardRef, { balance: newBalance, name: userData.name }, { merge: true });
-                showNotification(`Added ${amount} points to user!`); renderAdminUserTable(); 
-            } 
-        } catch(e) { console.error(e); }
-    }
-    
-    async function viewUserDetails(uid){ 
-        try {
-            const userRef = window.fsDoc(window.firestore, 'users', uid);
-            const userSnap = await window.fsGetDoc(userRef);
-            if(userSnap.exists()){ 
-                const user = userSnap.data(); 
-                alert(`📋 User Details\n\nName: ${user.name || 'N/A'}\nID: ${uid}\nBalance: ${(user.balance || 0).toLocaleString()}\nTotal Earned: ${(user.totalEarned || 0).toLocaleString()}\nTasks: ${(user.completedTasks || []).length}\nQuizzes: ${(user.completedQuizzes || []).length}\nReferrals: ${(user.invitedFriends || []).length}`); 
-            } 
-        } catch(e) { console.error(e); }
-    }
-    
-    async function adjustUserPoints(){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        const searchTerm = document.getElementById('search-user').value.trim();
-        const points = parseInt(document.getElementById('adjust-points').value);
-        const action = document.getElementById('adjust-action').value;
-        if(!searchTerm || isNaN(points)){ alert("Enter user name/ID and points"); return; }
-        try {
-            const usersCollection = window.fsCollection(window.firestore, 'users');
-            const usersSnapshot = await window.fsGetDocs(usersCollection);
-            let foundUser = null, foundUid = null;
-            for (const doc of usersSnapshot.docs) {
-                const userData = doc.data();
-                if (userData.name === searchTerm || doc.id === searchTerm) {
-                    foundUser = userData; foundUid = doc.id; break;
-                }
-            }
-            if(!foundUser){ alert("User not found"); return; }
-            let newBalance = foundUser.balance || 0;
-            if(action === 'add'){ newBalance += points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Added ${points} points to ${foundUser.name}`); if(foundUid === userId) await addActivityLog(`Admin added ${points} points`, points, 'earn'); }
-            else { if(points > newBalance){ alert("Not enough points!"); return; } newBalance -= points; await window.fsUpdateDoc(window.fsDoc(window.firestore, 'users', foundUid), { balance: newBalance }); showNotification(`Removed ${points} points from ${foundUser.name}`); if(foundUid === userId) await addActivityLog(`Admin removed ${points} points`, points, 'spend'); }
-            await window.fsSetDoc(window.fsDoc(window.firestore, 'leaderboard', foundUid), { balance: newBalance, name: foundUser.name }, { merge: true });
-            if(foundUid === userId){ balance = newBalance; updateBalanceUI(); }
-            renderAdminUserTable();
-        } catch(e) { console.error(e); }
-    }
-    
-    function renderAdminWithdrawals(){ 
-        const c = document.getElementById('admin-withdraw-list'); 
-        if(!c) return; 
-        if(withdrawalsCache.length === 0){ 
-            c.innerHTML = '<p class="text-slate-500 text-center py-4">No withdrawal requests</p>'; 
-            return; 
-        }
-        c.innerHTML = withdrawalsCache.map(w => `
-            <div class="withdrawal-item">
-                <div class="flex justify-between items-center">
+        <div class="bg-gray-950 border border-gray-850 rounded-2xl p-4 mb-5">
+            <span class="text-[10px] font-bold text-gray-500 block mb-1 uppercase">YOUR UNIQUE DEVICE ID</span>
+            <div id="displayDeviceID" class="text-sm font-mono tracking-wider font-bold text-white mb-2">GENERATING...</div>
+            <button onclick="copyDeviceID()" class="text-xs text-blue-400 hover:text-blue-300 font-medium underline">Copy ID to Clipboard</button>
+        </div>
+
+        <a href="https://t.me/Naungthu1610" target="_blank" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl inline-flex items-center justify-center gap-2 transition-all">
+            Contact Admin (@Naungthu1610)
+        </a>
+    </div>
+
+
+    <!-- CONFIGURATION & ADMIN MODAL DIALOG -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-md bg-gray-900 border border-gray-800 rounded-3xl p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-5 border-b border-gray-800 pb-3">
+                <h3 class="text-lg font-bold">SYSTEM SETTINGS</h3>
+                <button onclick="toggleModal('settingsModal')" class="text-gray-400 hover:text-white">&times;</button>
+            </div>
+
+            <!-- Tabs Selection inside Settings -->
+            <div class="flex gap-2 border-b border-gray-800 pb-4 mb-4 text-xs font-bold">
+                <button onclick="switchSettingsSection('about')" id="btn-sec-about" class="px-3 py-1.5 bg-gray-800 text-white rounded-lg">ABOUT</button>
+                <button onclick="switchSettingsSection('help')" id="btn-sec-help" class="px-3 py-1.5 text-gray-400 rounded-lg">HELP</button>
+                <button onclick="switchSettingsSection('admin')" id="btn-sec-admin" class="px-3 py-1.5 text-gray-400 rounded-lg">ADMIN</button>
+            </div>
+
+            <!-- SECTION: ABOUT (INSTRUCTIONS) -->
+            <div id="sec-about" class="settings-sec space-y-3 text-xs text-gray-400 leading-relaxed">
+                <p class="font-bold text-gray-200 text-sm">HOW TO PLAY:</p>
+                <p>1. Select any number configuration from <span class="text-gray-200">0 to 9</span>.</p>
+                <p>2. Normal mode behavior: <span class="text-blue-400">0-4 predicts SMALL</span>, <span class="text-purple-400">5-9 predicts BIG</span>.</p>
+                <p>3. A win is achieved if your sequential guess matches the previous categorization group profile.</p>
+                <p>4. After suffering <span class="text-amber-400">3 consecutive losses</span>, the logic layer triggers REVERSE MODE automatically.</p>
+                <p>5. System structural limits are reached at 15 rounds. If round 15 results in a loss, you gain an overtime exception until a clean WIN is established.</p>
+            </div>
+
+            <!-- SECTION: HELP -->
+            <div id="sec-help" class="settings-sec hidden space-y-4 text-center py-4">
+                <p class="text-sm text-gray-300">Encountering problems or need registration support?</p>
+                <a href="https://t.me/Naungthu1610" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-xs font-bold rounded-lg text-white transition-all">
+                    Message Support (@Naungthu1610)
+                </a>
+            </div>
+
+            <!-- SECTION: ADMIN PANEL -->
+            <div id="sec-admin" class="settings-sec hidden space-y-4">
+                <div id="adminAuthForm" class="space-y-3">
                     <div>
-                        <p class="text-xs font-bold text-white">${w.userName || w.userId.substring(0,8)}</p>
-                        <p class="text-[10px]">💰 ${w.amount.toLocaleString()} PTS</p>
-                        <p class="text-[9px] text-slate-500">${w.method === 'kapy' ? 'KPay' : 'Wave'} | ${w.name} | ${w.phone}</p>
+                        <label class="text-[10px] font-bold text-gray-500 block mb-1 uppercase">ADMIN KEYPASS</label>
+                        <input type="password" id="adminPassInput" placeholder="••••••••" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 text-white">
                     </div>
-                    <div class="flex gap-1">
-                        <button onclick="approveWithdrawal('${w.id}', ${w.amount})" class="admin-action-btn approve text-[8px] px-2 py-1">✅ Approve</button>
-                        <button onclick="rejectWithdrawal('${w.id}')" class="admin-action-btn reject text-[8px] px-2 py-1">❌ Reject</button>
+                    <button onclick="verifyAdminAuth()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-xl text-white transition-all">VERIFY SYSTEM IDENTITY</button>
+                </div>
+
+                <!-- Admin Dynamic Area (Shown only after verification) -->
+                <div id="adminContentArea" class="hidden space-y-4">
+                    <div class="bg-gray-950 p-4 border border-gray-800 rounded-2xl">
+                        <span class="text-[10px] font-bold text-gray-500 block mb-2 uppercase">USER PROVISIONING</span>
+                        <div class="text-xs mb-3 text-gray-400">Target ID: <span id="targetUserIDText" class="font-mono text-white font-bold"></span></div>
+                        <div class="flex gap-2">
+                            <button onclick="setAccessStatus(true)" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs font-bold rounded-lg text-white transition-all">APPROVE USER</button>
+                            <button onclick="setAccessStatus(false)" class="flex-1 py-2 bg-rose-600 hover:bg-rose-500 text-xs font-bold rounded-lg text-white transition-all">REVOKE ACCESS</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-950 p-4 border border-gray-800 rounded-2xl">
+                        <span class="text-[10px] font-bold text-gray-500 block mb-2 uppercase">USER DATABASE (TIMER STATS)</span>
+                        <div class="overflow-x-auto text-[11px]">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-gray-800 text-gray-500">
+                                        <th class="pb-2 font-medium">DEVICE ID</th>
+                                        <th class="pb-2 font-medium text-center">LOCKOUT STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dbTableBody" class="text-gray-300 divide-y divide-gray-900">
+                                    <!-- DB entries injected here -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                <div class="text-[8px] text-slate-600 mt-1">${new Date(w.timestamp).toLocaleString()}</div>
             </div>
-        `).join('');
-    }
-    
-    async function approveWithdrawal(id, amount) {
-        if (!isAdmin) return;
-        if(!confirm(`Approve withdrawal of ${amount.toLocaleString()} PTS?`)) return;
-        try {
-            const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', id);
-            await window.fsUpdateDoc(withdrawalRef, { status: 'approved' });
-            await sendTelegramNotification(`✅ Your withdrawal request of ${amount.toLocaleString()} PTS has been approved!`);
-            showNotification("Withdrawal approved!");
-            renderAdminWithdrawals();
-        } catch(e) { console.error(e); }
-    }
-    
-    async function rejectWithdrawal(id) {
-        if (!isAdmin) return;
-        if(!confirm(`Reject this withdrawal?`)) return;
-        try {
-            const withdrawalRef = window.fsDoc(window.firestore, 'withdrawals', id);
-            await window.fsUpdateDoc(withdrawalRef, { status: 'rejected' });
-            await sendTelegramNotification(`❌ Your withdrawal request has been rejected. Please contact support.`);
-            showNotification("Withdrawal rejected!");
-            renderAdminWithdrawals();
-        } catch(e) { console.error(e); }
-    }
-    
-    async function addAdminTask(){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        const title = document.getElementById('task-title').value.trim(), link = document.getElementById('task-link').value.trim(), type = document.getElementById('task-type').value, reward = parseInt(document.getElementById('task-reward').value); 
-        if(!title || !link || isNaN(reward)){ alert("Fill all fields"); return; } 
-        const newId = Date.now().toString(); 
-        await window.fsSetDoc(window.fsDoc(window.firestore, 'tasks', newId), { id: newId, title, link, reward, type });
-        renderAdminTaskList(); showNotification("Task added!"); 
-    }
-    
-    function renderAdminTaskList(){ 
-        if (!isAdmin) return;
-        const c = document.getElementById('admin-task-list'); if(!c) return; 
-        if(tasksCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No tasks</div>'; return; } 
-        const typeIcons = { link: "🔗", video: "🎬", telegram: "📱" };
-        c.innerHTML = tasksCache.map(t => `<div class="task-item flex justify-between items-center"><div><p class="text-xs text-white">${typeIcons[t.type] || '🔗'} ${t.title}</p><p class="text-[9px] text-amber-400">+${t.reward} PTS</p></div><button onclick="deleteAdminTask('${t.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
-    }
-    
-    async function deleteAdminTask(id){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        if(confirm("Delete permanently?")){ await window.fsDeleteDoc(window.fsDoc(window.firestore, 'tasks', id)); showNotification("Task deleted!"); } 
-    }
-    
-    async function addQuizQuestion(){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        const q = document.getElementById('quiz-question').value.trim();
-        const c1 = document.getElementById('quiz-choice1').value.trim();
-        const c2 = document.getElementById('quiz-choice2').value.trim();
-        const c3 = document.getElementById('quiz-choice3').value.trim();
-        const correct = parseInt(document.getElementById('quiz-correct').value);
-        const p = parseInt(document.getElementById('quiz-points').value);
-        const adCode = document.getElementById('quiz-ad-code').value.trim();
-        if(!q || !c1 || !c2 || !c3 || isNaN(correct) || isNaN(p)){ alert("Fill all fields"); return; } 
-        const newId = Date.now().toString(); 
-        await window.fsSetDoc(window.fsDoc(window.firestore, 'quizzes', newId), { q, c1, c2, c3, correct, p, adCode });
-        document.getElementById('quiz-question').value = ''; document.getElementById('quiz-choice1').value = '';
-        document.getElementById('quiz-choice2').value = ''; document.getElementById('quiz-choice3').value = '';
-        document.getElementById('quiz-points').value = '50'; document.getElementById('quiz-ad-code').value = '';
-        showNotification("Quiz added!"); 
-    }
-    
-    function renderQuizList(){ 
-        if (!isAdmin) return;
-        const c = document.getElementById('quiz-list'); if(!c) return; 
-        if(quizzesCache.length === 0){ c.innerHTML = '<div class="text-center text-slate-500 py-2">No quizzes</div>'; return; } 
-        c.innerHTML = quizzesCache.map(q => `<div class="quiz-item flex justify-between items-center"><div><p class="text-xs text-white">${q.q.substring(0,30)}...</p><p class="text-[9px] text-amber-400">+${q.p} PTS</p></div><button onclick="deleteQuizQuestion('${q.id}')" class="bg-red-600/50 px-2 py-1 rounded text-[10px]">Delete</button></div>`).join(''); 
-    }
-    
-    async function deleteQuizQuestion(id){ 
-        if (!isAdmin) { showNotification("Not authorized!"); return; }
-        if(confirm("Delete this quiz?")){ await window.fsDeleteDoc(window.fsDoc(window.firestore, 'quizzes', id)); showNotification("Quiz deleted"); } 
-    }
-    
-    let secretCount = 0;
-    function handleSecret(){ 
-        if (!isAdmin) { alert("❌ You are not authorized to access admin panel!"); return; }
-        secretCount++; setTimeout(() => secretCount = 0, 2000); 
-        if(secretCount === 3){ 
-            const pwd = prompt("Enter Admin Password:"); 
-            if(pwd === ADMIN_PASSWORD && isAdmin){ 
-                document.getElementById('admin-panel').classList.toggle('hidden'); 
-                if(document.getElementById('admin-panel').classList.contains('hidden')){ document.body.classList.remove('admin-mode'); } 
-                else { renderQuizList(); renderAdminTaskList(); renderAdminUserTable(); renderAdminWithdrawals(); }
-            } else if(pwd !== ADMIN_PASSWORD) { alert("Wrong password!"); }
-            secretCount = 0; 
-        } 
-    }
-    
-    setTimeout(() => {
-        initGameCanvas();
-        initTelegramUser();
-    }, 500);
-</script>
+        </div>
+    </div>
+
+    <script>
+        // System & Identification State Global Management
+        let deviceID = localStorage.getItem('app_device_id');
+        if (!deviceID) {
+            deviceID = 'UID-' + Math.floor(100000 + Math.random() * 900000);
+            localStorage.getItem('app_device_id') || localStorage.setItem('app_device_id', deviceID);
+        }
+        document.getElementById('displayDeviceID').innerText = deviceID;
+        document.getElementById('targetUserIDText').innerText = deviceID;
+
+        // System Mini-Database Engine Setup
+        function getDB() {
+            return JSON.parse(localStorage.getItem('sys_user_db')) || {};
+        }
+        function saveDB(db) {
+            localStorage.setItem('sys_user_db', JSON.stringify(db));
+        }
+
+        // Standard user record Initialization
+        let db = getDB();
+        if (!db[deviceID]) {
+            db[deviceID] = { approved: false, lockedUntil: 0 };
+            saveDB(db);
+        }
+
+        // Security check pipeline execution
+        function enforceAccessControl() {
+            const currentDB = getDB();
+            const userRecord = currentDB[deviceID];
+            
+            if (userRecord && userRecord.approved) {
+                document.getElementById('gatewayLock').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                checkLockoutTimer();
+            } else {
+                document.getElementById('gatewayLock').classList.remove('hidden');
+                document.getElementById('mainApp').classList.add('hidden');
+            }
+        }
+
+        function copyDeviceID() {
+            navigator.clipboard.writeText(deviceID);
+            alert("Device ID copied: " + deviceID);
+        }
+
+        // Tab Management Engine
+        function switchTab(target) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('page-' + target).classList.remove('hidden');
+            
+            document.getElementById('tab-home').className = target === 'home' ? 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white' : 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-400 hover:text-white';
+            document.getElementById('tab-game').className = target === 'game' ? 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white' : 'px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-gray-400 hover:text-white';
+        }
+
+        function toggleModal(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('hidden');
+            if (!el.classList.contains('hidden')) {
+                renderDBTable(); // Refresh metrics whenever options launch
+            }
+        }
+
+        function switchSettingsSection(sec) {
+            document.querySelectorAll('.settings-sec').forEach(el => el.classList.add('hidden'));
+            document.getElementById('sec-' + sec).classList.remove('hidden');
+            
+            ['about', 'help', 'admin'].forEach(k => {
+                document.getElementById('btn-sec-' + k).className = k === sec ? 'px-3 py-1.5 bg-gray-800 text-white rounded-lg' : 'px-3 py-1.5 text-gray-400 rounded-lg';
+            });
+        }
+
+        // Administrative Access Layer Verification
+        function verifyAdminAuth() {
+            const pass = document.getElementById('adminPassInput').value;
+            if (pass === '871033') {
+                document.getElementById('adminAuthForm').classList.add('hidden');
+                document.getElementById('adminContentArea').classList.remove('hidden');
+            } else {
+                alert("INVALID DECRYPTION CREDENTIALS");
+            }
+        }
+
+        function setAccessStatus(status) {
+            let currentDB = getDB();
+            if (currentDB[deviceID]) {
+                currentDB[deviceID].approved = status;
+                saveDB(currentDB);
+                alert(`User validation updated: ${status ? 'APPROVED' : 'REVOKED'}`);
+                enforceAccessControl();
+                renderDBTable();
+            }
+        }
+
+        function renderDBTable() {
+            const currentDB = getDB();
+            const tbody = document.getElementById('dbTableBody');
+            tbody.innerHTML = '';
+            
+            Object.keys(currentDB).forEach(id => {
+                const row = document.createElement('tr');
+                const isLocked = currentDB[id].lockedUntil > Date.now();
+                
+                row.innerHTML = `
+                    <td class="py-2 font-mono">${id} ${id === deviceID ? '<span class="text-blue-400 text-[9px]">(You)</span>':''}</td>
+                    <td class="py-2 text-center">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isLocked ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-gray-800 text-gray-500'}">
+                            ${isLocked ? 'LOCKED (2H)' : 'ACTIVE'}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // --------------------------------------------------------
+        // CORE PREDICTION LOGIC ENGINE (PRESERVED & UPGRADED)
+        // --------------------------------------------------------
+        let rounds = 0;
+        let wins = 0;
+        let losses = 0;
+        let consecutiveLosses = 0;
+        let isInverted = false;
+        let selectedNumber = null;
+        let previousNumber = null;
+        let timerInterval = null;
+
+        function selectNumber(num) {
+            selectedNumber = num;
+            const buttons = document.querySelectorAll('.num-btn');
+            buttons.forEach((btn, index) => {
+                if (index === num) {
+                    btn.className = "num-btn h-12 bg-blue-600 border-blue-400 text-white rounded-xl font-bold text-lg scale-95 transition-all shadow-[0_0_15px_rgba(59,130,246,0.5)]";
+                } else {
+                    btn.className = "num-btn h-12 bg-gray-800/40 border border-gray-700/40 rounded-xl font-bold text-lg text-gray-300 transition-all";
+                }
+            });
+
+            const display = document.getElementById('predictionDisplay');
+            let isSmall = num <= 4;
+            if (isInverted) isSmall = !isSmall; 
+
+            if (isSmall) {
+                display.innerText = "SMALL";
+                display.className = "text-5xl font-black tracking-widest neon-text-small";
+            } else {
+                display.innerText = "BIG";
+                display.className = "text-5xl font-black tracking-widest neon-text-big";
+            }
+            document.getElementById('gameStatusText').innerText = "Ready to proceed. Press NEXT STEP.";
+            document.getElementById('gameStatusText').className = "text-sm font-bold tracking-wide text-blue-400";
+        }
+
+        function handleNext() {
+            if (selectedNumber === null) {
+                alert("Please select a number first!");
+                return;
+            }
+
+            let currentOutcome = "Win";
+            if (previousNumber !== null) {
+                const isPrevSmall = previousNumber <= 4;
+                const isCurrSmall = selectedNumber <= 4;
+                currentOutcome = (!isInverted) ? ((isPrevSmall === isCurrSmall) ? "Win" : "Loss") : ((isPrevSmall !== isCurrSmall) ? "Win" : "Loss");
+            } else {
+                currentOutcome = "Win"; 
+            }
+
+            if (currentOutcome === "Win") {
+                wins++;
+                consecutiveLosses = 0;
+                isInverted = false; 
+            } else {
+                losses++;
+                consecutiveLosses++;
+                if (consecutiveLosses >= 3) isInverted = true;
+            }
+
+            rounds++;
+            document.getElementById('roundCount').innerText = `${rounds} / 15`;
+            document.getElementById('winCount').innerText = wins;
+            document.getElementById('lossCount').innerText = losses;
+            document.getElementById('streakCount').innerText = `${consecutiveLosses} / 3`;
+            
+            const statusText = document.getElementById('gameStatusText');
+            statusText.innerText = currentOutcome === "Win" ? "OUTCOME: WIN ✔" : "OUTCOME: LOSS ✘";
+            statusText.className = currentOutcome === "Win" ? "text-sm font-bold tracking-wide text-emerald-400" : "text-sm font-bold tracking-wide text-rose-500";
+
+            const modeBadge = document.getElementById('modeBadge');
+            modeBadge.innerHTML = isInverted ? `<span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> REVERSE MODE` : `<span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span> NORMAL MODE`;
+            modeBadge.className = isInverted ? "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full text-xs font-semibold shadow-[0_0_10px_rgba(239,68,68,0.2)]" : "flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full text-xs font-semibold";
+
+            addHistoryLog(currentOutcome, selectedNumber);
+            previousNumber = selectedNumber;
+            selectedNumber = null;
+            
+            document.querySelectorAll('.num-btn').forEach(btn => {
+                btn.className = "num-btn h-12 bg-gray-800/40 border border-gray-700/40 rounded-xl font-bold text-lg text-gray-300 transition-all";
+            });
+
+            // Structural limit boundary validations with Overtime protocol integration
+            if (rounds >= 15) {
+                if (currentOutcome === "Loss") {
+                    document.getElementById('roundCount').innerText = `${rounds} (OVERTIME)`;
+                    document.getElementById('roundCount').className = "text-sm font-bold text-amber-400 mt-0.5 animate-pulse";
+                } else {
+                    triggerLockoutDatabaseUpdate();
+                }
+            }
+        }
+
+        function addHistoryLog(outcome, num) {
+            const dot = document.createElement('div');
+            dot.className = `text-[10px] font-extrabold px-2 py-0.5 rounded-md ${outcome === 'Win' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`;
+            dot.innerText = `${num}:${outcome === 'Win' ? 'W' : 'L'}`;
+            document.getElementById('historyLogs').appendChild(dot);
+        }
+
+        // Individualized Timer Locking via Persistent DB Operations
+        function triggerLockoutDatabaseUpdate() {
+            let currentDB = getDB();
+            const lockoutDuration = 2 * 60 * 60 * 1000; // 2 hours metrics
+            currentDB[deviceID].lockedUntil = Date.now() + lockoutDuration;
+            saveDB(currentDB);
+            checkLockoutTimer();
+        }
+
+        function checkLockoutTimer() {
+            const currentDB = getDB();
+            const userRecord = currentDB[deviceID];
+            
+            if (!userRecord || !userRecord.lockedUntil) return;
+            
+            const remainingTime = userRecord.lockedUntil - Date.now();
+            
+            if (remainingTime > 0) {
+                document.getElementById('timerOverlay').classList.remove('hidden');
+                if (timerInterval) clearInterval(timerInterval);
+                
+                timerInterval = setInterval(() => {
+                    const timeLeft = userRecord.lockedUntil - Date.now();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        document.getElementById('timerOverlay').classList.add('hidden');
+                        resetLocalGameSession();
+                    } else {
+                        updateTimerDisplay(timeLeft);
+                    }
+                }, 1000);
+            } else {
+                document.getElementById('timerOverlay').classList.add('hidden');
+            }
+        }
+
+        function updateTimerDisplay(ms) {
+            let totalSeconds = Math.floor(ms / 1000);
+            let hrs = Math.floor(totalSeconds / 3600);
+            let mins = Math.floor((totalSeconds % 3600) / 60);
+            let secs = totalSeconds % 60;
+            
+            hrs = hrs < 10 ? "0" + hrs : hrs;
+            mins = mins < 10 ? "0" + mins : mins;
+            secs = secs < 10 ? "0" + secs : secs;
+            
+            document.getElementById('countdownDisplay').innerText = `${hrs}:${mins}:${secs}`;
+        }
+
+        function resetLocalGameSession() {
+            rounds = 0; wins = 0; losses = 0; consecutiveLosses = 0; isInverted = false; previousNumber = null;
+            document.getElementById('roundCount').innerText = "0 / 15";
+            document.getElementById('roundCount').className = "text-lg font-black text-gray-200 mt-0.5";
+            document.getElementById('winCount').innerText = "0";
+            document.getElementById('lossCount').innerText = "0";
+            document.getElementById('streakCount').innerText = "0 / 3";
+            document.getElementById('historyLogs').innerHTML = "";
+            document.getElementById('predictionDisplay').innerText = "-";
+            document.getElementById('predictionDisplay').className = "text-6xl font-black tracking-widest text-gray-600";
+            document.getElementById('gameStatusText').innerText = "Please select a number above";
+            document.getElementById('gameStatusText').className = "text-sm font-bold tracking-wide text-gray-500";
+            
+            let currentDB = getDB();
+            if(currentDB[deviceID]) {
+                currentDB[deviceID].lockedUntil = 0;
+                saveDB(currentDB);
+            }
+        }
+
+        // Initialize verification check on startup
+        enforceAccessControl();
+    </script>
 </body>
 </html>
